@@ -27,124 +27,148 @@ public class Commands implements CommandExecutor {
   public boolean onCommand(CommandSender sender, Command command, String name, String[] args) {
 
     if (args.length < 1) {
-      sender.sendMessage(ERROR + "Incorrect arguments.");
+      sender.sendMessage(ERROR + "Incorrect arguments: /enchantments help");
       return false;
     }
 
-    if (args[0].equalsIgnoreCase("enchant")) {
+    CustomEnchant enchant;
+    ItemStack held;
+    ItemMeta meta;
+    List<String> lore;
 
-      if (args.length < 3) {
-        sender.sendMessage(ERROR + "Incorrect arguments: /enchantments enchant <level> <enchantment name>");
-        return false;
-      }
+    switch (args[0]) {
 
-      ItemStack held = getHeldItem(sender);
+      case "enchant":
 
-      if (held == null) {
-        sender.sendMessage(ERROR + "You must be holding an item to enchant.");
-        return false;
-      }
+        if (args.length < 3) {
+          sender.sendMessage(ERROR + "Incorrect arguments: /enchantments enchant <level> <enchantment name>");
+          return false;
+        }
 
-      CustomEnchant enchant = getCustomEnchant(Arrays.copyOfRange(args, 2, args.length));
+        held = getHeldItem(sender);
 
-      if (enchant == null) {
-        sender.sendMessage(ERROR + "An enchantment with that name could not be found.");
-        return false;
-      }
+        if (held == null || held.getType() == Material.AIR) {
+          sender.sendMessage(ERROR + "You must be holding an item to enchant.");
+          return false;
+        }
 
-      if (!enchant.canEnchantItem(held)) {
-        sender.sendMessage(ERROR + "That enchantment can not be added to this item.");
-        return false;
-      }
+        enchant = getCustomEnchant(Arrays.copyOfRange(args, 2, args.length));
 
-      int level;
+        if (enchant == null) {
+          sender.sendMessage(ERROR + "An enchantment with that name could not be found.");
+          return false;
+        }
 
-      try {
-        level = Integer.valueOf(args[1]);
-      } catch (NumberFormatException e) {
-        sender.sendMessage(ERROR + "That is not a valid enchantment level...");
-        return false;
-      }
+        if (!enchant.canEnchantItem(held)) {
+          sender.sendMessage(ERROR + "That enchantment can not be added to this item.");
+          return false;
+        }
 
-      ItemMeta meta = held.getItemMeta();
-      meta.addEnchant(enchant, level, true);
+        int level;
 
-      List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
-      lore.add(enchant.getName() + " " + RomanNumerals.toRoman(level));
-      meta.setLore(lore);
+        try {
+          level = Integer.valueOf(args[1]);
+        } catch (NumberFormatException e) {
+          sender.sendMessage(ERROR + "That is not a valid enchantment level...");
+          return false;
+        }
 
-      held.setItemMeta(meta);
-      sender.sendMessage(TITLE + "Successfully added the enchantment to the item!");
+        meta = held.getItemMeta();
+        meta.addEnchant(enchant, level, true);
 
-    } else if (args[0].equalsIgnoreCase("info")) {
+        lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
+        lore.add(enchant.getName() + " " + RomanNumerals.toRoman(level));
+        meta.setLore(lore);
 
-      try {
-        CustomEnchant enchant = getCustomEnchant(Arrays.copyOfRange(args, 1, args.length));
+        held.setItemMeta(meta);
+        sender.sendMessage(TITLE + "Successfully added the enchantment to the item!");
+        break;
+
+      case "unenchant":
+
+        if (args.length < 2) {
+          sender.sendMessage(ERROR + "Incorrect arguments: /enchantments unenchant <enchantment name>");
+          return false;
+        }
+
+        held = getHeldItem(sender);
+
+        if (held == null || held.getType() == Material.AIR) {
+          sender.sendMessage(ERROR + "You must be holding an item to unenchant.");
+          return false;
+        }
+        enchant = getCustomEnchant(Arrays.copyOfRange(args, 1, args.length));
+
+        if (enchant == null) {
+          sender.sendMessage(ERROR + "An enchantment with that name could not be found.");
+          return false;
+        }
+
+        meta = held.getItemMeta();
+
+        if (meta == null || !meta.hasEnchant(enchant)) {
+          sender.sendMessage(ERROR + "This item does not have that enchantment!");
+          return false;
+        }
+
+        meta.removeEnchant(enchant);
+
+        if (meta.getLore() != null) {
+          lore = meta.getLore();
+          lore.removeIf(line -> line.contains(enchant.getName()));
+          meta.setLore(lore);
+        }
+
+        held.setItemMeta(meta);
+        sender.sendMessage(TITLE + "Successfully removed enchantment.");
+        break;
+
+      case "list":
+
+        String list = ChatColor.AQUA + Enchantments.REGISTERED.stream()
+                .map(CustomEnchant::getName).collect(Collectors.joining(", "));
+        sender.sendMessage(TITLE + "Registered custom enchantments: " + list);
+        break;
+
+      case "info":
+
+        if (args.length < 2) {
+          sender.sendMessage(ERROR + "Incorrect arguments: /enchantments info <enchantment name>");
+          return false;
+        }
+
+        try {
+        enchant = getCustomEnchant(Arrays.copyOfRange(args, 1, args.length));
         sender.sendMessage(TITLE + enchant.getDescription());
       } catch (NullPointerException | IllegalArgumentException e) {
-        sender.sendMessage(ERROR + "An enchantment with that name could not be found.");
-      }
+          sender.sendMessage(ERROR + "An enchantment with that name could not be found.");
+        }
+        break;
 
-    } else if (args[0].equalsIgnoreCase("unenchant")) {
+      case "help":
+        sender.sendMessage(TITLE + ChatColor.GOLD + "Available Commands:");
+        sender.sendMessage(ChatColor.GRAY + "/enchantments enchant <level> <enchantment name>");
+        sender.sendMessage(ChatColor.GRAY + "/enchantments unenchant <enchantment name>");
+        sender.sendMessage( ChatColor.GRAY + "/enchantments info <enchantment name>");
+        sender.sendMessage(ChatColor.GRAY + "/enchantments list");
+        break;
 
-      ItemStack held = getHeldItem(sender);
-
-      if (held == null) {
-        sender.sendMessage(ERROR + "You must be holding an item to enchant.");
+      default:
+        sender.sendMessage(ERROR + "Incorrect arguments.");
         return false;
-      }
-
-      CustomEnchant enchant = getCustomEnchant(Arrays.copyOfRange(args, 1, args.length));
-
-      if (enchant == null) {
-        sender.sendMessage(ERROR + "An enchantment with that name could not be found.");
-        return false;
-      }
-
-      ItemMeta meta = held.getItemMeta();
-
-      if (meta == null || !meta.hasEnchant(enchant)) {
-        sender.sendMessage(ERROR + "This tem does not have that enchantment!");
-        return false;
-      }
-
-      meta.removeEnchant(enchant);
-
-      if (meta.getLore() != null) {
-        List<String> lore = meta.getLore();
-        lore.removeIf(line -> line.contains(enchant.getName()));
-        meta.setLore(lore);
-      }
-
-      held.setItemMeta(meta);
-      sender.sendMessage(TITLE + "Successfully removed enchantment.");
-
-    } else if (args[0].equalsIgnoreCase("list")) {
-
-      String list = ChatColor.AQUA + Enchantments.REGISTERED.stream()
-              .map(CustomEnchant::getName).collect(Collectors.joining(", "));
-      sender.sendMessage(TITLE + "Registered custom enchantments: " + list);
 
     }
-
     return true;
   }
 
   private ItemStack getHeldItem(CommandSender sender) {
     if (!(sender instanceof Player)) {
       sender.sendMessage(ERROR + "Only players can use this command!");
+      return null;
     } else {
-
       Player player = (Player) sender;
-      ItemStack held = player.getInventory().getItemInMainHand();
-
-      if (held.getType() == Material.AIR) {
-        player.sendMessage(ERROR + "You must be holding an item to enchant.");
-      } else return held;
-
+      return player.getInventory().getItemInMainHand();
     }
-
-    return null;
   }
 
   private CustomEnchant getCustomEnchant(String... args) {
@@ -155,5 +179,4 @@ public class Commands implements CommandExecutor {
                     .filter(enchant -> enchant.getName().equalsIgnoreCase(name.replace("_", " ")))
                     .findAny().orElse(null));
   }
-
 }
