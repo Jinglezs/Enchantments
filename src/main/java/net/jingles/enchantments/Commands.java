@@ -1,159 +1,95 @@
 package net.jingles.enchantments;
 
+import co.aikar.commands.BaseCommand;
+import co.aikar.commands.annotation.*;
 import net.jingles.enchantments.enchants.CustomEnchant;
 import net.jingles.enchantments.util.RomanNumerals;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Commands implements CommandExecutor {
+public class Commands extends BaseCommand {
 
-  private static final String TITLE = ChatColor.DARK_GRAY + "[" + ChatColor.LIGHT_PURPLE + "Enchantments" +
+  @Dependency
+  private Enchantments plugin;
+
+  private static final String TITLE = ChatColor.DARK_GRAY + "[" + ChatColor.AQUA + "Enchantments" +
           ChatColor.DARK_GRAY + "] " + ChatColor.RESET;
 
   private static final String ERROR = TITLE + ChatColor.RED;
 
-  @Override
-  public boolean onCommand(CommandSender sender, Command command, String name, String[] args) {
+  @HelpCommand
+  @CommandAlias("enchantments help")
+  @CatchUnknown @Default
+  public void onEnchantHelpCommand(CommandSender sender) {
+    //Sends the CommandSender the automagykally generated help message.
+    getCommandHelp().showHelp();
+  }
 
-    if (args.length < 1) {
-      sender.sendMessage(ERROR + "Incorrect arguments.");
-      return false;
+  @CommandAlias("enchant")
+  @CommandCompletion("enchantments")
+  @Conditions("operator")
+  @Syntax("<level> <enchantment name>")
+  @Description("Applies the custom enchantment with the given level to the item held in the executor's main (right) hand.")
+  public void onAddEnchant(@Conditions("holdingItem") Player player, ItemStack item, int level, CustomEnchant enchant) {
+
+    ItemMeta meta = item.getItemMeta();
+    //Do nothing if the item already has the enchant with the same level.
+    if (meta.hasEnchant(enchant) && meta.getEnchantLevel(enchant) == level) return;
+
+    //Add the enchantment name and level to the item's lore
+    List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
+    String enchantment = enchant.getName() + " " + RomanNumerals.toRoman(level);
+
+    lore.add(enchantment);
+    meta.setLore(lore);
+    meta.addEnchant(enchant, level, true);
+    item.setItemMeta(meta);
+
+    player.sendMessage(TITLE + "Successfully added " + enchantment + " to the item.");
+  }
+
+  @CommandAlias("disenchant")
+  @CommandCompletion("enchantments")
+  @Conditions("operator")
+  @Syntax("<enchantment name>")
+  @Description("Removes the given custom enchantment from the item held in the executor's main (right) hand.")
+  public void onDisenchant(@Conditions("holdingItem") Player player, ItemStack item, CustomEnchant enchant) {
+
+    ItemMeta meta = item.getItemMeta();
+
+    if (!meta.hasEnchant(enchant)) {
+      player.sendMessage(ERROR + "This item does not have " + enchant.getName());
+      return;
     }
 
-    if (args[0].equalsIgnoreCase("enchant")) {
+    meta.removeEnchant(enchant);
 
-      if (args.length < 3) {
-        sender.sendMessage(ERROR + "Incorrect arguments: /enchantments enchant <level> <enchantment name>");
-        return false;
-      }
-
-      ItemStack held = getHeldItem(sender);
-
-      if (held == null) {
-        sender.sendMessage(ERROR + "You must be holding an item to enchant.");
-        return false;
-      }
-
-      CustomEnchant enchant = getCustomEnchant(Arrays.copyOfRange(args, 2, args.length));
-
-      if (enchant == null) {
-        sender.sendMessage(ERROR + "An enchantment with that name could not be found.");
-        return false;
-      }
-
-      if (!enchant.canEnchantItem(held)) {
-        sender.sendMessage(ERROR + "That enchantment can not be added to this item.");
-        return false;
-      }
-
-      int level;
-
-      try {
-        level = Integer.valueOf(args[1]);
-      } catch (NumberFormatException e) {
-        sender.sendMessage(ERROR + "That is not a valid enchantment level...");
-        return false;
-      }
-
-      ItemMeta meta = held.getItemMeta();
-      meta.addEnchant(enchant, level, true);
-
-      List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
-      lore.add(enchant.getName() + " " + RomanNumerals.toRoman(level));
+    if (meta.hasLore()) {
+      List<String> lore = meta.getLore();
+      lore.removeIf(line -> line.contains(enchant.getName()));
       meta.setLore(lore);
-
-      held.setItemMeta(meta);
-      sender.sendMessage(TITLE + "Successfully added the enchantment to the item!");
-
-    } else if (args[0].equalsIgnoreCase("info")) {
-
-      try {
-        CustomEnchant enchant = getCustomEnchant(Arrays.copyOfRange(args, 1, args.length));
-        sender.sendMessage(TITLE + enchant.getDescription());
-      } catch (NullPointerException | IllegalArgumentException e) {
-        sender.sendMessage(ERROR + "An enchantment with that name could not be found.");
-      }
-
-    } else if (args[0].equalsIgnoreCase("unenchant")) {
-
-      ItemStack held = getHeldItem(sender);
-
-      if (held == null) {
-        sender.sendMessage(ERROR + "You must be holding an item to enchant.");
-        return false;
-      }
-
-      CustomEnchant enchant = getCustomEnchant(Arrays.copyOfRange(args, 1, args.length));
-
-      if (enchant == null) {
-        sender.sendMessage(ERROR + "An enchantment with that name could not be found.");
-        return false;
-      }
-
-      ItemMeta meta = held.getItemMeta();
-
-      if (meta == null || !meta.hasEnchant(enchant)) {
-        sender.sendMessage(ERROR + "This tem does not have that enchantment!");
-        return false;
-      }
-
-      meta.removeEnchant(enchant);
-
-      if (meta.getLore() != null) {
-        List<String> lore = meta.getLore();
-        lore.removeIf(line -> line.contains(enchant.getName()));
-        meta.setLore(lore);
-      }
-
-      held.setItemMeta(meta);
-      sender.sendMessage(TITLE + "Successfully removed enchantment.");
-
-    } else if (args[0].equalsIgnoreCase("list")) {
-
-      String list = ChatColor.AQUA + Enchantments.REGISTERED.stream()
-              .map(CustomEnchant::getName).collect(Collectors.joining(", "));
-      sender.sendMessage(TITLE + "Registered custom enchantments: " + list);
-
     }
 
-    return true;
+    item.setItemMeta(meta);
+    player.sendMessage(TITLE + "Successfully disenchanted the item.");
   }
 
-  private ItemStack getHeldItem(CommandSender sender) {
-    if (!(sender instanceof Player)) {
-      sender.sendMessage(ERROR + "Only players can use this command!");
-    } else {
-
-      Player player = (Player) sender;
-      ItemStack held = player.getInventory().getItemInMainHand();
-
-      if (held.getType() == Material.AIR) {
-        player.sendMessage(ERROR + "You must be holding an item to enchant.");
-      } else return held;
-
-    }
-
-    return null;
+  @CommandAlias("enchantments list")
+  @Description("Shows the executor a complete list of registered custom enchantment names.")
+  public void onEnchantmentList(CommandSender sender) {
+    String enchants = Enchantments.REGISTERED.stream().map(CustomEnchant::getName).collect(Collectors.joining(ChatColor.WHITE + ", " + ChatColor.AQUA));
+    sender.sendMessage(TITLE + "Registered custom enchantments: " + ChatColor.AQUA + enchants);
   }
 
-  private CustomEnchant getCustomEnchant(String... args) {
-    String name = String.join("_", args).toLowerCase();
-    return Enchantments.REGISTERED.stream()
-            .filter(enchant -> enchant.getKeyName().equals(name))
-            .findAny().orElse(Enchantments.REGISTERED.stream()
-                    .filter(enchant -> enchant.getName().equalsIgnoreCase(name.replace("_", " ")))
-                    .findAny().orElse(null));
+  public void onEnchantmentInfo() {
+    //TODO: Nyghoe do this for me plez. Examples above hoE
   }
 
 }

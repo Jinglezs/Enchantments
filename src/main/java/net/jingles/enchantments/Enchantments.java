@@ -1,8 +1,14 @@
 package net.jingles.enchantments;
 
+import co.aikar.commands.ConditionFailedException;
+import co.aikar.commands.InvalidCommandArgument;
+import co.aikar.commands.PaperCommandManager;
 import net.jingles.enchantments.enchants.CustomEnchant;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -11,7 +17,9 @@ import org.reflections.Reflections;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Enchantments extends JavaPlugin {
 
@@ -47,8 +55,8 @@ public class Enchantments extends JavaPlugin {
 
     });
 
+    registerCommands();
     getServer().getPluginManager().registerEvents(new EnchantListener(), this);
-    getCommand("enchantments").setExecutor(new Commands());
     METADATA = new FixedMetadataValue(this, 0);
   }
 
@@ -67,6 +75,61 @@ public class Enchantments extends JavaPlugin {
       getLogger().warning("Could not enable Enchantments! The server is not accepting enchantment registrations.");
       setEnabled(false);
     }
+  }
+
+  private void registerCommands() {
+
+    PaperCommandManager manager = new PaperCommandManager(this);
+    manager.enableUnstableAPI("help");
+
+    //----- ARGUMENT COMPLETIONS -----
+
+    //Command completion for CustomEnchant names
+    manager.getCommandCompletions().registerStaticCompletion("enchantments",
+            REGISTERED.stream().map(CustomEnchant::getName).collect(Collectors.toList()));
+
+    //----- CONDITIONS -----
+
+    //ACF automatically catches these exceptions and sends the player an error message.
+    manager.getCommandConditions().addCondition(Player.class, "holdingItem", (context, exeContext, player) -> {
+      if (player.getInventory().getItemInMainHand().getType() == Material.AIR)
+        throw new ConditionFailedException("You must be holding an item to use this command!");
+    });
+
+    manager.getCommandConditions().addCondition(ItemStack.class, "hasCustomEnchants", (context, execContext, item) -> {
+      if (item.getItemMeta() == null || item.getItemMeta().getEnchants().isEmpty())
+        throw new ConditionFailedException("This item does not have any enchantments!");
+      else if (item.getItemMeta().getEnchants().keySet().stream().noneMatch(enchant -> enchant instanceof CustomEnchant))
+        throw new ConditionFailedException("This item does not have any custom enchantments.");
+    });
+
+    manager.getCommandConditions().addCondition("operator", handler -> {
+      if (!handler.getIssuer().getIssuer().isOp()) throw new ConditionFailedException("Only operators can use this command!");
+    });
+
+    //----- PARAMETER CONTEXTS -----
+
+    //Issuer Only context does not not consume any of the command arguments. Instead, it retrieves the
+    //value from the CommandSender itself (in this case, the Player).
+    manager.getCommandContexts().registerIssuerOnlyContext(ItemStack.class, context ->
+            context.getPlayer().getInventory().getItemInMainHand());
+
+    //Gets a CustomEnchant object from the remaining command arguments (String array)
+    manager.getCommandContexts().registerContext(CustomEnchant.class, context -> {
+      String key = String.join("_", context.getArgs());
+      Optional<CustomEnchant> optional = Enchantments.REGISTERED.stream()
+              .filter(customEnchant -> customEnchant.getKeyName().equals(key))
+              .findAny();
+
+      CustomEnchant enchant = optional.orElseGet(() -> Enchantments.REGISTERED.stream()
+              .filter(customEnchant -> customEnchant.getName().equalsIgnoreCase(key.replace("_", " ")))
+              .findAny().orElse(null));
+
+      if (enchant == null) throw new InvalidCommandArgument("A custom enchantment with that name could not be found.");
+      return enchant;
+    });
+
+    manager.registerCommand(new Commands());
   }
 
 }
