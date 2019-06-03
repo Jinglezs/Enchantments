@@ -1,6 +1,7 @@
 package net.jingles.enchantments;
 
 import co.aikar.commands.BaseCommand;
+import co.aikar.commands.CommandHelp;
 import co.aikar.commands.annotation.*;
 import net.jingles.enchantments.enchants.CustomEnchant;
 import net.jingles.enchantments.util.RomanNumerals;
@@ -16,25 +17,19 @@ import java.util.stream.Collectors;
 
 public class Commands extends BaseCommand {
 
-  @Dependency
-  private Enchantments plugin;
-
   private static final String TITLE = ChatColor.DARK_GRAY + "[" + ChatColor.AQUA + "Enchantments" +
           ChatColor.DARK_GRAY + "] " + ChatColor.RESET;
 
   private static final String ERROR = TITLE + ChatColor.RED;
 
-  @HelpCommand
-  @CommandAlias("enchantments help")
-  @CatchUnknown @Default
-  public void onEnchantHelpCommand(CommandSender sender) {
+  @HelpCommand @CatchUnknown @Default
+  public void onEnchantHelpCommand(CommandHelp help) {
     //Sends the CommandSender the automagykally generated help message.
-    getCommandHelp().showHelp();
+    help.showHelp();
   }
 
-  @CommandAlias("enchant")
-  @CommandCompletion("enchantments")
-  @Conditions("operator")
+  @CommandAlias("enchant") @Conditions("operator")
+  @CommandCompletion("@nothing @nothing @enchantments")
   @Syntax("<level> <enchantment name>")
   @Description("Applies the custom enchantment with the given level to the item held in the executor's main (right) hand.")
   public void onAddEnchant(@Conditions("holdingItem") Player player, ItemStack item, int level, CustomEnchant enchant) {
@@ -55,20 +50,13 @@ public class Commands extends BaseCommand {
     player.sendMessage(TITLE + "Successfully added " + enchantment + " to the item.");
   }
 
-  @CommandAlias("disenchant")
-  @CommandCompletion("enchantments")
-  @Conditions("operator")
+  @CommandAlias("disenchant") @Conditions("operator")
+  @CommandCompletion("@nothing @enchantments")
   @Syntax("<enchantment name>")
   @Description("Removes the given custom enchantment from the item held in the executor's main (right) hand.")
-  public void onDisenchant(@Conditions("holdingItem") Player player, ItemStack item, CustomEnchant enchant) {
+  public void onDisenchant(@Conditions("holdingItem") Player player, @Conditions("hasCustomEnchants") ItemStack item, CustomEnchant enchant) {
 
     ItemMeta meta = item.getItemMeta();
-
-    if (!meta.hasEnchant(enchant)) {
-      player.sendMessage(ERROR + "This item does not have " + enchant.getName());
-      return;
-    }
-
     meta.removeEnchant(enchant);
 
     if (meta.hasLore()) {
@@ -84,7 +72,8 @@ public class Commands extends BaseCommand {
   @CommandAlias("enchantments list")
   @Description("Shows the executor a complete list of registered custom enchantment names.")
   public void onEnchantmentList(CommandSender sender) {
-    String enchants = Enchantments.REGISTERED.stream().map(CustomEnchant::getName).collect(Collectors.joining(ChatColor.WHITE + ", " + ChatColor.AQUA));
+    String enchants = Enchantments.REGISTERED.stream().map(CustomEnchant::getName)
+            .collect(Collectors.joining(ChatColor.WHITE + ", " + ChatColor.AQUA));
     sender.sendMessage(TITLE + "Registered custom enchantments: " + ChatColor.AQUA + enchants);
   }
 
