@@ -15,21 +15,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@CommandAlias("enchantments")
 public class Commands extends BaseCommand {
 
   private static final String TITLE = ChatColor.DARK_GRAY + "[" + ChatColor.AQUA + "Enchantments" +
           ChatColor.DARK_GRAY + "] " + ChatColor.RESET;
 
-  private static final String ERROR = TITLE + ChatColor.RED;
-
-  @HelpCommand @CatchUnknown @Default
+  @HelpCommand
   public void onEnchantHelpCommand(CommandHelp help) {
     //Sends the CommandSender the automagykally generated help message.
     help.showHelp();
   }
 
   @CommandAlias("enchant") @Conditions("operator")
-  @CommandCompletion("@nothing @nothing @enchantments")
+  @CommandCompletion("@nothing @range:1-20 @enchantments")
   @Syntax("<level> <enchantment name>")
   @Description("Applies the custom enchantment with the given level to the item held in the executor's main (right) hand.")
   public void onAddEnchant(@Conditions("holdingItem") Player player, ItemStack item, int level, CustomEnchant enchant) {
@@ -69,12 +68,12 @@ public class Commands extends BaseCommand {
     player.sendMessage(TITLE + "Successfully disenchanted the item.");
   }
 
-  @CommandAlias("enchantments list")
+  @Subcommand("list")
   @Description("Shows the executor a complete list of registered custom enchantment names.")
   public void onEnchantmentList(CommandSender sender) {
     String enchants = Enchantments.REGISTERED.stream().map(CustomEnchant::getName)
-            .collect(Collectors.joining(ChatColor.WHITE + ", " + ChatColor.AQUA));
-    sender.sendMessage(TITLE + "Registered custom enchantments: " + ChatColor.AQUA + enchants);
+            .collect(Collectors.joining(ChatColor.WHITE + ", " + ChatColor.GOLD));
+    sender.sendMessage(TITLE + "Registered custom enchantments: " + ChatColor.GOLD + enchants);
   }
 
   public void onEnchantmentInfo() {

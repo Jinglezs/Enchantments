@@ -1,8 +1,8 @@
 package net.jingles.enchantments;
 
+import co.aikar.commands.BukkitCommandManager;
 import co.aikar.commands.ConditionFailedException;
 import co.aikar.commands.InvalidCommandArgument;
-import co.aikar.commands.PaperCommandManager;
 import net.jingles.enchantments.enchants.CustomEnchant;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -79,13 +79,13 @@ public class Enchantments extends JavaPlugin {
 
   private void registerCommands() {
 
-    PaperCommandManager manager = new PaperCommandManager(this);
+    BukkitCommandManager manager = new BukkitCommandManager(this);
     manager.enableUnstableAPI("help");
 
     //----- ARGUMENT COMPLETIONS -----
 
     //Command completion for CustomEnchant names
-    manager.getCommandCompletions().registerStaticCompletion("enchantments",
+    manager.getCommandCompletions().registerAsyncCompletion("enchantments", handler ->
             REGISTERED.stream().map(CustomEnchant::getName).collect(Collectors.toList()));
 
     //----- CONDITIONS -----

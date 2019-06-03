@@ -55,7 +55,7 @@ public class Grapple extends CustomEnchant {
     arrow.getPersistentDataContainer().set(getKey(), PersistentDataType.INTEGER, 1);
     arrow.setShooter(player);
 
-    player.getInventory().remove(new ItemStack(Material.ARROW, 1));
+    player.getInventory().removeItem(new ItemStack(Material.ARROW, 1));
   }
 
   @EventHandler
