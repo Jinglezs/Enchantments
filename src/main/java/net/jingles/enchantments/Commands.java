@@ -76,8 +76,11 @@ public class Commands extends BaseCommand {
     sender.sendMessage(TITLE + "Registered custom enchantments: " + ChatColor.GOLD + enchants);
   }
 
-  public void onEnchantmentInfo() {
-    //TODO: Nyghoe do this for me plez. Examples above hoE
+  @Subcommand("info")
+  @Syntax("<enchantment name>")
+  @CommandCompletion("@enchantments")
+  @Description("Shows the executor information about the provided enchantment")
+  public void onEnchantmentInfo(CommandSender sender, CustomEnchant enchant) {
+    sender.sendMessage(TITLE + enchant.getDescription());
   }
-
 }
