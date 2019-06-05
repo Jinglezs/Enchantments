@@ -1,6 +1,7 @@
-package net.jingles.enchantments.enchants;
+package net.jingles.enchantments.enchants.weapon;
 
 import net.jingles.enchantments.Enchant;
+import net.jingles.enchantments.enchants.CustomEnchant;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -54,7 +55,7 @@ public class Grapple extends CustomEnchant {
     arrow.getPersistentDataContainer().set(getKey(), PersistentDataType.INTEGER, 1);
     arrow.setShooter(player);
 
-    player.getInventory().remove(new ItemStack(Material.ARROW, 1));
+    player.getInventory().removeItem(new ItemStack(Material.ARROW, 1));
   }
 
   @EventHandler

@@ -1,6 +1,7 @@
-package net.jingles.enchantments.enchants;
+package net.jingles.enchantments.enchants.tools;
 
 import net.jingles.enchantments.Enchant;
+import net.jingles.enchantments.enchants.CustomEnchant;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;

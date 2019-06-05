@@ -1,7 +1,8 @@
-package net.jingles.enchantments.enchants;
+package net.jingles.enchantments.enchants.armor;
 
 import net.jingles.enchantments.Enchant;
 import net.jingles.enchantments.Enchantments;
+import net.jingles.enchantments.enchants.CustomEnchant;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
