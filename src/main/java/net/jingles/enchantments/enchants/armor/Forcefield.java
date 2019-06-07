@@ -17,6 +17,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 
 @Enchant(name = "Forcefield", key = "forcefield", maxLevel = 3, targetItem = EnchantmentTarget.ARMOR_TORSO,
         levelRequirement = 13, horseArmor = true, description = "When a projectile nears the owner, there is " +
@@ -34,7 +35,7 @@ public class Forcefield extends CustomEnchant {
   }
 
   @Override
-  public boolean canEnchantItem(ItemStack item) {
+  public boolean canEnchantItem(@NotNull ItemStack item) {
     if (item.getType().toString().contains("HORSE_ARMOR")) return true;
     else return super.canEnchantItem(item);
   }

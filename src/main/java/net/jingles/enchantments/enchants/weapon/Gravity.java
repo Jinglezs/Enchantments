@@ -43,7 +43,8 @@ public class Gravity extends CustomEnchant {
   @Override
   public boolean canTrigger(Inventory inventory, Event event) {
     ItemStack bow = getItem(inventory);
-    return bow != null && hasEnchantment(bow);
+    return bow != null && hasEnchantment(bow) && Enchantments.getCooldownManager()
+        .hasCooldown(((Player) inventory.getHolder()).getUniqueId(), this);
   }
 
   @EventHandler
@@ -83,6 +84,8 @@ public class Gravity extends CustomEnchant {
     int duration = (5 * level) * 20;
     PotionEffect slow = new PotionEffect(PotionEffectType.SLOW, duration, 1, false, true);
     targets.forEach(target -> target.addPotionEffect(slow));
+
+    Enchantments.getCooldownManager().addCooldown(player.getUniqueId(), this, getCooldown(), getTimeUnit());
 
   }
 

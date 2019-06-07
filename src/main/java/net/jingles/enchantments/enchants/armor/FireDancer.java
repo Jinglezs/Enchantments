@@ -17,6 +17,7 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.jetbrains.annotations.NotNull;
 
 @Enchant(name = "Fire Dancer", key = "fire_dancer", targetItem = EnchantmentTarget.ARMOR_FEET,
         levelRequirement = 20, maxLevel = 1, horseArmor = true, description = "Grants the wearer immunity " +
@@ -34,7 +35,7 @@ public class FireDancer extends CustomEnchant {
   }
 
   @Override
-  public boolean canEnchantItem(ItemStack item) {
+  public boolean canEnchantItem(@NotNull ItemStack item) {
     if (item.getType().toString().contains("HORSE_ARMOR")) return true;
     else return super.canEnchantItem(item);
   }
