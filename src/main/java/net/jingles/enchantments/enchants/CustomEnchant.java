@@ -14,57 +14,93 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class CustomEnchant extends Enchantment implements Listener {
 
+  private final String name;
+  private final String keyName;
+  private final String description;
+  private final long cooldown;
+  private final TimeUnit timeUnit;
+  private final int levelRequirement;
+  private final int maxLevel;
+  private final int startLevel;
+  private final EnchantmentTarget target;
+  private final boolean treasure;
+  private final boolean cursed;
+
   public CustomEnchant(NamespacedKey key) {
     super(key);
+
+    Enchant annotation = this.getClass().getAnnotation(Enchant.class);
+    this.name = annotation.name();
+    this.keyName = annotation.key();
+    this.description = annotation.description();
+    this.cooldown = annotation.cooldown();
+    this.timeUnit = annotation.timeUnit();
+    this.levelRequirement = annotation.levelRequirement();
+    this.maxLevel = annotation.maxLevel();
+    this.startLevel = annotation.startingLevel();
+    this.target = annotation.targetItem();
+    this.treasure = annotation.treasure();
+    this.cursed = annotation.cursed();
   }
 
   public String getKeyName() {
-    return this.getClass().getAnnotation(Enchant.class).key();
+    return this.keyName;
   }
 
   public String getDescription() {
-    return this.getClass().getAnnotation(Enchant.class).description();
+    return this.description;
   }
 
   public int getLevelRequirement() {
-    return this.getClass().getAnnotation(Enchant.class).levelRequirement();
+    return this.levelRequirement;
   }
 
+  public long getCooldown() {
+    return this.cooldown;
+  }
+
+  public TimeUnit getTimeUnit() {
+    return this.timeUnit;
+  }
+
+  @NotNull
   @Override
   public String getName() {
-    return this.getClass().getAnnotation(Enchant.class).name();
+    return this.name;
   }
 
   @Override
   public int getMaxLevel() {
-    return this.getClass().getAnnotation(Enchant.class).maxLevel();
+    return this.maxLevel;
   }
 
   @Override
   public int getStartLevel() {
-    return this.getClass().getAnnotation(Enchant.class).startingLevel();
+    return this.startLevel;
   }
 
   @Override
   public EnchantmentTarget getItemTarget() {
-    return this.getClass().getAnnotation(Enchant.class).targetItem();
+    return this.target;
   }
 
   @Override
   public boolean isTreasure() {
-    return this.getClass().getAnnotation(Enchant.class).treasure();
+    return this.treasure;
   }
 
   @Override
   public boolean isCursed() {
-    return this.getClass().getAnnotation(Enchant.class).cursed();
+    return this.cursed;
   }
 
   @Override
