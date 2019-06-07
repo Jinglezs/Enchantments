@@ -3,6 +3,7 @@ package net.jingles.enchantments;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.CommandHelp;
 import co.aikar.commands.annotation.*;
+import net.jingles.enchantments.cooldown.CooldownManager;
 import net.jingles.enchantments.enchants.CustomEnchant;
 import net.jingles.enchantments.util.RomanNumerals;
 import org.bukkit.ChatColor;
@@ -20,6 +21,9 @@ public class Commands extends BaseCommand {
 
   private static final String TITLE = ChatColor.DARK_GRAY + "[" + ChatColor.AQUA + "Enchantments" +
           ChatColor.DARK_GRAY + "] " + ChatColor.RESET;
+
+  @Dependency
+  private CooldownManager cooldownManager;
 
   @HelpCommand
   public void onEnchantHelpCommand(CommandHelp help) {
@@ -83,4 +87,16 @@ public class Commands extends BaseCommand {
   public void onEnchantmentInfo(CommandSender sender, CustomEnchant enchant) {
     sender.sendMessage(TITLE + enchant.getDescription());
   }
+
+  public void onCooldownInfo() {
+    //TODO: Yo Nyghoe, give the player a list of their remaining cooldowns (how much longer they must wait).
+    // If I find out that you're spamming Player.sendMessage(), I will have you executed.
+    // Use a damn StringBuilder or something. StringBuilder.toString() gives ya the completed String.
+    // TIP: Skip to the next line using "\n" in a string ya dirty hoe
+    // FYI: There is already an instance of CooldownManager here. Use it >:V
+
+    //TODO: Make an enchantment that reduces the cooldowns of other enchantments if ya want ;)
+    // You can do this using by listening to the  EnchantmentCooldownEvent or whatever I called it.
+  }
+
 }

@@ -88,6 +88,7 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
     return this.startLevel;
   }
 
+  @NotNull
   @Override
   public EnchantmentTarget getItemTarget() {
     return this.target;
@@ -104,7 +105,7 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
   }
 
   @Override
-  public boolean canEnchantItem(ItemStack itemStack) {
+  public boolean canEnchantItem(@NotNull ItemStack itemStack) {
     return getItemTarget().includes(itemStack);
   }
 

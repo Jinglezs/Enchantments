@@ -3,14 +3,13 @@ package net.jingles.enchantments;
 import co.aikar.commands.BukkitCommandManager;
 import co.aikar.commands.ConditionFailedException;
 import co.aikar.commands.InvalidCommandArgument;
+import net.jingles.enchantments.cooldown.CooldownManager;
 import net.jingles.enchantments.enchants.CustomEnchant;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.metadata.MetadataValue;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.reflections.Reflections;
 
@@ -24,7 +23,7 @@ import java.util.stream.Collectors;
 public class Enchantments extends JavaPlugin {
 
   public static final Set<CustomEnchant> REGISTERED = new HashSet<>();
-  public static MetadataValue METADATA;
+  private static CooldownManager cooldownManager;
 
   @Override
   public void onEnable() {
@@ -57,7 +56,6 @@ public class Enchantments extends JavaPlugin {
 
     registerCommands();
     getServer().getPluginManager().registerEvents(new EnchantListener(), this);
-    METADATA = new FixedMetadataValue(this, 0);
   }
 
   //Ignore what Spigot has to say and forcefully enable enchantment registration
@@ -81,6 +79,11 @@ public class Enchantments extends JavaPlugin {
 
     BukkitCommandManager manager = new BukkitCommandManager(this);
     manager.enableUnstableAPI("help");
+
+    //----- COMMAND DEPENDENCY INJECTION -----
+
+    cooldownManager = new CooldownManager(this);
+    manager.registerDependency(CooldownManager.class, cooldownManager);
 
     //----- ARGUMENT COMPLETIONS -----
 
@@ -130,6 +133,10 @@ public class Enchantments extends JavaPlugin {
     });
 
     manager.registerCommand(new Commands());
+  }
+
+  public static CooldownManager getCooldownManager() {
+    return cooldownManager;
   }
 
 }
