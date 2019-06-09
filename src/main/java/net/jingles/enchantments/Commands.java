@@ -102,7 +102,7 @@ public class Commands extends BaseCommand {
     String cooldownMessage = cooldownManager.getCooldowns().stream()
         .filter(entry -> player.getUniqueId().equals(entry.getRow()))
         .map(entry -> {
-          long remaining = entry.getCol().getTimeUnit().convert(entry.getValue(), TimeUnit.MILLISECONDS) - System.currentTimeMillis();
+          long remaining = entry.getCol().getTimeUnit().convert(entry.getValue() - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
           return String.format(COOLDOWN_INFO, entry.getCol().getName(), (int) remaining, entry.getCol().getTimeUnit().name().toLowerCase());
         })
         .collect(Collectors.joining("\n"));
