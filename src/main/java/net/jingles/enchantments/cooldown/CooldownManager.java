@@ -42,10 +42,14 @@ public class CooldownManager extends BukkitRunnable {
     plugin.getServer().getPluginManager().callEvent(event);
 
     if (!event.isCancelled())
-      cooldowns.put(id, enchant, System.currentTimeMillis() + TimeUnit.MILLISECONDS.convert(time, unit));
-
+      cooldowns.put(id, enchant, System.currentTimeMillis() +
+          TimeUnit.MILLISECONDS.convert(event.getRawCooldown(), event.getTimeUnit()));
   }
 
+  /**
+   * Gets the instance of the cooldown table.
+   * @return the cooldown table
+   */
   public Table<UUID, CustomEnchant, Long> getCooldowns() {
     return this.cooldowns;
   }
