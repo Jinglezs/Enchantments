@@ -14,6 +14,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @CommandAlias("enchantments")
@@ -88,15 +89,26 @@ public class Commands extends BaseCommand {
     sender.sendMessage(TITLE + enchant.getDescription());
   }
 
-  public void onCooldownInfo() {
-    //TODO: Yo Nyghoe, give the player a list of their remaining cooldowns (how much longer they must wait).
-    // If I find out that you're spamming Player.sendMessage(), I will have you executed.
-    // Use a damn StringBuilder or something. StringBuilder.toString() gives ya the completed String.
-    // TIP: Skip to the next line using "\n" in a string ya dirty hoe
-    // FYI: There is already an instance of CooldownManager here. Use it >:V
+  private static final String COOLDOWN_HEADER = ChatColor.DARK_GRAY + "+-------+ " + ChatColor.AQUA +
+      "Enchantment Cooldowns " + ChatColor.DARK_GRAY + "+-------+\n" + ChatColor.RESET;
 
-    //TODO: Make an enchantment that reduces the cooldowns of other enchantments if ya want ;)
-    // You can do this using by listening to the  EnchantmentCooldownEvent or whatever I called it.
+  //Replacements: Name, cooldown, time unit
+  private static final String COOLDOWN_INFO = ChatColor.GOLD + " - " + ChatColor.AQUA + "%s " + ChatColor.GOLD + ": "
+      + ChatColor.RED + "%d %s";
+
+  @CommandAlias("cooldowns")
+  public void onCooldownInfo(Player player) {
+
+    String cooldownMessage = cooldownManager.getCooldowns().stream()
+        .filter(entry -> player.getUniqueId().equals(entry.getRow()))
+        .map(entry -> {
+          long remaining = entry.getCol().getTimeUnit().convert(System.currentTimeMillis() - entry.getValue(), TimeUnit.MILLISECONDS);
+          return String.format(COOLDOWN_INFO, entry.getCol().getName(), (int) remaining, entry.getCol().getTimeUnit().name().toLowerCase());
+        })
+        .collect(Collectors.joining("\n"));
+
+    player.sendMessage(COOLDOWN_HEADER + cooldownMessage);
+
   }
 
 }

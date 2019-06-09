@@ -46,6 +46,10 @@ public class CooldownManager extends BukkitRunnable {
 
   }
 
+  public Table<UUID, CustomEnchant, Long> getCooldowns() {
+    return this.cooldowns;
+  }
+
   /**
    * Checks if the player has an active cooldown for the given enchantment.
    * @param id the player's unique id
