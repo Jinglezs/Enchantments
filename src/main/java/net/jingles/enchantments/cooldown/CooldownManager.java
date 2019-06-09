@@ -5,6 +5,7 @@ import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchants.CustomEnchant;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.Iterator;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -26,7 +27,14 @@ public class CooldownManager extends BukkitRunnable {
   // cooldowns cannot be shorter than 0.25 seconds, or 250 milliseconds).
   @Override
   public void run() {
-    cooldowns.removeIf((id, enchant, time) -> time < System.currentTimeMillis());
+
+    for (Iterator<Table.Entry<UUID, CustomEnchant, Long>> it = cooldowns.iterator(); it.hasNext(); ) {
+      Table.Entry<UUID, CustomEnchant, Long> entry = it.next();
+      if (entry == null || entry.getRow() == null || entry.getCol() == null || entry.getValue() == null) continue;
+      if (entry.getValue() < System.currentTimeMillis()) it.remove();
+    }
+
+    //cooldowns.removeIf((id, enchant, time) -> time == null || time < System.currentTimeMillis());
   }
 
   /**
