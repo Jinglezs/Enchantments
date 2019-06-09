@@ -107,8 +107,7 @@ public class Commands extends BaseCommand {
         })
         .collect(Collectors.joining("\n"));
 
-    player.sendMessage(COOLDOWN_HEADER + cooldownMessage);
-
+    player.sendMessage(COOLDOWN_HEADER + (!cooldownMessage.isEmpty() ? cooldownMessage : " - You do not have any active enchantment cooldowns"));
   }
 
 }
