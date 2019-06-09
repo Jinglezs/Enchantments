@@ -43,7 +43,7 @@ public class Gravity extends CustomEnchant {
   @Override
   public boolean canTrigger(Inventory inventory, Event event) {
     ItemStack bow = getItem(inventory);
-    return bow != null && hasEnchantment(bow) && Enchantments.getCooldownManager()
+    return bow != null && hasEnchantment(bow) && !Enchantments.getCooldownManager()
         .hasCooldown(((Player) inventory.getHolder()).getUniqueId(), this);
   }
 

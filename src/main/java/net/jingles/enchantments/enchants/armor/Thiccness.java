@@ -45,7 +45,7 @@ public class Thiccness extends CustomEnchant {
   public boolean canTrigger(Inventory inventory, Event event) {
     ItemStack leggings = getItem(inventory);
     return leggings != null && hasEnchantment(leggings) &&
-        Enchantments.getCooldownManager().hasCooldown(((Player) inventory.getHolder()).getUniqueId(), this);
+        !Enchantments.getCooldownManager().hasCooldown(((Player) inventory.getHolder()).getUniqueId(), this);
   }
 
   @EventHandler
