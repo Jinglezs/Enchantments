@@ -17,6 +17,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -175,6 +176,10 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
     return Enchantments.REGISTERED.stream()
             .filter(enchantment -> enchantment.canEnchantItem(item))
             .collect(Collectors.toSet());
+  }
+
+  public void addCooldown(UUID uuid) {
+    Enchantments.getCooldownManager().addCooldown(uuid, this, getCooldown(), getTimeUnit());
   }
 
 }
