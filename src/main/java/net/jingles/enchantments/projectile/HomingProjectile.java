@@ -46,4 +46,9 @@ public class HomingProjectile extends Projectile {
     return this;
   }
 
+  @Override
+  public void launch() {
+    if (target != null) super.launch();
+  }
+
 }

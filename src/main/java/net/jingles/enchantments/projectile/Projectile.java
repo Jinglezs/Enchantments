@@ -224,12 +224,13 @@ public class Projectile extends BukkitRunnable {
   public void launch() {
 
     //Ensures that none of the necessary fields are null.
-    boolean canLaunch = Stream.of(getClass().getDeclaredFields())
+    boolean canLaunch = Stream.of(Projectile.class.getDeclaredFields())
         .filter(field -> field.getType() != Object.class)
         .allMatch(field -> {
           try {
             return field.get(this) != null;
           } catch (IllegalAccessException e) {
+            e.printStackTrace();
             return false;
           }
         });

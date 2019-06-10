@@ -24,7 +24,7 @@ import org.bukkit.util.RayTraceResult;
 
 @Enchant(name = "Pyromancer", key = "pyromancer", targetItem = EnchantmentTarget.WEAPON, cooldown = 10,
     description = "When the wielder right clicks while holding an enchanted blade and looking at an entity, " +
-    "homing flame projectiles are launched at the target. Upon finding their target, the entity is dealt " +
+        "homing flame projectiles are launched at the target. Upon finding their target, the entity is dealt " +
         "5 (+2 per level) damage and ignited for 5 (+2 per level) seconds.")
 
 public class Pyromancer extends CustomEnchant {
@@ -52,9 +52,9 @@ public class Pyromancer extends CustomEnchant {
         !canTrigger(event.getPlayer().getInventory(), event)) return;
 
     Player player = event.getPlayer();
-
     RayTraceResult result = player.getWorld().rayTraceEntities(player.getEyeLocation(),
-        player.getEyeLocation().getDirection(), 120, entity -> entity instanceof LivingEntity);
+        player.getEyeLocation().getDirection(), 120, entity -> entity instanceof LivingEntity
+            && !entity.equals(player));
 
     final LivingEntity target = result != null ? (LivingEntity) result.getHitEntity() : null;
     if (target == null) return;
