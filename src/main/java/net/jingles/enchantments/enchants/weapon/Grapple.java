@@ -1,10 +1,13 @@
 package net.jingles.enchantments.enchants.weapon;
 
 import net.jingles.enchantments.Enchant;
+import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchants.CustomEnchant;
+import net.jingles.enchantments.util.InventoryUtils;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Tag;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Arrow;
@@ -20,7 +23,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
 
-@Enchant(name = "Grapple", key = "grapple", targetItem = EnchantmentTarget.BOW, maxLevel = 1,
+@Enchant(name = "Grapple", key = "grapple", targetItem = EnchantmentTarget.BOW, maxLevel = 1, cooldown = 2,
   description = "Allows the user to launch an arrow by left clicking. When it hits a target, the user is quickly " +
           "propelled in its direction.")
 
@@ -55,7 +58,9 @@ public class Grapple extends CustomEnchant {
     arrow.getPersistentDataContainer().set(getKey(), PersistentDataType.INTEGER, 1);
     arrow.setShooter(player);
 
-    player.getInventory().removeItem(new ItemStack(Material.ARROW, 1));
+    InventoryUtils.removeItem(player.getInventory(), Tag.ITEMS_ARROWS, 1);
+    Enchantments.getCooldownManager().addCooldown(player.getUniqueId(),
+        this, getCooldown(), getTimeUnit());
   }
 
   @EventHandler

@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-@Enchant(name = "Thiccness", key = "thiccness", targetItem = EnchantmentTarget.ARMOR_LEGS,
+@Enchant(name = "Thiccness", key = "thiccness", targetItem = EnchantmentTarget.ARMOR_LEGS, cooldown = 3,
         description = "Allows the player to use the strength of their thicc thighs to supercharge the " +
                 "power of their jump, increasing their jump height dramatically.")
 
@@ -44,7 +44,8 @@ public class Thiccness extends CustomEnchant {
   @Override
   public boolean canTrigger(Inventory inventory, Event event) {
     ItemStack leggings = getItem(inventory);
-    return leggings != null && hasEnchantment(leggings);
+    return leggings != null && hasEnchantment(leggings) &&
+        !Enchantments.getCooldownManager().hasCooldown(((Player) inventory.getHolder()).getUniqueId(), this);
   }
 
   @EventHandler
@@ -77,6 +78,9 @@ public class Thiccness extends CustomEnchant {
 
             player.getPersistentDataContainer().set(getKey(), PersistentDataType.INTEGER, 1);
             player.setVelocity(player.getVelocity().setY((charge / 75)));
+
+            Enchantments.getCooldownManager().addCooldown(player.getUniqueId(),
+                Thiccness.this, getCooldown(), getTimeUnit());
             this.cancel();
 
           }

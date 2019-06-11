@@ -3,6 +3,7 @@ package net.jingles.enchantments;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.CommandHelp;
 import co.aikar.commands.annotation.*;
+import net.jingles.enchantments.cooldown.CooldownManager;
 import net.jingles.enchantments.enchants.CustomEnchant;
 import net.jingles.enchantments.util.RomanNumerals;
 import org.bukkit.ChatColor;
@@ -13,6 +14,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @CommandAlias("enchantments")
@@ -21,6 +23,9 @@ public class Commands extends BaseCommand {
   private static final String TITLE = ChatColor.DARK_GRAY + "[" + ChatColor.AQUA + "Enchantments" +
           ChatColor.DARK_GRAY + "] " + ChatColor.RESET;
 
+  @Dependency
+  private CooldownManager cooldownManager;
+
   @HelpCommand
   public void onEnchantHelpCommand(CommandHelp help) {
     //Sends the CommandSender the automagykally generated help message.
@@ -28,7 +33,7 @@ public class Commands extends BaseCommand {
   }
 
   @CommandAlias("enchant") @Conditions("operator")
-  @CommandCompletion("@nothing @range:1-20 @enchantments")
+  @CommandCompletion("@range:1-20 @enchantments")
   @Syntax("<level> <enchantment name>")
   @Description("Applies the custom enchantment with the given level to the item held in the executor's main (right) hand.")
   public void onAddEnchant(@Conditions("holdingItem") Player player, ItemStack item, int level, CustomEnchant enchant) {
@@ -50,7 +55,7 @@ public class Commands extends BaseCommand {
   }
 
   @CommandAlias("disenchant") @Conditions("operator")
-  @CommandCompletion("@nothing @enchantments")
+  @CommandCompletion("@enchantments")
   @Syntax("<enchantment name>")
   @Description("Removes the given custom enchantment from the item held in the executor's main (right) hand.")
   public void onDisenchant(@Conditions("holdingItem") Player player, @Conditions("hasCustomEnchants") ItemStack item, CustomEnchant enchant) {
@@ -83,4 +88,26 @@ public class Commands extends BaseCommand {
   public void onEnchantmentInfo(CommandSender sender, CustomEnchant enchant) {
     sender.sendMessage(TITLE + enchant.getDescription());
   }
+
+  private static final String COOLDOWN_HEADER = ChatColor.DARK_GRAY + "+-------+ " + ChatColor.AQUA +
+      "Enchantment Cooldowns " + ChatColor.DARK_GRAY + "+-------+\n" + ChatColor.RESET;
+
+  //Replacements: Name, cooldown, time unit
+  private static final String COOLDOWN_INFO = ChatColor.GOLD + " - " + ChatColor.AQUA + "%s " + ChatColor.GOLD + ": "
+      + ChatColor.RED + "%d %s";
+
+  @CommandAlias("cooldowns")
+  public void onCooldownInfo(Player player) {
+
+    String cooldownMessage = cooldownManager.getCooldowns().stream()
+        .filter(entry -> player.getUniqueId().equals(entry.getRow()))
+        .map(entry -> {
+          long remaining = entry.getCol().getTimeUnit().convert(entry.getValue() - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+          return String.format(COOLDOWN_INFO, entry.getCol().getName(), (int) remaining, entry.getCol().getTimeUnit().name().toLowerCase());
+        })
+        .collect(Collectors.joining("\n"));
+
+    player.sendMessage(COOLDOWN_HEADER + (!cooldownMessage.isEmpty() ? cooldownMessage : " - You do not have any active enchantment cooldowns"));
+  }
+
 }
