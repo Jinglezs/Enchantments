@@ -33,7 +33,7 @@ public class Commands extends BaseCommand {
   }
 
   @CommandAlias("enchant") @Conditions("operator")
-  @CommandCompletion("@nothing @range:1-20 @enchantments")
+  @CommandCompletion("@range:1-20 @enchantments")
   @Syntax("<level> <enchantment name>")
   @Description("Applies the custom enchantment with the given level to the item held in the executor's main (right) hand.")
   public void onAddEnchant(@Conditions("holdingItem") Player player, ItemStack item, int level, CustomEnchant enchant) {
@@ -55,7 +55,7 @@ public class Commands extends BaseCommand {
   }
 
   @CommandAlias("disenchant") @Conditions("operator")
-  @CommandCompletion("@nothing @enchantments")
+  @CommandCompletion("@enchantments")
   @Syntax("<enchantment name>")
   @Description("Removes the given custom enchantment from the item held in the executor's main (right) hand.")
   public void onDisenchant(@Conditions("holdingItem") Player player, @Conditions("hasCustomEnchants") ItemStack item, CustomEnchant enchant) {
