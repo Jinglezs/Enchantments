@@ -41,8 +41,7 @@ public class Projectile extends BukkitRunnable {
     this.blockFilters = new HashSet<>();
     this.entityFilters = new HashSet<>();
     this.owner = owner;
-    entityFilters.add(entity -> !entity.equals(owner));
-    blockFilters.add(block -> block.getType().name().endsWith("AIR"));
+    blockFilters.add(block -> !block.getType().name().endsWith("AIR"));
   }
 
   @Override
@@ -51,6 +50,8 @@ public class Projectile extends BukkitRunnable {
     move();
     display();
     target();
+
+    if (distanceTraveled > maxDistance) this.cancel();
   }
 
   public void move() {
@@ -63,6 +64,7 @@ public class Projectile extends BukkitRunnable {
   public void target() {
 
     List<Entity> targets = location.getWorld().getNearbyEntities(hitbox).stream()
+        .filter(entity -> !entity.equals(owner))
         .filter(entityFilters.stream().reduce(Predicate::or).orElse(t -> true))
         .collect(Collectors.toList());
 
@@ -70,7 +72,7 @@ public class Projectile extends BukkitRunnable {
     if (noClip) return; //No need to check for block collisions
 
     Block block = location.getBlock();
-    boolean canCollide = blockFilters.stream().reduce(Predicate::or).orElse(t -> true).test(block);
+    boolean canCollide = blockFilters.stream().reduce(Predicate::and).orElse(t -> false).test(block);
     if (canCollide) onBlockHit.accept(this, block);
 
   }
@@ -80,6 +82,26 @@ public class Projectile extends BukkitRunnable {
     if (options != null) {
       location.getWorld().spawnParticle(particle, location, 1, 0, 0, 0, options);
     } else location.getWorld().spawnParticle(particle, location, 1);
+  }
+
+  /**
+   * Ensures that all fields have a non-null value and starts the BukkitRunnable.
+   */
+  public void launch() {
+
+    //Ensures that none of the necessary fields are null.
+    boolean canLaunch = Stream.of(Projectile.class.getDeclaredFields())
+        .filter(field -> field.getType() != Object.class)
+        .allMatch(field -> {
+          try {
+            return field.get(this) != null;
+          } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return false;
+          }
+        });
+
+    if (canLaunch) runTaskTimer(Bukkit.getPluginManager().getPlugin("Enchantments"), 0, 1);
   }
 
   /**
@@ -219,23 +241,6 @@ public class Projectile extends BukkitRunnable {
   public Projectile withHitbox(double x, double y, double z) {
     this.hitbox = BoundingBox.of(location, x, y, z);
     return this;
-  }
-
-  public void launch() {
-
-    //Ensures that none of the necessary fields are null.
-    boolean canLaunch = Stream.of(Projectile.class.getDeclaredFields())
-        .filter(field -> field.getType() != Object.class)
-        .allMatch(field -> {
-          try {
-            return field.get(this) != null;
-          } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            return false;
-          }
-        });
-
-    if (canLaunch) runTask(Bukkit.getPluginManager().getPlugin("Enchantments"));
   }
 
   /**

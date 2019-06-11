@@ -64,8 +64,8 @@ public class Pyromancer extends CustomEnchant {
     int fireTicks = (5 + (level * 2)) * 20;
 
     new HomingProjectile(player, target)
-        .withAccuracy(0.55)
-        .withDistanceThreshold(15)
+        .withAccuracy(0.35)
+        .withDistanceThreshold(7)
         .setStartLocation(player.getEyeLocation())
         .setDirection(player.getEyeLocation().getDirection())
         .setParticle(Particle.REDSTONE)

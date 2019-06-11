@@ -27,10 +27,10 @@ public class HomingProjectile extends Projectile {
     double addition;
     double distance = getLocation().distanceSquared(target.getLocation());
 
-    addition = (distance > threshold) ? 0 : (threshold + 1) - distance / 10;
+    addition = (distance > threshold) ? 0 : (threshold + 1) - distance / 5;
     localAccuracy += addition;
 
-    Location location = target.getLocation().add(0, 1, 0);
+    Location location = target.getLocation();
     setDirection(getDirection().add(location.subtract(getLocation()).toVector().normalize()
         .multiply(localAccuracy * speed)).normalize().multiply(speed));
     super.move();
