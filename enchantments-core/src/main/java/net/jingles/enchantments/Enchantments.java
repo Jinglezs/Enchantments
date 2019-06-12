@@ -6,9 +6,9 @@ import co.aikar.commands.InvalidCommandArgument;
 import net.jingles.enchantments.cooldown.CooldownManager;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
+import net.jingles.enchantments.enchant.EnchantmentManager;
 import net.jingles.enchantments.projectile.ProjectileManager;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -16,17 +16,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.reflections.Reflections;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Enchantments extends JavaPlugin {
 
-  public static final Set<CustomEnchant> REGISTERED = new HashSet<>();
   private static CooldownManager cooldownManager;
   private static ProjectileManager projectileManager;
+  private static EnchantmentManager enchantmentManager;
 
   @Override
   public void onEnable() {
@@ -37,23 +34,7 @@ public class Enchantments extends JavaPlugin {
     Reflections reflections = new Reflections("net.jingles.enchantments.enchants");
     reflections.getTypesAnnotatedWith(Enchant.class).forEach(enchant -> {
 
-      Enchant annotation = enchant.getAnnotation(Enchant.class);
-      NamespacedKey key = new NamespacedKey(this, annotation.key());
-      CustomEnchant enchantment;
 
-      try {
-
-        enchantment = (CustomEnchant) enchant.getConstructor(NamespacedKey.class).newInstance(key);
-        getServer().getPluginManager().registerEvents(enchantment, this);
-        REGISTERED.add(enchantment);
-
-        Enchantment.registerEnchantment(enchantment);
-
-      } catch (IllegalArgumentException | NoSuchMethodException | InstantiationException | InvocationTargetException |
-              IllegalAccessException | IllegalStateException e) {
-        //Only thrown when a duplicate enchantment is registered (plugin reload).
-        if (!(e instanceof IllegalArgumentException)) e.printStackTrace();
-      }
 
     });
 
@@ -85,9 +66,11 @@ public class Enchantments extends JavaPlugin {
 
     //----- COMMAND DEPENDENCY INJECTION -----
 
+    enchantmentManager = new EnchantmentManager(this);
     cooldownManager = new CooldownManager(this);
     projectileManager = new ProjectileManager();
 
+    manager.registerDependency(EnchantmentManager.class, enchantmentManager);
     manager.registerDependency(CooldownManager.class, cooldownManager);
     manager.registerDependency(ProjectileManager.class, projectileManager);
 
@@ -95,7 +78,8 @@ public class Enchantments extends JavaPlugin {
 
     //Command completion for CustomEnchant names
     manager.getCommandCompletions().registerAsyncCompletion("enchantments", handler ->
-            REGISTERED.stream().map(CustomEnchant::getName).collect(Collectors.toList()));
+            enchantmentManager.getRegisteredEnchants().stream().map(CustomEnchant::getName)
+                .collect(Collectors.toList()));
 
     //----- CONDITIONS -----
 
@@ -126,11 +110,11 @@ public class Enchantments extends JavaPlugin {
     //Gets a CustomEnchant object from the remaining command arguments (String array)
     manager.getCommandContexts().registerContext(CustomEnchant.class, context -> {
       String key = String.join("_", context.getArgs());
-      Optional<CustomEnchant> optional = Enchantments.REGISTERED.stream()
+      Optional<CustomEnchant> optional = enchantmentManager.getRegisteredEnchants().stream()
               .filter(customEnchant -> customEnchant.getKeyName().equals(key))
               .findAny();
 
-      CustomEnchant enchant = optional.orElseGet(() -> Enchantments.REGISTERED.stream()
+      CustomEnchant enchant = optional.orElseGet(() -> enchantmentManager.getRegisteredEnchants().stream()
               .filter(customEnchant -> customEnchant.getName().equalsIgnoreCase(key.replace("_", " ")))
               .findAny().orElse(null));
 
@@ -147,6 +131,10 @@ public class Enchantments extends JavaPlugin {
 
   public static ProjectileManager getProjectileManager() {
     return projectileManager;
+  }
+
+  public static EnchantmentManager getEnchantmentManager() {
+    return enchantmentManager;
   }
 
 }

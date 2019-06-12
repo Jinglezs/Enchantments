@@ -1,6 +1,8 @@
 package net.jingles.enchantments.enchant;
 
 import net.jingles.enchantments.Enchantments;
+import org.bukkit.NamespacedKey;
+import org.bukkit.enchantments.Enchantment;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
@@ -8,6 +10,7 @@ import org.reflections.util.ConfigurationBuilder;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -20,11 +23,19 @@ import java.util.stream.Collectors;
 public final class EnchantmentManager {
 
   private final Set<Class<? extends CustomEnchant>> enchantmentClasses = new HashSet<>();
+  private final Set<CustomEnchant> registered = new HashSet<>();
+
+  private final Enchantments plugin;
   private Reflections reflections;
 
   public EnchantmentManager(Enchantments plugin) {
+    this.plugin = plugin;
     if (!plugin.getDataFolder().exists()) plugin.getDataFolder().mkdirs();
     loadClasses(plugin.getDataFolder());
+  }
+
+  public Set<CustomEnchant> getRegisteredEnchants() {
+    return this.registered;
   }
 
   private void loadClasses(File start) {
@@ -52,12 +63,38 @@ public final class EnchantmentManager {
       System.out.println("Error loading hero class files!");
     }
 
-    //Gets all classes in the data folder annotated with HeroInfo and adds them to the set
-    //of found Hero classes.
+    //Gets all classes in the data folder annotated with Enchant and adds them to the set
+    //of found CustomEnchant classes.
     reflections.getTypesAnnotatedWith(Enchant.class).forEach(clazz ->
         enchantmentClasses.add((Class<? extends CustomEnchant>) clazz));
 
    System.out.println("Loaded " + enchantmentClasses.size() + " custom enchantments");
+   instantiateClasses();
+  }
+
+  private void instantiateClasses() {
+
+    enchantmentClasses.forEach(enchant -> {
+
+      Enchant annotation = enchant.getAnnotation(Enchant.class);
+      NamespacedKey key = new NamespacedKey(plugin, annotation.key());
+      CustomEnchant enchantment;
+
+      try {
+
+        enchantment = enchant.getConstructor(NamespacedKey.class).newInstance(key);
+        plugin.getServer().getPluginManager().registerEvents(enchantment, plugin);
+        registered.add(enchantment);
+
+        Enchantment.registerEnchantment(enchantment);
+
+      } catch (IllegalArgumentException | NoSuchMethodException | InstantiationException | InvocationTargetException |
+          IllegalAccessException | IllegalStateException e) {
+        //Only thrown when a duplicate enchantment is registered (plugin reload).
+        if (!(e instanceof IllegalArgumentException)) e.printStackTrace();
+      }
+
+    });
 
   }
 

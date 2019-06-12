@@ -76,8 +76,10 @@ public class Commands extends BaseCommand {
   @Subcommand("list")
   @Description("Shows the executor a complete list of registered custom enchantment names.")
   public void onEnchantmentList(CommandSender sender) {
-    String enchants = Enchantments.REGISTERED.stream().map(CustomEnchant::getName)
-            .collect(Collectors.joining(ChatColor.WHITE + ", " + ChatColor.GOLD));
+    String enchants = Enchantments.getEnchantmentManager().getRegisteredEnchants().stream()
+        .map(CustomEnchant::getName)
+        .collect(Collectors.joining(ChatColor.WHITE + ", " + ChatColor.GOLD));
+
     sender.sendMessage(TITLE + "Registered custom enchantments: " + ChatColor.GOLD + enchants);
   }
 
