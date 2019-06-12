@@ -43,7 +43,7 @@
         <finalName>${project.artifactId}-${project.version}</finalName>
         <resources>
             <resource>
-                <directory>enchantments-core/src/src/main/resources</directory>
+                <directory>../enchantments-core/src/main/resources</directory>
                 <filtering>true</filtering>
             </resource>
         </resources>
