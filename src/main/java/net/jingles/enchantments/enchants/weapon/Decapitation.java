@@ -9,7 +9,9 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
-import org.bukkit.entity.*;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Mob;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -17,13 +19,12 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 @Enchant(name = "Decapitation", key = "decapitation", levelRequirement = 15, maxLevel = 4, targetItem = EnchantmentTarget.WEAPON,
-        description = "Has a 10% (+ 10% per additional level) chance of decapitating players, creepers, skeletons, wither skeletons, zombies or dragons upon killing them.")
-
-//TODO: Fix description?
-//TODO: Lower max probability chance? Is it too OP?
+        description = "Upon killing a mob that is capable of dropping a head, there is 10% chance per level that the " +
+            "mob's head will be added to its drops")
 
 public class Decapitation extends CustomEnchant {
 
