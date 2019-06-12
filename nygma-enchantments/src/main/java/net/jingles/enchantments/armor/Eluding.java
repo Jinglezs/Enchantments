@@ -37,26 +37,27 @@ public class Eluding extends CustomEnchant {
   public boolean canTrigger(Inventory inventory, Event event) {
     ItemStack boots = getItem(inventory);
     return boots != null && hasEnchantment(boots) &&
-        !Enchantments.getCooldownManager().hasCooldown(((Player) inventory.getHolder()).getUniqueId(), this);
+        !Enchantments.getCooldownManager()
+                .hasCooldown(((Player) inventory.getHolder()).getUniqueId(), this);
   }
 
   @EventHandler
   public void onPlayerDamage(EntityDamageByEntityEvent event) {
 
-    if (!(event.getEntity() instanceof Player)) { return; }
+    if (!(event.getEntity() instanceof Player) || ((Player) event.getEntity()).getHealth() > 10) return;
 
     Player player = (Player) event.getEntity();
-
-    if (player.getHealth() > 10) return;
     if (!canTrigger(player.getInventory(), event)) return;
 
     int level = getItem(player.getInventory()).getItemMeta().getEnchantLevel(this);
-    double probability = 0.25 + ((level * 5) / 100D); // Max level can be 5, equals to a .5 chance every time hit - if other conditions met
+    double probability = 0.25 + ((level * 5) / 100D);
+    // Max level can be 5, equals to a .5 chance every time hit - if other conditions met
 
     if (Math.random() >= probability) return;
 
     int speedDuration = level * 3;
-    PotionEffect speedEffect = new PotionEffect(PotionEffectType.SPEED, speedDuration * 20, 2); //duration multiplied by 20 because its in ticks
+    PotionEffect speedEffect = new PotionEffect(PotionEffectType.SPEED, speedDuration * 20, 2);
+    //duration multiplied by 20 because its in ticks
 
     if (player.hasPotionEffect(speedEffect.getType())) {
       player.removePotionEffect(speedEffect.getType());
@@ -70,15 +71,14 @@ public class Eluding extends CustomEnchant {
     player.getNearbyEntities(mobFilterRadius, mobFilterRadius, mobFilterRadius).stream()
         .filter(entity -> entity instanceof Mob)
         .map(entity -> (Mob) entity)
-        .filter(entity -> entity.getTarget() != null && entity.getTarget().equals(player))
-        .forEach(entity -> {
-          entity.addPotionEffect(slownessEffect);
-          entity.setTarget(null);
+        .filter(mob -> mob.getTarget() != null && mob.getTarget().equals(player))
+        .forEach(mob -> {
+          mob.addPotionEffect(slownessEffect);
+          mob.setTarget(null);
         });
 
     TextComponent message = new TextComponent("Elusive speed boost applied for " + speedDuration + " seconds");
     message.setColor(ChatColor.GOLD);
     player.spigot().sendMessage(ChatMessageType.ACTION_BAR, message);
   }
-
 }

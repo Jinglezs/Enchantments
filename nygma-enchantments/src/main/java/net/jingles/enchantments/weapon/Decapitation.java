@@ -10,7 +10,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -22,9 +21,9 @@ import org.bukkit.inventory.meta.SkullMeta;
 import java.util.HashMap;
 import java.util.Map;
 
-@Enchant(name = "Decapitation", key = "decapitation", levelRequirement = 15, maxLevel = 4, targetItem = EnchantmentTarget.WEAPON,
-    description = "Upon killing a mob that is capable of dropping a head, there is 10% chance per level that the " +
-        "mob's head will be added to its drops")
+@Enchant(name = "Decapitation", key = "decapitation", levelRequirement = 15, maxLevel = 4,
+        targetItem = EnchantmentTarget.WEAPON, description = "Upon killing a mob that is capable of " +
+        "dropping a head, there is 10% chance per level that the mob's head will be added to its drops")
 
 public class Decapitation extends CustomEnchant {
 
@@ -55,21 +54,21 @@ public class Decapitation extends CustomEnchant {
   @EventHandler
   public void onEntityDeath(EntityDeathEvent event) {
 
-    if ((event.getEntity().getKiller() == null) || (event.getEntity().getKiller() instanceof Mob)) { return; }
+    if (event.getEntity().getKiller() == null) return;
 
     Player player = event.getEntity().getKiller();
 
-    if (!(canTrigger(player.getInventory(), event)) || !(DROPPABLE.containsKey(event.getEntityType()))) { return; }
+    if (!canTrigger(player.getInventory(), event) || !DROPPABLE.containsKey(event.getEntityType())) return;
 
     int level = getItem(player.getInventory()).getItemMeta().getEnchantLevel(this);
-    double probability = 10 * level / 100D;
+    double probability = (10 * level) / 100D;
     if (Math.random() >= probability) return;
 
     ItemStack droppedHead = new ItemStack(DROPPABLE.get(event.getEntityType()));
 
     if (event.getEntity() instanceof Player) {
       SkullMeta skullMeta = (SkullMeta) droppedHead.getItemMeta();
-      skullMeta.setOwningPlayer(((Player) event.getEntity()).getPlayer());
+      skullMeta.setOwningPlayer((Player) event.getEntity());
       droppedHead.setItemMeta(skullMeta);
     }
 
