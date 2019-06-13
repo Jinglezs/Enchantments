@@ -2,11 +2,12 @@ package net.jingles.enchantments;
 
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.util.RomanNumerals;
-import org.bukkit.ChatColor;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.enchantment.EnchantItemEvent;
+import org.bukkit.event.inventory.PrepareAnvilEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
@@ -95,11 +96,31 @@ public class EnchantListener implements Listener {
           ItemMeta meta = event.getItem().getItemMeta();
           List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
 
-          lore.add(ChatColor.AQUA + enchant.getName() + " " + RomanNumerals.toRoman(entry.getValue()));
+          lore.add(enchant.getName() + " " + RomanNumerals.toRoman(entry.getValue()));
           meta.setLore(lore);
           event.getItem().setItemMeta(meta);
 
         });
+
+  }
+
+  @EventHandler
+  public void onAvilEnchantment(PrepareAnvilEvent event) {
+
+    ItemStack previous = event.getInventory().getItem(0);
+    ItemStack result = event.getResult();
+
+    if (previous == null || result == null ||
+        !previous.hasItemMeta() || !result.hasItemMeta()) return;
+
+    ItemMeta resultMeta = result.getItemMeta();
+
+    previous.getItemMeta().getEnchants().entrySet().forEach(entry -> {
+      if (!resultMeta.getEnchants().containsKey(entry.getKey()))
+        resultMeta.addEnchant(entry.getKey(), entry.getValue(), true);
+    });
+
+    result.setItemMeta(resultMeta);
 
   }
 
