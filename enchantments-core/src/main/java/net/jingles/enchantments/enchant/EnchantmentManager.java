@@ -98,4 +98,19 @@ public final class EnchantmentManager {
 
   }
 
+  public CustomEnchant getEnchantmentByKey(String key) {
+    return getRegisteredEnchants().stream()
+        .filter(customEnchant -> customEnchant.getKeyName().equalsIgnoreCase(key))
+        .findFirst().orElse(null);
+  }
+
+  public NamespacedKey newNamespacedKey(String key) {
+    return new NamespacedKey(plugin, key);
+  }
+
+  public NamespacedKey getEnchantmentKey(String key) {
+    CustomEnchant enchant = getEnchantmentByKey(key);
+    return enchant != null ? enchant.getKey() : null;
+  }
+
 }

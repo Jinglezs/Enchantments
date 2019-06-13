@@ -8,11 +8,13 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
+import org.bukkit.entity.Item;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -73,7 +75,10 @@ public class MoltenCore extends CustomEnchant {
     event.setCancelled(true);
     block.setType(Material.AIR);
     block.getState().update();
-    drops.forEach(item -> block.getWorld().dropItemNaturally(block.getLocation(), item));
+    drops.forEach(item -> {
+      Item entity = block.getWorld().dropItemNaturally(block.getLocation(), item);
+      entity.getPersistentDataContainer().set(getKey(), PersistentDataType.STRING, event.getPlayer().getName());
+    });
 
   }
 
