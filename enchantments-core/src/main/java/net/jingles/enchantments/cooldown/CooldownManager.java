@@ -3,6 +3,10 @@ package net.jingles.enchantments.cooldown;
 import co.aikar.util.Table;
 import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Iterator;
@@ -69,7 +73,16 @@ public class CooldownManager extends BukkitRunnable {
    * @return whether or not an active cooldown is present.
    */
   public boolean hasCooldown(UUID id, CustomEnchant enchant) {
-    return cooldowns.containsKey(id, enchant);
+    if (!cooldowns.containsKey(id, enchant)) return false;
+
+    String message = String.format("%s is on cooldown for %d %s", enchant.getName(),
+        getCooldowns().get(id, enchant), enchant.getTimeUnit().name().toLowerCase());
+
+    TextComponent component = new TextComponent(message);
+    component.setColor(ChatColor.RED);
+    Bukkit.getPlayer(id).spigot().sendMessage(ChatMessageType.ACTION_BAR, component);
+
+    return true;
   }
 
   /**

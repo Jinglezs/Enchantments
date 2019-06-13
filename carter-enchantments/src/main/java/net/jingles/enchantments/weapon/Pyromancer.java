@@ -83,7 +83,6 @@ public class Pyromancer extends CustomEnchant {
           }
 
           projectile.cancel();
-          addCooldown(player.getUniqueId());
 
         }))
         .onEntityHit((projectile, entity) -> {
@@ -91,11 +90,11 @@ public class Pyromancer extends CustomEnchant {
           LivingEntity hit = (LivingEntity) entity;
           hit.setFireTicks(fireTicks);
           hit.damage(damage);
-
           projectile.cancel();
-          addCooldown(player.getUniqueId());
 
         }).launch();
+
+    addCooldown(player.getUniqueId());
 
   }
 

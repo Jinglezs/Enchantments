@@ -1,5 +1,6 @@
 package net.jingles.enchantments.projectile;
 
+import net.jingles.enchantments.Enchantments;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -42,6 +43,7 @@ public class Projectile extends BukkitRunnable {
     this.entityFilters = new HashSet<>();
     this.owner = owner;
     blockFilters.add(block -> !block.getType().name().endsWith("AIR"));
+    Enchantments.getProjectileManager().register(this);
   }
 
   @Override
