@@ -4,15 +4,15 @@ import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.enchant.TargetGroup;
+import net.jingles.enchantments.util.ParticleUtil;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Bukkit;
-import org.bukkit.FluidCollisionMode;
-import org.bukkit.NamespacedKey;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -57,7 +57,7 @@ public class Thor extends CustomEnchant {
   @EventHandler
   public void onPlayerInteract(PlayerInteractEvent event) {
     if (event.getAction() != Action.RIGHT_CLICK_AIR ||
-      !canTrigger(event.getPlayer().getInventory(), event)) return;
+        !canTrigger(event.getPlayer().getInventory(), event)) return;
 
     Player player = event.getPlayer();
     Plugin enchantments = Bukkit.getPluginManager().getPlugin("Enchantments");
@@ -85,9 +85,9 @@ public class Thor extends CustomEnchant {
       }.runTaskTimer(enchantments, 0, 20);
 
     } else {
-      Block targetted = player.getTargetBlockExact(300, FluidCollisionMode.ALWAYS);
-      if (targetted != null) {
-        targetted.getWorld().strikeLightning(targetted.getLocation());
+      Block targeted = player.getTargetBlockExact(300, FluidCollisionMode.ALWAYS);
+      if (targeted != null) {
+        targeted.getWorld().strikeLightning(targeted.getLocation());
         addCooldown(player.getUniqueId());
       }
     }
@@ -103,8 +103,12 @@ public class Thor extends CustomEnchant {
 
         int time = timeInFlight.getAndIncrement();
 
-        //Cancel flight if player logs off, time runs out, or if they begin sneaking.
-        if (!player.isOnline() || time > duration || player.isSneaking()) {
+        //Cancel flight if player logs off, they reach the ground, or time runs out.
+        if (!player.isOnline()) {
+          this.cancel();
+          return;
+        } else if ((time > 20 && player.isOnGround()) || time > duration) {
+          if (player.isOnGround()) seismicSmash(player);
           addCooldown(player.getUniqueId());
           this.cancel();
           return;
@@ -113,11 +117,26 @@ public class Thor extends CustomEnchant {
         TextComponent component = new TextComponent(String.format(remaining, (duration - time) / 20));
         component.setColor(ChatColor.GOLD);
         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, component);
-        player.setVelocity(player.getEyeLocation().getDirection().multiply(1.75));
+        player.setVelocity(player.getEyeLocation().getDirection().multiply(1.25));
 
       }
     }.runTaskTimer(plugin, 0, 0);
 
+  }
+
+  private void seismicSmash(Player player) {
+    Particle.DustOptions options = new Particle.DustOptions(Color.WHITE, 1);
+    player.getWorld().playSound(player.getLocation(), Sound.BLOCK_GRASS_BREAK, 2, 1);
+
+    player.getWorld().getNearbyEntities(player.getLocation(), 10, 10, 10).stream()
+        .filter(entity -> entity instanceof LivingEntity)
+        .map(entity -> (LivingEntity) entity)
+        .forEach(entity -> {
+          ParticleUtil.sphere(entity.getLocation(), entity.getWidth(), Particle.REDSTONE, options);
+          entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_GRASS_BREAK, 2, 1);
+          entity.damage(10F);
+          entity.setVelocity(entity.getVelocity().setY(1.25));
+        });
   }
 
 }
