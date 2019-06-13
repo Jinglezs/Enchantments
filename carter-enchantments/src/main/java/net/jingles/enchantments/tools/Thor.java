@@ -26,7 +26,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Enchant(name = "Thor", key = "thor", levelRequirement = 30, maxLevel = 1, cooldown = 15,
+@Enchant(name = "Thor", key = "thor", levelRequirement = 30, maxLevel = 1, cooldown = 15, enchantChance = 0.10,
     targetItem = EnchantmentTarget.TOOL, targetGroup = TargetGroup.AXES, description = "Allows the " +
     "user to right click while looking at a block to summon lightning. Alternatively, the user may " +
     "hold crouch and right click to charge a brief flight, which lasts 3 seconds for every second it " +
@@ -76,6 +76,7 @@ public class Thor extends CustomEnchant {
           player.spigot().sendMessage(ChatMessageType.ACTION_BAR, component);
 
           if (!player.isSneaking() || duration > 7) {
+            player.setSneaking(false);
             flight(player, enchantments, duration * 20);
             this.cancel();
           }
@@ -112,7 +113,7 @@ public class Thor extends CustomEnchant {
         TextComponent component = new TextComponent(String.format(remaining, (duration - time) / 20));
         component.setColor(ChatColor.GOLD);
         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, component);
-        player.setVelocity(player.getEyeLocation().getDirection().multiply(3));
+        player.setVelocity(player.getEyeLocation().getDirection().multiply(1.75));
 
       }
     }.runTaskTimer(plugin, 0, 0);

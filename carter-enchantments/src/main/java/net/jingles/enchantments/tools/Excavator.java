@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Enchant(name = "Excavator", key = "excavator", targetItem = EnchantmentTarget.TOOL, levelRequirement = 30,
+@Enchant(name = "Excavator", key = "excavator", targetItem = EnchantmentTarget.TOOL, levelRequirement = 30, enchantChance = 0.6,
         targetGroup = TargetGroup.SHOVELS, maxLevel = 1, description = "Breaks all of the blocks surrounding the broken block.")
 
 public class Excavator extends CustomEnchant {

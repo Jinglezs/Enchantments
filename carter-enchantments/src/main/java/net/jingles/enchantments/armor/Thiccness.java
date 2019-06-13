@@ -25,8 +25,8 @@ import java.util.Map;
 import java.util.UUID;
 
 @Enchant(name = "Thiccness", key = "thiccness", targetItem = EnchantmentTarget.ARMOR_LEGS, cooldown = 3,
-        description = "Allows the player to use the strength of their thicc thighs to supercharge the " +
-                "power of their jump, increasing their jump height dramatically.")
+    enchantChance = 0.45, description = "Allows the player to use the strength of their thicc thighs to " +
+    "supercharge the power of their jump, increasing their jump height dramatically.")
 
 public class Thiccness extends CustomEnchant {
 
@@ -55,7 +55,7 @@ public class Thiccness extends CustomEnchant {
 
     Player player = event.getPlayer();
 
-    if (event.isSneaking()) {
+    if (player.isOnGround() && event.isSneaking()) {
 
       Enchantments plugin = (Enchantments) Bukkit.getPluginManager().getPlugin("Enchantments");
 
@@ -94,7 +94,7 @@ public class Thiccness extends CustomEnchant {
   @EventHandler
   public void onSuperjumpDamage(EntityDamageEvent event) {
     if (!(event.getEntity() instanceof Player) ||
-            event.getCause() != EntityDamageEvent.DamageCause.FALL) return;
+        event.getCause() != EntityDamageEvent.DamageCause.FALL) return;
 
     Player player = (Player) event.getEntity();
     if (player.getPersistentDataContainer().has(getKey(), PersistentDataType.INTEGER)) {

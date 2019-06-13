@@ -24,8 +24,8 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
 
 @Enchant(name = "Grapple", key = "grapple", targetItem = EnchantmentTarget.BOW, maxLevel = 1, cooldown = 2,
-  description = "Allows the user to launch an arrow by left clicking. When it hits a target, the user is quickly " +
-          "propelled in its direction.")
+    enchantChance = 0.50, description = "Allows the user to launch an arrow by left clicking. When it hits a " +
+    "target, the user is quickly propelled in its direction.")
 
 public class Grapple extends CustomEnchant {
 
@@ -47,7 +47,7 @@ public class Grapple extends CustomEnchant {
   @EventHandler
   public void onBowLeftClick(PlayerInteractEvent event) {
     if (event.getAction() != Action.LEFT_CLICK_AIR ||
-            !canTrigger(event.getPlayer().getInventory(), event)) return;
+        !canTrigger(event.getPlayer().getInventory(), event)) return;
 
     Player player = event.getPlayer();
 
@@ -66,13 +66,13 @@ public class Grapple extends CustomEnchant {
   @EventHandler
   public void onArrowHit(ProjectileHitEvent event) {
     if (!(event.getEntity() instanceof Arrow) ||
-            !(event.getEntity().getShooter() instanceof Player)) return;
+        !(event.getEntity().getShooter() instanceof Player)) return;
 
     Player player = (Player) event.getEntity().getShooter();
     Arrow arrow = (Arrow) event.getEntity();
 
     if (!arrow.getPersistentDataContainer().has(getKey(), PersistentDataType.INTEGER) ||
-            !canTrigger(player.getInventory(), event)) return;
+        !canTrigger(player.getInventory(), event)) return;
 
     if (player.getLocation().distance(arrow.getLocation()) > 75) return;
 
@@ -84,7 +84,7 @@ public class Grapple extends CustomEnchant {
   @EventHandler
   public void onFallDamage(EntityDamageEvent event) {
     if (!(event.getEntity() instanceof Player) ||
-            event.getCause() != EntityDamageEvent.DamageCause.FALL) return;
+        event.getCause() != EntityDamageEvent.DamageCause.FALL) return;
 
     Player player = (Player) event.getEntity();
     if (player.getPersistentDataContainer().has(getKey(), PersistentDataType.INTEGER)) {

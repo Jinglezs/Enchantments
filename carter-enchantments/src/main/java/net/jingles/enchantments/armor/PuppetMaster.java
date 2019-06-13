@@ -14,7 +14,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-@Enchant(name = "Puppet Master", key = "puppet_master", levelRequirement = 30, maxLevel = 3,
+@Enchant(name = "Puppet Master", key = "puppet_master", levelRequirement = 30, maxLevel = 3, enchantChance = 0.25,
         targetItem = EnchantmentTarget.ARMOR_HEAD, description = "When the wearer attacks a mob, " +
         "there is a 25% (+15% per level) chance that nearby mobs capable of attacking will target the victim.")
 

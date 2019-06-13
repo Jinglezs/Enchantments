@@ -11,6 +11,8 @@ public enum TargetGroup {
   HOES(material -> material.name().endsWith("_HOE")),
   SHOVELS(material -> material.name().endsWith("_SHOVEL")),
   PICKAXES(material -> material.name().endsWith("_PICKAXE")),
+  DIGGING(material -> PICKAXES.canEnchant(material) || SHOVELS.canEnchant(material)),
+  MELEE_WEAPONS(material -> EnchantmentTarget.WEAPON.includes(material) || AXES.canEnchant(material)),
   SHEARS(material -> material == Material.SHEARS),
   FLINT_AND_STEEL(material -> material == Material.FLINT_AND_STEEL),
   HORSE_ARMOR(material -> material.name().endsWith("_HORSE_ARMOR")),

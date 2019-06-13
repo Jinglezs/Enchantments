@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-@Enchant(name = "Egg Hunter", key = "egg_hunter", levelRequirement = 30, maxLevel = 3,
+@Enchant(name = "Egg Hunter", key = "egg_hunter", levelRequirement = 30, maxLevel = 3, enchantChance = 0.20,
   targetItem = EnchantmentTarget.WEAPON, description = "Upon killing any living entity, " +
     "there is a 10% chance per level that its spawn egg will be added to the drops.")
 

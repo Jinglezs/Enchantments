@@ -30,6 +30,7 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
   private final TimeUnit timeUnit;
   private final TargetGroup targetGroup;
   private final int levelRequirement;
+  private final double enchantChance;
   private final int maxLevel;
   private final int startLevel;
   private final EnchantmentTarget target;
@@ -47,6 +48,7 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
     this.timeUnit = annotation.timeUnit();
     this.targetGroup = annotation.targetGroup();
     this.levelRequirement = annotation.levelRequirement();
+    this.enchantChance = annotation.enchantChance();
     this.maxLevel = annotation.maxLevel();
     this.startLevel = annotation.startingLevel();
     this.target = annotation.targetItem();
@@ -64,6 +66,10 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
 
   public int getLevelRequirement() {
     return this.levelRequirement;
+  }
+
+  public double getEnchantChance() {
+    return this.enchantChance;
   }
 
   public long getCooldown() {
@@ -108,7 +114,8 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
 
   @Override
   public boolean canEnchantItem(@NotNull ItemStack itemStack) {
-    return getItemTarget().includes(itemStack) || getTargetGroup().canEnchant(itemStack.getType());
+    return getItemTarget().includes(itemStack) ||
+        (targetGroup != TargetGroup.NONE && getTargetGroup().canEnchant(itemStack.getType()));
   }
 
   public boolean hasEnchantment(ItemStack item) {

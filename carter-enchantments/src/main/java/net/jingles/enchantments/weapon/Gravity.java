@@ -24,10 +24,11 @@ import org.bukkit.util.Vector;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Enchant(name = "Gravity", key = "gravity", levelRequirement = 30, targetItem = EnchantmentTarget.BOW, maxLevel = 3, cooldown = 3,
-        description = "When an arrow launched by a bow with Gravity hits a block or entity, the arrow creates a gravitational " +
-                "field in a 5 (+3 per additional level) block radius that pulls entities towards itself. The arrow then " +
-                "detonates, dealing an additional 7 damage and slowing all entities caught in the blast for 5 seconds per level")
+@Enchant(name = "Gravity", key = "gravity", levelRequirement = 30, targetItem = EnchantmentTarget.BOW, maxLevel = 3,
+    cooldown = 3, enchantChance = 0.15, description = "When an arrow launched by a bow with Gravity hits a block or " +
+    "entity, the arrow creates a gravitational field in a 5 (+3 per additional level) block radius that pulls entities " +
+    "towards itself. The arrow then detonates, dealing an additional 7 damage and slowing all entities caught in the " +
+    "blast for 5 seconds per level")
 
 public class Gravity extends CustomEnchant {
 
@@ -50,22 +51,22 @@ public class Gravity extends CustomEnchant {
   @EventHandler
   public void onArrowHit(ProjectileHitEvent event) {
     if (!(event.getEntity() instanceof Arrow) ||
-            !(event.getEntity().getShooter() instanceof Player)) return;
+        !(event.getEntity().getShooter() instanceof Player)) return;
 
     Player player = (Player) event.getEntity().getShooter();
     if (!canTrigger(player.getInventory(), event)) return;
 
     Location hitLoc = event.getHitEntity() != null ? event.getHitEntity().getLocation() :
-            event.getHitBlock().getLocation();
+        event.getHitBlock().getLocation();
 
     int level = getItem(player.getInventory()).getItemMeta().getEnchantLevel(this);
     int radius = 5 + (3 * level);
 
     //Gets nearby entities within the radius that are living, not players, and are not tamed by the enchant owner.
     Set<Monster> targets = hitLoc.getWorld().getNearbyEntities(hitLoc, radius, radius, radius).stream()
-            .filter(entity -> entity instanceof Monster)
-            .map(entity -> (Monster) entity)
-            .collect(Collectors.toSet());
+        .filter(entity -> entity instanceof Monster)
+        .map(entity -> (Monster) entity)
+        .collect(Collectors.toSet());
 
     //Quickly pull the target towards the hit location.
     targets.forEach(target -> {

@@ -4,27 +4,28 @@ import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.util.RomanNumerals;
 import org.bukkit.ChatColor;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.enchantments.EnchantmentOffer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.enchantment.EnchantItemEvent;
-import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class EnchantListener implements Listener {
 
-  @EventHandler
+  /*@EventHandler
   public void onPrepareEnchant(PrepareItemEnchantEvent event) {
 
     if (event.isCancelled()) event.setCancelled(false);
 
-    // Gets all possible enchantments, both custom and vanilla.
+    // Gets all possible enchantments
     List<Enchantment> enchantments = Arrays.asList(Enchantment.values());
-    enchantments.addAll(Enchantments.getEnchantmentManager().getRegisteredEnchants());
 
     // Filter them so it only includes those that can applied to the item
     enchantments = enchantments.stream()
@@ -55,18 +56,36 @@ public class EnchantListener implements Listener {
    * @param enchantment the desired enchantment
    * @return the enchantment offer
    */
-  private EnchantmentOffer getEnchantOffer(Enchantment enchantment) {
+  /* private EnchantmentOffer getEnchantOffer(Enchantment enchantment) {
     int level = ThreadLocalRandom.current().nextInt(enchantment.getStartLevel(), enchantment.getMaxLevel() + 1);
     int cost = ThreadLocalRandom.current().nextInt(1, 11);
     return new EnchantmentOffer(enchantment, level, cost);
-  }
+  } */
+
 
   @EventHandler
   public void onEnchant(EnchantItemEvent event) {
 
-    Map<Enchantment, Integer> enchants = event.getEnchantsToAdd();
+    List<CustomEnchant> enchants = Enchantments.getEnchantmentManager().getRegisteredEnchants().stream()
+        .filter(customEnchant -> customEnchant.canEnchantItem(event.getItem()))
+        .filter(customEnchant -> event.getEnchanter().getLevel() >= customEnchant.getLevelRequirement())
+        .collect(Collectors.toList());
 
-    enchants.entrySet().stream()
+    Collections.shuffle(enchants);
+    Map<Enchantment, Integer> additions = event.getEnchantsToAdd();
+    AtomicInteger customAdditions = new AtomicInteger(1);
+
+    enchants.forEach(enchant -> {
+
+      if (Math.random() <  enchant.getEnchantChance()) {
+        customAdditions.set(customAdditions.get() + 1); //Decreases likelihood of multiple custom enchants
+        int level = ThreadLocalRandom.current().nextInt(enchant.getStartLevel(), enchant.getMaxLevel() + 1);
+        additions.put(enchant, level);
+      }
+
+    });
+
+    additions.entrySet().stream()
         .filter(entry -> entry.getKey() instanceof CustomEnchant)
         .forEach(entry -> {
 

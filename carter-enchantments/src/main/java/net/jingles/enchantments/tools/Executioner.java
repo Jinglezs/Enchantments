@@ -15,7 +15,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
-@Enchant(name = "Executioner", key = "executioner", targetItem = EnchantmentTarget.TOOL,
+@Enchant(name = "Executioner", key = "executioner", targetItem = EnchantmentTarget.TOOL, enchantChance = 0.45,
     targetGroup = TargetGroup.AXES, description = "Increases weapon damage by 10% (+5% per level) " +
     "and has a 10% (+10% per level) to ignite the target for 1 (+2 per level) seconds.")
 

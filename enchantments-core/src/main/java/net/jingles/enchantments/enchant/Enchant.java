@@ -28,6 +28,8 @@ public @interface Enchant {
 
   TargetGroup targetGroup() default TargetGroup.NONE;
 
+  double enchantChance() default 0.35;
+
   //Standard enchantment information:
 
   int startingLevel() default 1;

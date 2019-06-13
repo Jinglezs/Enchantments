@@ -2,6 +2,7 @@ package net.jingles.enchantments.tools;
 
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
+import net.jingles.enchantments.enchant.TargetGroup;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -19,7 +20,9 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 @Enchant(name = "Molten Core", key = "molten_core", maxLevel = 1, targetItem = EnchantmentTarget.TOOL,
-        description = "Automatically smelts ores/powders as they are mined/shoveled.")
+    targetGroup = TargetGroup.DIGGING, description = "Automatically smelts ores/powders as they are " +
+    "mined/shoveled.")
+
 public class MoltenCore extends CustomEnchant {
 
   private final Map<Material, Material> SMELTABLE = new HashMap<>();
@@ -34,9 +37,9 @@ public class MoltenCore extends CustomEnchant {
 
     //Accounts for all concrete powder -> concrete transformations.
     Stream.of(Material.values())
-            .filter(material -> material.name().endsWith("CONCRETE_POWDER"))
-            .forEach(material -> SMELTABLE.put(material,
-                    Material.valueOf(material.name().replace("_POWDER", ""))));
+        .filter(material -> material.name().endsWith("CONCRETE_POWDER"))
+        .forEach(material -> SMELTABLE.put(material,
+            Material.valueOf(material.name().replace("_POWDER", ""))));
 
   }
 
@@ -55,14 +58,14 @@ public class MoltenCore extends CustomEnchant {
   public void onSmeltableBreak(BlockBreakEvent event) {
 
     if (!canTrigger(event.getPlayer().getInventory(), event) ||
-            !SMELTABLE.containsKey(event.getBlock().getType())) return;
+        !SMELTABLE.containsKey(event.getBlock().getType())) return;
 
     Block block = event.getBlock();
     Material replacement = SMELTABLE.get(block.getType());
     Collection<ItemStack> drops = block.getDrops();
 
     int amount = drops.stream().filter(stack -> stack.getType() == block.getType())
-            .findFirst().map(ItemStack::getAmount).orElse(1);
+        .findFirst().map(ItemStack::getAmount).orElse(1);
 
     drops.removeIf(stack -> stack.getType() == block.getType());
     drops.add(new ItemStack(replacement, amount));
