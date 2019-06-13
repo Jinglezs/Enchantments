@@ -12,16 +12,19 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LightningStrike;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -30,8 +33,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Enchant(name = "Thor", key = "thor", levelRequirement = 30, maxLevel = 1, cooldown = 15, enchantChance = 0.10,
     targetItem = EnchantmentTarget.TOOL, targetGroup = TargetGroup.AXES, description = "Allows the " +
     "user to right click while looking at a block to summon lightning. Alternatively, the user may " +
-    "hold crouch and right click to charge a brief flight, which lasts 3 seconds for every second it " +
-    "is charged, for a maximum of 7 seconds (21 seconds of flight time).")
+    "hold crouch and right click to charge a brief flight, which lasts 2 seconds for every second it " +
+    "is charged, for a maximum of 10 seconds (20 seconds of flight time). If the player hits the ground " +
+    "before the flight duration ends, nearby entities are knocked up and are dealt 10 damage.")
 
 public class Thor extends CustomEnchant {
 
@@ -76,9 +80,11 @@ public class Thor extends CustomEnchant {
           TextComponent component = new TextComponent(String.format(charging, duration * 2));
           component.setColor(ChatColor.AQUA);
           player.spigot().sendMessage(ChatMessageType.ACTION_BAR, component);
-          ParticleUtil.sphere(player.getLocation().add(0, 1, 0),2, Particle.REDSTONE, options);
 
-          if (!player.isSneaking() || duration > 7) {
+          ParticleUtil.sphere(player.getLocation().add(0, 1, 0), 2, Particle.REDSTONE, options);
+          player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1, 0.5F);
+
+          if (!player.isSneaking() || duration > 9) {
             player.setSneaking(false);
             flight(player, enchantments, duration * 2 * 20);
             this.cancel();
@@ -101,11 +107,30 @@ public class Thor extends CustomEnchant {
 
   }
 
+  @EventHandler // Allows player to keep flight animation.
+  public void onGlideToggle(EntityToggleGlideEvent event) {
+    if (event.getEntityType() != EntityType.PLAYER) return;
+    Player player = (Player) event.getEntity();
+
+    if (player.getPersistentDataContainer().has(getKey(), PersistentDataType.INTEGER)) {
+      event.setCancelled(true);
+      player.setGliding(true);
+    }
+  }
+
   private void flight(Player player, Plugin plugin, int duration) {
 
     AtomicInteger timeInFlight = new AtomicInteger();
     Particle.DustOptions options = new Particle.DustOptions(Color.WHITE, 3);
-    player.playSound(player.getLocation(), Sound.ITEM_ELYTRA_FLYING, 1, 1);
+
+    //Indicates that the player is supposed to be flying
+    player.getPersistentDataContainer().set(getKey(), PersistentDataType.INTEGER, 1);
+    //Negates fall damage
+    NamespacedKey key = Enchantments.getEnchantmentManager().getFallDamageKey();
+    player.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, 1);
+
+    player.getWorld().playSound(player.getLocation(), Sound.ITEM_ELYTRA_FLYING, 1, 1);
+    player.setGliding(true);
 
     new BukkitRunnable() {
       public void run() {
@@ -117,9 +142,7 @@ public class Thor extends CustomEnchant {
           this.cancel();
           return;
         } else if ((time > 20 && player.isOnGround()) || time > duration) {
-          if (player.isOnGround()) seismicSmash(player);
-          player.stopSound(Sound.ITEM_ELYTRA_FLYING);
-          addCooldown(player.getUniqueId());
+          stopFlight(player);
           this.cancel();
           return;
         }
@@ -128,20 +151,29 @@ public class Thor extends CustomEnchant {
         component.setColor(ChatColor.GOLD);
         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, component);
 
-        player.setVelocity(player.getEyeLocation().getDirection().multiply(1.25));
-        player.getWorld().spawnParticle(Particle.REDSTONE, player.getLocation(),1, options);
+        player.setVelocity(player.getEyeLocation().getDirection().multiply(1.35));
+        player.getWorld().spawnParticle(Particle.REDSTONE, player.getLocation(), 1, options);
 
       }
     }.runTaskTimer(plugin, 0, 0);
 
   }
 
+  private void stopFlight(Player player) {
+
+    if (player.isOnGround()) seismicSmash(player);
+    addCooldown(player.getUniqueId());
+
+    player.getPersistentDataContainer().remove(getKey());
+    player.setGliding(false);
+    player.stopSound(Sound.ITEM_ELYTRA_FLYING);
+  }
+
   private void seismicSmash(Player player) {
-    Particle.DustOptions options = new Particle.DustOptions(Color.WHITE, 1);
-    player.getWorld().playSound(player.getLocation(), Sound.BLOCK_GRASS_BREAK, 2, 1);
+    player.getWorld().playSound(player.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 2, 1);
 
     player.getWorld().getNearbyEntities(player.getLocation(), 10, 10, 10).stream()
-        .filter(entity -> entity instanceof LivingEntity)
+        .filter(entity -> entity instanceof LivingEntity && !entity.equals(player))
         .map(entity -> (LivingEntity) entity)
         .forEach(entity -> {
           entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_GRASS_BREAK, 2, 1);

@@ -132,7 +132,7 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
 
   public ItemStack getItem(Inventory inventory) {
     //Why the fuck does a llama have my enchantment?
-    if (!(inventory instanceof HorseInventory) || !(inventory instanceof PlayerInventory)) return null;
+    if (!(inventory instanceof PlayerInventory) && !(inventory instanceof HorseInventory)) return null;
 
     if (inventory instanceof HorseInventory) return ((HorseInventory) inventory).getArmor();
     PlayerInventory player = (PlayerInventory) inventory;

@@ -2,13 +2,16 @@ package net.jingles.enchantments;
 
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.util.RomanNumerals;
+import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.enchantment.EnchantItemEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,50 +22,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class EnchantListener implements Listener {
-
-  /*@EventHandler
-  public void onPrepareEnchant(PrepareItemEnchantEvent event) {
-
-    if (event.isCancelled()) event.setCancelled(false);
-
-    // Gets all possible enchantments
-    List<Enchantment> enchantments = Arrays.asList(Enchantment.values());
-
-    // Filter them so it only includes those that can applied to the item
-    enchantments = enchantments.stream()
-        .filter(enchantment -> enchantment.canEnchantItem(event.getItem()))
-        .collect(Collectors.toList());
-
-    // If it's a custom enchantment, ensure that the player meets the level requirement
-    // Remove the enchantment from the list of possibilities if they do not.
-    enchantments.removeIf(enchantment -> enchantment instanceof CustomEnchant &&
-        event.getEnchanter().getLevel() < ((CustomEnchant) enchantment).getLevelRequirement());
-
-    // Shuffle the list so that it is random.
-    Collections.shuffle(enchantments);
-    // Get the array that determines what shows up in the enchantment table from the event.
-    EnchantmentOffer[] offers = event.getOffers();
-
-    // Override the array with our own enchantments.
-    for (int i = 0; i < 3; i++) {
-      if (i < enchantments.size()) offers[i] = getEnchantOffer(enchantments.get(i));
-      else offers[i] = null;
-    }
-
-  }
-
-  /**
-   * Creates an EnchantmentOffer for the given enchantment. The level and cost are determined
-   * randomly and are bounded by the enchantment values.
-   * @param enchantment the desired enchantment
-   * @return the enchantment offer
-   */
-  /* private EnchantmentOffer getEnchantOffer(Enchantment enchantment) {
-    int level = ThreadLocalRandom.current().nextInt(enchantment.getStartLevel(), enchantment.getMaxLevel() + 1);
-    int cost = ThreadLocalRandom.current().nextInt(1, 11);
-    return new EnchantmentOffer(enchantment, level, cost);
-  } */
-
 
   @EventHandler
   public void onEnchant(EnchantItemEvent event) {
@@ -121,6 +80,18 @@ public class EnchantListener implements Listener {
     });
 
     result.setItemMeta(resultMeta);
+
+  }
+
+  @EventHandler
+  public void onFallDamage(EntityDamageEvent event) {
+    if (event.getCause() != EntityDamageEvent.DamageCause.FALL) return;
+
+    NamespacedKey key = Enchantments.getEnchantmentManager().getFallDamageKey();
+    if (event.getEntity().getPersistentDataContainer().has(key, PersistentDataType.INTEGER)) {
+      event.setCancelled(true);
+      event.getEntity().getPersistentDataContainer().remove(key);
+    }
 
   }
 

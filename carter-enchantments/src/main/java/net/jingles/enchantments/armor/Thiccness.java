@@ -13,7 +13,6 @@ import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -76,7 +75,10 @@ public class Thiccness extends CustomEnchant {
             message.setColor(ChatColor.RED);
             player.spigot().sendMessage(ChatMessageType.ACTION_BAR, message);
 
-            player.getPersistentDataContainer().set(getKey(), PersistentDataType.INTEGER, 1);
+            //Negate fall damage
+            NamespacedKey key = Enchantments.getEnchantmentManager().getFallDamageKey();
+            player.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, 1);
+
             player.setVelocity(player.getVelocity().setY((charge / 75)));
 
             Enchantments.getCooldownManager().addCooldown(player.getUniqueId(),
@@ -87,19 +89,6 @@ public class Thiccness extends CustomEnchant {
 
         }
       }.runTaskTimer(plugin, 0L, 0L);
-    }
-
-  }
-
-  @EventHandler
-  public void onSuperjumpDamage(EntityDamageEvent event) {
-    if (!(event.getEntity() instanceof Player) ||
-        event.getCause() != EntityDamageEvent.DamageCause.FALL) return;
-
-    Player player = (Player) event.getEntity();
-    if (player.getPersistentDataContainer().has(getKey(), PersistentDataType.INTEGER)) {
-      event.setCancelled(true);
-      player.getPersistentDataContainer().remove(getKey());
     }
 
   }

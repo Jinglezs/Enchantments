@@ -4,7 +4,6 @@ import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.enchant.TargetGroup;
 import org.bukkit.NamespacedKey;
-import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Horse;
@@ -63,11 +62,8 @@ public class FireDancer extends CustomEnchant {
     event.setCancelled(true);
     entity.setFireTicks(0);
     entity.getPassengers().forEach(e -> e.setFireTicks(0));
+    entity.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 5, 3, false, true));
 
-    Block block = entity.getLocation().getBlock();
-    if (entity.getLocation().getBlock().isLiquid() || block.getLocation().clone().add(0, 1, 0).getBlock().isLiquid()) {
-      entity.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 5, 3, false, true));
-    } else entity.removePotionEffect(PotionEffectType.SPEED);
   }
 
 }

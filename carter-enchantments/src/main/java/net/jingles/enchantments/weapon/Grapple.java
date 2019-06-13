@@ -15,7 +15,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
@@ -76,22 +75,12 @@ public class Grapple extends CustomEnchant {
 
     if (player.getLocation().distance(arrow.getLocation()) > 75) return;
 
-    player.getPersistentDataContainer().set(getKey(), PersistentDataType.INTEGER, 1);
+    //Negate fall damage
+    NamespacedKey key = Enchantments.getEnchantmentManager().getFallDamageKey();
+    player.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, 1);
+
     Vector difference = arrow.getLocation().toVector().subtract(player.getLocation().toVector());
     player.setVelocity(difference.multiply(0.15));
-  }
-
-  @EventHandler
-  public void onFallDamage(EntityDamageEvent event) {
-    if (!(event.getEntity() instanceof Player) ||
-        event.getCause() != EntityDamageEvent.DamageCause.FALL) return;
-
-    Player player = (Player) event.getEntity();
-    if (player.getPersistentDataContainer().has(getKey(), PersistentDataType.INTEGER)) {
-      event.setCancelled(true);
-      player.getPersistentDataContainer().remove(getKey());
-    }
-
   }
 
 }
