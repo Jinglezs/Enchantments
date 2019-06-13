@@ -43,10 +43,11 @@ public class CooldownManager extends BukkitRunnable {
 
   /**
    * Adds a new cooldown or overwrites an existing one.
-   * @param id the player's unique id
+   *
+   * @param id      the player's unique id
    * @param enchant the enchantment the cooldown is being applied to
-   * @param time the length of the cooldown **PRIOR** to conversions.
-   * @param unit the time unit of the cooldown, such as SECONDS or MINUTES
+   * @param time    the length of the cooldown **PRIOR** to conversions.
+   * @param unit    the time unit of the cooldown, such as SECONDS or MINUTES
    */
   public void addCooldown(UUID id, CustomEnchant enchant, long time, TimeUnit unit) {
 
@@ -60,6 +61,7 @@ public class CooldownManager extends BukkitRunnable {
 
   /**
    * Gets the instance of the cooldown table.
+   *
    * @return the cooldown table
    */
   public Table<UUID, CustomEnchant, Long> getCooldowns() {
@@ -68,15 +70,20 @@ public class CooldownManager extends BukkitRunnable {
 
   /**
    * Checks if the player has an active cooldown for the given enchantment.
-   * @param id the player's unique id
+   *
+   * @param id      the player's unique id
    * @param enchant the enchantment in question
    * @return whether or not an active cooldown is present.
    */
   public boolean hasCooldown(UUID id, CustomEnchant enchant) {
     if (!cooldowns.containsKey(id, enchant)) return false;
 
+    long cooldown = getCooldowns().get(id, enchant);
+    long remainingTime = TimeUnit.SECONDS.convert(
+        cooldown - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+
     String message = String.format("%s is on cooldown for %d %s", enchant.getName(),
-        getCooldowns().get(id, enchant), enchant.getTimeUnit().name().toLowerCase());
+        remainingTime, enchant.getTimeUnit().name().toLowerCase());
 
     TextComponent component = new TextComponent(message);
     component.setColor(ChatColor.RED);
@@ -87,7 +94,8 @@ public class CooldownManager extends BukkitRunnable {
 
   /**
    * Removes a cooldown for the given enchantment.
-   * @param id the player's unique id
+   *
+   * @param id      the player's unique id
    * @param enchant the enchantment in question.
    */
   public void removeCooldown(UUID id, CustomEnchant enchant) {
