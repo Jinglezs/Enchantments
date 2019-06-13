@@ -12,6 +12,7 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
+import org.bukkit.entity.LightningStrike;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -65,19 +66,21 @@ public class Thor extends CustomEnchant {
     if (player.isSneaking()) {
 
       AtomicInteger charge = new AtomicInteger();
+      Particle.DustOptions options = new Particle.DustOptions(Color.YELLOW, 1);
 
       new BukkitRunnable() {
         public void run() {
 
           int duration = charge.getAndIncrement();
 
-          TextComponent component = new TextComponent(String.format(charging, duration * 3));
+          TextComponent component = new TextComponent(String.format(charging, duration * 2));
           component.setColor(ChatColor.AQUA);
           player.spigot().sendMessage(ChatMessageType.ACTION_BAR, component);
+          ParticleUtil.sphere(player.getLocation().add(0, 1, 0),2, Particle.REDSTONE, options);
 
           if (!player.isSneaking() || duration > 7) {
             player.setSneaking(false);
-            flight(player, enchantments, duration * 20);
+            flight(player, enchantments, duration * 2 * 20);
             this.cancel();
           }
 
@@ -85,11 +88,15 @@ public class Thor extends CustomEnchant {
       }.runTaskTimer(enchantments, 0, 20);
 
     } else {
+
       Block targeted = player.getTargetBlockExact(300, FluidCollisionMode.ALWAYS);
       if (targeted != null) {
-        targeted.getWorld().strikeLightning(targeted.getLocation());
+        LightningStrike lightning = targeted.getWorld().strikeLightning(targeted.getLocation());
+        lightning.getWorld().playSound(lightning.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 3, 1);
+        lightning.getWorld().playSound(lightning.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 3, 1);
         addCooldown(player.getUniqueId());
       }
+
     }
 
   }
@@ -97,6 +104,8 @@ public class Thor extends CustomEnchant {
   private void flight(Player player, Plugin plugin, int duration) {
 
     AtomicInteger timeInFlight = new AtomicInteger();
+    Particle.DustOptions options = new Particle.DustOptions(Color.WHITE, 3);
+    player.playSound(player.getLocation(), Sound.ITEM_ELYTRA_FLYING, 1, 1);
 
     new BukkitRunnable() {
       public void run() {
@@ -109,6 +118,7 @@ public class Thor extends CustomEnchant {
           return;
         } else if ((time > 20 && player.isOnGround()) || time > duration) {
           if (player.isOnGround()) seismicSmash(player);
+          player.stopSound(Sound.ITEM_ELYTRA_FLYING);
           addCooldown(player.getUniqueId());
           this.cancel();
           return;
@@ -117,7 +127,9 @@ public class Thor extends CustomEnchant {
         TextComponent component = new TextComponent(String.format(remaining, (duration - time) / 20));
         component.setColor(ChatColor.GOLD);
         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, component);
+
         player.setVelocity(player.getEyeLocation().getDirection().multiply(1.25));
+        player.getWorld().spawnParticle(Particle.REDSTONE, player.getLocation(),1, options);
 
       }
     }.runTaskTimer(plugin, 0, 0);
@@ -132,7 +144,6 @@ public class Thor extends CustomEnchant {
         .filter(entity -> entity instanceof LivingEntity)
         .map(entity -> (LivingEntity) entity)
         .forEach(entity -> {
-          ParticleUtil.sphere(entity.getLocation(), entity.getWidth(), Particle.REDSTONE, options);
           entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_GRASS_BREAK, 2, 1);
           entity.damage(10F);
           entity.setVelocity(entity.getVelocity().setY(1.25));
