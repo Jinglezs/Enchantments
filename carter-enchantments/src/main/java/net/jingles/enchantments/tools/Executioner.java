@@ -2,6 +2,7 @@ package net.jingles.enchantments.tools;
 
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
+import net.jingles.enchantments.enchant.TargetGroup;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
@@ -15,8 +16,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
 @Enchant(name = "Executioner", key = "executioner", targetItem = EnchantmentTarget.TOOL,
-        description = "Increases weapon damage by 10% (+5% per level) and has a 10% (+10% per level) " +
-                "to ignite the target for 1 (+2 per level) seconds.")
+    targetGroup = TargetGroup.AXES, description = "Increases weapon damage by 10% (+5% per level) " +
+    "and has a 10% (+10% per level) to ignite the target for 1 (+2 per level) seconds.")
 
 public class Executioner extends CustomEnchant {
 

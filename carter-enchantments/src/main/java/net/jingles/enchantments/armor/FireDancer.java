@@ -2,6 +2,7 @@ package net.jingles.enchantments.armor;
 
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
+import net.jingles.enchantments.enchant.TargetGroup;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
@@ -20,8 +21,8 @@ import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
 @Enchant(name = "Fire Dancer", key = "fire_dancer", targetItem = EnchantmentTarget.ARMOR_FEET,
-        levelRequirement = 20, maxLevel = 1, horseArmor = true, description = "Grants the wearer immunity " +
-        "to fire damage and provides a speed buff while on fire.")
+    levelRequirement = 20, maxLevel = 1, targetGroup = TargetGroup.ALL_ARMOR,
+    description = "Grants the wearer immunity to fire damage and provides a speed buff while on fire.")
 
 public class FireDancer extends CustomEnchant {
 
@@ -49,13 +50,13 @@ public class FireDancer extends CustomEnchant {
     if (enchanted == null || !hasEnchantment(enchanted)) return false;
 
     return event.getCause() == EntityDamageEvent.DamageCause.LAVA || event.getCause() == EntityDamageEvent.DamageCause.FIRE
-            || event.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK;
+        || event.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK;
   }
 
   @EventHandler
   private void onCombust(EntityDamageEvent event) {
     LivingEntity entity = (event.getEntity() instanceof Player) ? (Player) event.getEntity() :
-            (event.getEntity() instanceof Horse) ? (Horse) event.getEntity() : null;
+        (event.getEntity() instanceof Horse) ? (Horse) event.getEntity() : null;
 
     if (entity == null || !canTrigger(((InventoryHolder) entity).getInventory(), event)) return;
 

@@ -5,7 +5,6 @@ import co.aikar.commands.ConditionFailedException;
 import co.aikar.commands.InvalidCommandArgument;
 import net.jingles.enchantments.cooldown.CooldownManager;
 import net.jingles.enchantments.enchant.CustomEnchant;
-import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.enchant.EnchantmentManager;
 import net.jingles.enchantments.projectile.ProjectileManager;
 import org.bukkit.Material;
@@ -13,7 +12,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.reflections.Reflections;
 
 import java.lang.reflect.Field;
 import java.util.Optional;
@@ -27,17 +25,7 @@ public class Enchantments extends JavaPlugin {
 
   @Override
   public void onEnable() {
-
     enableRegistrations();
-
-    //Register all custom enchantment classes, which are annotated with @Enchant
-    Reflections reflections = new Reflections("net.jingles.enchantments.enchants");
-    reflections.getTypesAnnotatedWith(Enchant.class).forEach(enchant -> {
-
-
-
-    });
-
     registerCommands();
     getServer().getPluginManager().registerEvents(new EnchantListener(), this);
   }

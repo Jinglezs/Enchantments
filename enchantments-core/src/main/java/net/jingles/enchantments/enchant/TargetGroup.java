@@ -1,0 +1,32 @@
+package net.jingles.enchantments.enchant;
+
+import org.bukkit.Material;
+import org.bukkit.enchantments.EnchantmentTarget;
+
+import java.util.function.Predicate;
+
+public enum TargetGroup {
+
+  AXES(material -> material.name().endsWith("_AXE")),
+  HOES(material -> material.name().endsWith("_HOE")),
+  SHOVELS(material -> material.name().endsWith("_SHOVEL")),
+  PICKAXES(material -> material.name().endsWith("_PICKAXE")),
+  SHEARS(material -> material == Material.SHEARS),
+  FLINT_AND_STEEL(material -> material == Material.FLINT_AND_STEEL),
+  HORSE_ARMOR(material -> material.name().endsWith("_HORSE_ARMOR")),
+  ALL_ARMOR(material -> EnchantmentTarget.ARMOR.includes(material) || HORSE_ARMOR.canEnchant(material)),
+  ELYTRA(material -> material == Material.ELYTRA),
+  BOWS(material -> material == Material.BOW || material == Material.CROSSBOW),
+  NONE(material -> true);
+
+  private Predicate<Material> includes;
+
+  TargetGroup(Predicate<Material> includes) {
+    this.includes = includes;
+  }
+
+  public boolean canEnchant(Material material) {
+    return includes.test(material);
+  }
+
+}

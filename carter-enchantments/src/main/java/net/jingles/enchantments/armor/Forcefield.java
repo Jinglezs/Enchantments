@@ -2,6 +2,7 @@ package net.jingles.enchantments.armor;
 
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
+import net.jingles.enchantments.enchant.TargetGroup;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -20,8 +21,8 @@ import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 @Enchant(name = "Forcefield", key = "forcefield", maxLevel = 3, targetItem = EnchantmentTarget.ARMOR_TORSO,
-        levelRequirement = 13, horseArmor = true, description = "When a projectile nears the owner, there is " +
-        "a 10 (+10% for each level) percent chance for the arrow to be deflected")
+    levelRequirement = 13, targetGroup = TargetGroup.ALL_ARMOR, description = "When a projectile nears " +
+    "the owner, there is a 10 (+10% for each level) percent chance for the arrow to be deflected")
 
 public class Forcefield extends CustomEnchant {
 
@@ -55,7 +56,7 @@ public class Forcefield extends CustomEnchant {
     Entity hit = event.getEntity();
 
     if (!(hit instanceof InventoryHolder) ||
-            !canTrigger(((InventoryHolder) hit).getInventory(), event)) return;
+        !canTrigger(((InventoryHolder) hit).getInventory(), event)) return;
 
     event.setCancelled(true);
     Projectile projectile = (Projectile) event.getDamager();

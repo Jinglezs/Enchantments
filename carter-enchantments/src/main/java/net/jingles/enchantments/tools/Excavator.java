@@ -2,6 +2,7 @@ package net.jingles.enchantments.tools;
 
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
+import net.jingles.enchantments.enchant.TargetGroup;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -19,7 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Enchant(name = "Excavator", key = "excavator", targetItem = EnchantmentTarget.TOOL, levelRequirement = 30,
-        maxLevel = 1, description = "Breaks all of the blocks surrounding the broken block.")
+        targetGroup = TargetGroup.SHOVELS, maxLevel = 1, description = "Breaks all of the blocks surrounding the broken block.")
 
 public class Excavator extends CustomEnchant {
 

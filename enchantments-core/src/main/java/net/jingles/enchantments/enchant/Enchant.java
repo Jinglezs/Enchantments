@@ -26,6 +26,8 @@ public @interface Enchant {
 
   TimeUnit timeUnit() default TimeUnit.SECONDS;
 
+  TargetGroup targetGroup() default TargetGroup.NONE;
+
   //Standard enchantment information:
 
   int startingLevel() default 1;
@@ -37,7 +39,5 @@ public @interface Enchant {
   boolean treasure() default false;
 
   boolean cursed() default false;
-
-  boolean horseArmor() default false;
 
 }
