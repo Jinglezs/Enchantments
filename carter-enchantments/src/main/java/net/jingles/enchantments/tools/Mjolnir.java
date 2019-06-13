@@ -30,19 +30,19 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Enchant(name = "Thor", key = "thor", levelRequirement = 30, maxLevel = 1, cooldown = 15, enchantChance = 0.10,
+@Enchant(name = "Mjolnir", key = "mjolnir", levelRequirement = 30, maxLevel = 1, cooldown = 15, enchantChance = 0.10,
     targetItem = EnchantmentTarget.TOOL, targetGroup = TargetGroup.AXES, description = "Allows the " +
     "user to right click while looking at a block to summon lightning. Alternatively, the user may " +
     "hold crouch and right click to charge a brief flight, which lasts 2 seconds for every second it " +
     "is charged, for a maximum of 10 seconds (20 seconds of flight time). If the player hits the ground " +
     "before the flight duration ends, nearby entities are knocked up and are dealt 10 damage.")
 
-public class Thor extends CustomEnchant {
+public class Mjolnir extends CustomEnchant {
 
   private final String remaining = "%d seconds of flight remaining";
   private final String charging = "Flight Charge: %d seconds";
 
-  public Thor(NamespacedKey key) {
+  public Mjolnir(NamespacedKey key) {
     super(key);
   }
 
