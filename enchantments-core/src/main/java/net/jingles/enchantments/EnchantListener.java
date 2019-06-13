@@ -3,7 +3,6 @@ package net.jingles.enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.util.RomanNumerals;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentOffer;
 import org.bukkit.event.EventHandler;
@@ -11,12 +10,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -25,45 +20,45 @@ public class EnchantListener implements Listener {
   @EventHandler
   public void onPrepareEnchant(PrepareItemEnchantEvent event) {
 
+    if (event.isCancelled()) event.setCancelled(false);
+
+    // Gets all possible enchantments, both custom and vanilla.
+    List<Enchantment> enchantments = Arrays.asList(Enchantment.values());
+    enchantments.addAll(Enchantments.getEnchantmentManager().getRegisteredEnchants());
+
+    // Filter them so it only includes those that can applied to the item
+    enchantments = enchantments.stream()
+        .filter(enchantment -> enchantment.canEnchantItem(event.getItem()))
+        .collect(Collectors.toList());
+
+    // If it's a custom enchantment, ensure that the player meets the level requirement
+    // Remove the enchantment from the list of possibilities if they do not.
+    enchantments.removeIf(enchantment -> enchantment instanceof CustomEnchant &&
+        event.getEnchanter().getLevel() < ((CustomEnchant) enchantment).getLevelRequirement());
+
+    // Shuffle the list so that it is random.
+    Collections.shuffle(enchantments);
+    // Get the array that determines what shows up in the enchantment table from the event.
     EnchantmentOffer[] offers = event.getOffers();
 
-    for (int i = 0; i < event.getOffers().length; i++) {
-
-      if (offers[i] == null) offers[i] = populateEmptyEnchant(event.getItem().getType());
-
-      EnchantmentOffer offer = offers[i];
-      //The offer can still be null. The populate method is not always successful!
-      if (offer == null || !(offer.getEnchantment() instanceof CustomEnchant)) continue;
-
-      CustomEnchant enchant = (CustomEnchant) offer.getEnchantment();
-
-      if (enchant.getTargetGroup() != null && !enchant.getTargetGroup().canEnchant(event.getItem().getType())) {
-        offers[i] = null; //Remove the enchantment offer
-        continue;
-      }
-
-      if (offer.getCost() < enchant.getLevelRequirement())
-        offer.setCost(enchant.getLevelRequirement());
-
+    // Override the array with our own enchantments.
+    for (int i = 0; i < 3; i++) {
+      if (i < enchantments.size()) offers[i] = getEnchantOffer(enchantments.get(i));
+      else offers[i] = null;
     }
 
   }
 
-  @Nullable
-  private EnchantmentOffer populateEmptyEnchant(Material material) {
-
-    List<CustomEnchant> applicable = Enchantments.getEnchantmentManager().getRegisteredEnchants().stream()
-        .filter(enchant -> enchant.getTargetGroup() != null && enchant.getTargetGroup().canEnchant(material))
-        .collect(Collectors.toList());
-
-    if (applicable.isEmpty()) return null;
-
-    Collections.shuffle(applicable);
-    CustomEnchant enchant = applicable.get(0);
-    int level = ThreadLocalRandom.current().nextInt(1, enchant.getMaxLevel() + 1);
+  /**
+   * Creates an EnchantmentOffer for the given enchantment. The level and cost are determined
+   * randomly and are bounded by the enchantment values.
+   * @param enchantment the desired enchantment
+   * @return the enchantment offer
+   */
+  private EnchantmentOffer getEnchantOffer(Enchantment enchantment) {
+    int level = ThreadLocalRandom.current().nextInt(enchantment.getStartLevel(), enchantment.getMaxLevel() + 1);
     int cost = ThreadLocalRandom.current().nextInt(1, 11);
-
-    return new EnchantmentOffer(enchant, level, cost);
+    return new EnchantmentOffer(enchantment, level, cost);
   }
 
   @EventHandler
