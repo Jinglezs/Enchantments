@@ -21,9 +21,8 @@ import org.bukkit.potion.PotionEffectType;
 
 @Enchant(name = "Eluding", key = "eluding", targetItem = EnchantmentTarget.ARMOR_FEET, cooldown = 2,
     levelRequirement = 20, enchantChance = 0.30, description = "When the player is attacked while under half health, " +
-        "there is a 25% (+5% per level) chance to grant the player a speed boost for 3 seconds per level, " +
-        "slow nearby mobs for 1 seconds per level, " +
-        "and cause mobs within a 5 (+3 per level) block radius to forget their target.")
+        "there is a 25% (+5% per level) chance to grant the player a speed boost for 3 seconds per level, slow nearby " +
+        "mobs for 1 seconds per level, and cause mobs within a 5 (+3 per level) block radius to forget their target.")
 
 public class Eluding extends CustomEnchant {
 
