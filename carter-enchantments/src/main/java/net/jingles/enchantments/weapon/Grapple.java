@@ -58,7 +58,7 @@ public class Grapple extends CustomEnchant {
     arrow.setShooter(player);
 
     InventoryUtils.removeItem(player.getInventory(), Tag.ITEMS_ARROWS, 1);
-    Enchantments.getCooldownManager().addCooldown(player.getUniqueId(),
+    Enchantments.getCooldownManager().addCooldown(player,
         this, getCooldown(), getTimeUnit());
   }
 
