@@ -1,10 +1,16 @@
 package net.jingles.enchantments.util;
 
+import net.jingles.enchantments.enchant.CustomEnchant;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class InventoryUtils {
@@ -31,6 +37,35 @@ public class InventoryUtils {
           else item.setAmount(newAmount);
     });
 
+  }
+
+  public static void removeEnchantLore(ItemStack item) {
+    if (item.getItemMeta() == null || item.getEnchantments().isEmpty()) return;
+    else if (item.getItemMeta().getLore() == null) return;
+
+    Set<CustomEnchant> enchants = item.getEnchantments().keySet().stream()
+        .filter(enchantment -> enchantment instanceof CustomEnchant)
+        .map(enchantment -> (CustomEnchant) enchantment)
+        .collect(Collectors.toSet());
+
+    List<String> lore = item.getItemMeta().getLore();
+    lore.removeIf(line -> enchants.stream().anyMatch(enchant -> line.contains(enchant.getName())));
+
+    ItemMeta meta = item.getItemMeta();
+    meta.setLore(lore);
+    item.setItemMeta(meta);
+  }
+
+  public static void removeEnchantLore(ItemStack item, CustomEnchant enchant) {
+    if (item.getItemMeta() == null || item.getEnchantments().isEmpty()) return;
+    else if (item.getItemMeta().getLore() == null) return;
+
+    ItemMeta meta = item.getItemMeta();
+    List<String> lore = meta.getLore();
+    lore.removeIf(line -> line.contains(enchant.getName()));
+    meta.setLore(lore);
+
+    item.setItemMeta(meta);
   }
 
 }
