@@ -1,5 +1,6 @@
 package net.jingles.enchantments.tools;
 
+import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.enchant.TargetGroup;
@@ -8,13 +9,11 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
-import org.bukkit.entity.Item;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -64,7 +63,8 @@ public class MoltenCore extends CustomEnchant {
 
     Block block = event.getBlock();
     Material replacement = SMELTABLE.get(block.getType());
-    Collection<ItemStack> drops = block.getDrops();
+    ItemStack tool = getItem(event.getPlayer().getInventory());
+    Collection<ItemStack> drops = block.getDrops(tool);
 
     int amount = drops.stream().filter(stack -> stack.getType() == block.getType())
         .findFirst().map(ItemStack::getAmount).orElse(1);
@@ -75,10 +75,11 @@ public class MoltenCore extends CustomEnchant {
     event.setCancelled(true);
     block.setType(Material.AIR);
     block.getState().update();
-    drops.forEach(item -> {
-      Item entity = block.getWorld().dropItemNaturally(block.getLocation(), item);
-      entity.getPersistentDataContainer().set(getKey(), PersistentDataType.STRING, event.getPlayer().getName());
-    });
+
+    CustomEnchant magnetic = Enchantments.getEnchantmentManager().getEnchantmentByKey("magnetic");
+    //Only drop the items if the tool does not have the Magnetic enchantment
+    if (magnetic == null || (tool.hasItemMeta() && !tool.getItemMeta().hasEnchant(magnetic)))
+      drops.forEach(item -> block.getWorld().dropItemNaturally(block.getLocation(), item));
 
   }
 
