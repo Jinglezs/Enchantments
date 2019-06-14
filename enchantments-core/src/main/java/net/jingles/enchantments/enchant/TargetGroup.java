@@ -17,7 +17,7 @@ public enum TargetGroup {
   FLINT_AND_STEEL(material -> material == Material.FLINT_AND_STEEL),
   HORSE_ARMOR(material -> material.name().endsWith("_HORSE_ARMOR")),
   ALL_ARMOR(material -> EnchantmentTarget.ARMOR.includes(material) || HORSE_ARMOR.canEnchant(material)),
-  NON_ARMOR(material -> !EnchantmentTarget.WEARABLE.includes(material)),
+  NON_WEARABLE(material -> !EnchantmentTarget.WEARABLE.includes(material)),
   ELYTRA(material -> material == Material.ELYTRA),
   BOWS(material -> material == Material.BOW || material == Material.CROSSBOW),
   NONE(material -> true);
