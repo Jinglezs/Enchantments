@@ -24,7 +24,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.Collection;
 import java.util.Map;
 
-@Enchant(name = "Magnetic", key = "magnetic", levelRequirement = 30, maxLevel = 1, enchantChance = 40,
+@Enchant(name = "Magnetic", key = "magnetic", levelRequirement = 30, maxLevel = 1, enchantChance = 0.40,
         targetItem = EnchantmentTarget.TOOL, targetGroup = TargetGroup.DIGGING,
         description = "Allows the player to instantly pick up the drops from any block " +
                 "that is broken that has the enchantment on it.")

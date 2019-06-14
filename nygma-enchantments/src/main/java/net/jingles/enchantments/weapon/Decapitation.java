@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Enchant(name = "Decapitation", key = "decapitation", levelRequirement = 15, maxLevel = 4,
-        targetItem = EnchantmentTarget.WEAPON, enchantChance = 15, description = "Upon killing a mob " +
+        targetItem = EnchantmentTarget.WEAPON, enchantChance = 0.15, description = "Upon killing a mob " +
         "that is capable of dropping a head, there is 10% chance per level that " +
         "the mob's head will be added to its drops")
 
