@@ -24,6 +24,7 @@ import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -41,9 +42,11 @@ public class Mjolnir extends CustomEnchant {
 
   private final String remaining = "%d seconds of flight remaining";
   private final String charging = "Flight Charge: %d seconds";
+  private final Plugin plugin;
 
   public Mjolnir(NamespacedKey key) {
     super(key);
+    plugin = Bukkit.getPluginManager().getPlugin("Enchantments");
   }
 
   @Override
@@ -55,8 +58,9 @@ public class Mjolnir extends CustomEnchant {
   public boolean canTrigger(Inventory inventory, Event e) {
     Player player = ((PlayerEvent) e).getPlayer();
     ItemStack axe = getItem(inventory);
-    return axe != null && hasEnchantment(axe) && !Enchantments.getCooldownManager()
-        .hasCooldown(player.getUniqueId(), this);
+    return axe != null && hasEnchantment(axe) &&
+        !Enchantments.getCooldownManager().hasCooldown(player, this) &&
+        !player.hasMetadata("mjolnir");
   }
 
   @EventHandler
@@ -65,12 +69,13 @@ public class Mjolnir extends CustomEnchant {
         !canTrigger(event.getPlayer().getInventory(), event)) return;
 
     Player player = event.getPlayer();
-    Plugin enchantments = Bukkit.getPluginManager().getPlugin("Enchantments");
 
     if (player.isSneaking()) {
 
       AtomicInteger charge = new AtomicInteger();
       Particle.DustOptions options = new Particle.DustOptions(Color.YELLOW, 1);
+      // Indicates that the player is currently using the ability. Is erased if the player logs off.
+      player.setMetadata("mjolnir", new FixedMetadataValue(plugin, 0));
 
       new BukkitRunnable() {
         public void run() {
@@ -85,13 +90,12 @@ public class Mjolnir extends CustomEnchant {
           player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1, 0.5F);
 
           if (!player.isSneaking() || duration > 9) {
-            player.setSneaking(false);
-            flight(player, enchantments, duration * 2 * 20);
+            flight(player, plugin, duration * 2 * 20);
             this.cancel();
           }
 
         }
-      }.runTaskTimer(enchantments, 0, 20);
+      }.runTaskTimer(plugin, 0, 20);
 
     } else {
 
@@ -100,7 +104,7 @@ public class Mjolnir extends CustomEnchant {
         LightningStrike lightning = targeted.getWorld().strikeLightning(targeted.getLocation());
         lightning.getWorld().playSound(lightning.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_THUNDER, 3, 1);
         lightning.getWorld().playSound(lightning.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 3, 1);
-        addCooldown(player.getUniqueId());
+        addCooldown(player);
       }
 
     }
@@ -112,7 +116,7 @@ public class Mjolnir extends CustomEnchant {
     if (event.getEntityType() != EntityType.PLAYER) return;
     Player player = (Player) event.getEntity();
 
-    if (player.getPersistentDataContainer().has(getKey(), PersistentDataType.INTEGER)) {
+    if (player.hasMetadata("mjolnir")) {
       event.setCancelled(true);
       player.setGliding(true);
     }
@@ -123,8 +127,6 @@ public class Mjolnir extends CustomEnchant {
     AtomicInteger timeInFlight = new AtomicInteger();
     Particle.DustOptions options = new Particle.DustOptions(Color.WHITE, 3);
 
-    //Indicates that the player is supposed to be flying
-    player.getPersistentDataContainer().set(getKey(), PersistentDataType.INTEGER, 1);
     //Negates fall damage
     NamespacedKey key = Enchantments.getEnchantmentManager().getFallDamageKey();
     player.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, 1);
@@ -139,12 +141,11 @@ public class Mjolnir extends CustomEnchant {
 
         //Cancel flight if player logs off, they reach the ground, or time runs out.
         if (!player.isOnline()) {
-          this.cancel();
-          return;
+          player.removeMetadata("mjolnir", plugin);
+          this.cancel(); return;
         } else if ((time > 20 && player.isOnGround()) || time > duration) {
           stopFlight(player);
-          this.cancel();
-          return;
+          this.cancel(); return;
         }
 
         TextComponent component = new TextComponent(String.format(remaining, (duration - time) / 20));
@@ -162,9 +163,9 @@ public class Mjolnir extends CustomEnchant {
   private void stopFlight(Player player) {
 
     if (player.isOnGround()) seismicSmash(player);
-    addCooldown(player.getUniqueId());
+    addCooldown(player);
 
-    player.getPersistentDataContainer().remove(getKey());
+    player.removeMetadata("mjolnir", plugin);
     player.setGliding(false);
     player.stopSound(Sound.ITEM_ELYTRA_FLYING);
   }
@@ -181,5 +182,7 @@ public class Mjolnir extends CustomEnchant {
           entity.setVelocity(entity.getVelocity().setY(1.25));
         });
   }
+
+
 
 }

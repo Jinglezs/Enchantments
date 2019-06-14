@@ -39,7 +39,7 @@ public class Eluding extends CustomEnchant {
     ItemStack boots = getItem(inventory);
     return boots != null && hasEnchantment(boots) &&
         !Enchantments.getCooldownManager()
-                .hasCooldown(((Player) inventory.getHolder()).getUniqueId(), this);
+                .hasCooldown(((Player) inventory.getHolder()), this);
   }
 
   @EventHandler
@@ -81,5 +81,7 @@ public class Eluding extends CustomEnchant {
     TextComponent message = new TextComponent("Elusive speed boost applied for " + speedDuration + " seconds");
     message.setColor(ChatColor.GOLD);
     player.spigot().sendMessage(ChatMessageType.ACTION_BAR, message);
+
+    addCooldown(player);
   }
 }

@@ -43,7 +43,7 @@ public class Pyromancer extends CustomEnchant {
     PlayerInteractEvent event = (PlayerInteractEvent) e;
     ItemStack sword = event.getItem();
     return sword != null && hasEnchantment(sword) &&
-        !Enchantments.getCooldownManager().hasCooldown(event.getPlayer().getUniqueId(), this);
+        !Enchantments.getCooldownManager().hasCooldown(event.getPlayer(), this);
   }
 
   @EventHandler
@@ -94,7 +94,7 @@ public class Pyromancer extends CustomEnchant {
 
         }).launch();
 
-    addCooldown(player.getUniqueId());
+    addCooldown(player);
 
   }
 

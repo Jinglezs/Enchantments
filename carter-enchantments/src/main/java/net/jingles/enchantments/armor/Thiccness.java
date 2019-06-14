@@ -44,7 +44,7 @@ public class Thiccness extends CustomEnchant {
   public boolean canTrigger(Inventory inventory, Event event) {
     ItemStack leggings = getItem(inventory);
     return leggings != null && hasEnchantment(leggings) &&
-        !Enchantments.getCooldownManager().hasCooldown(((Player) inventory.getHolder()).getUniqueId(), this);
+        !Enchantments.getCooldownManager().hasCooldown(((Player) inventory.getHolder()), this);
   }
 
   @EventHandler
@@ -81,7 +81,7 @@ public class Thiccness extends CustomEnchant {
 
             player.setVelocity(player.getVelocity().setY((charge / 75)));
 
-            Enchantments.getCooldownManager().addCooldown(player.getUniqueId(),
+            Enchantments.getCooldownManager().addCooldown(player,
                 Thiccness.this, getCooldown(), getTimeUnit());
             this.cancel();
 

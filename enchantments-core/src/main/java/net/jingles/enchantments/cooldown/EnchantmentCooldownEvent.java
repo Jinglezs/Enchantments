@@ -1,13 +1,12 @@
 package net.jingles.enchantments.cooldown;
 
 import net.jingles.enchantments.enchant.CustomEnchant;
-import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerEvent;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -24,8 +23,8 @@ public class EnchantmentCooldownEvent extends PlayerEvent implements Cancellable
   private TimeUnit unit;
   private boolean cancelled;
 
-  public EnchantmentCooldownEvent(UUID id, CustomEnchant enchant, long cooldown, TimeUnit unit) {
-    super(Bukkit.getPlayer(id));
+  public EnchantmentCooldownEvent(Player player, CustomEnchant enchant, long cooldown, TimeUnit unit) {
+    super(player);
     this.enchant = enchant;
     this.cooldown = cooldown;
     this.unit = unit;
