@@ -1,6 +1,5 @@
 package net.jingles.enchantments.tools;
 
-import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.enchant.TargetGroup;
@@ -46,7 +45,8 @@ public class MoltenCore extends CustomEnchant {
 
   @Override
   public boolean conflictsWith(Enchantment other) {
-    return other.equals(Enchantment.SILK_TOUCH);
+    // Incompatible with Magnetic enchant due to the immutability of block drops.
+    return other.equals(Enchantment.SILK_TOUCH) || other.getKey().getKey().equals("magnetic");
   }
 
   @Override
@@ -75,11 +75,7 @@ public class MoltenCore extends CustomEnchant {
     event.setCancelled(true);
     block.setType(Material.AIR);
     block.getState().update();
-
-    CustomEnchant magnetic = Enchantments.getEnchantmentManager().getEnchantmentByKey("magnetic");
-    //Only drop the items if the tool does not have the Magnetic enchantment
-    if (magnetic == null || (tool.hasItemMeta() && !tool.getItemMeta().hasEnchant(magnetic)))
-      drops.forEach(item -> block.getWorld().dropItemNaturally(block.getLocation(), item));
+    drops.forEach(item -> block.getWorld().dropItemNaturally(block.getLocation(), item));
 
   }
 

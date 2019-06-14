@@ -12,22 +12,20 @@ import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Collection;
 import java.util.Map;
 
 @Enchant(name = "Magnetic", key = "magnetic", levelRequirement = 30, maxLevel = 1, enchantChance = 0.40,
-    targetItem = EnchantmentTarget.TOOL, targetGroup = TargetGroup.DIGGING,
-    description = "Allows the player to instantly pick up the drops from any block " +
-        "that is broken that has the enchantment on it.")
+    targetItem = EnchantmentTarget.TOOL, targetGroup = TargetGroup.DIGGING, description = "All item drops " +
+    "resulting from mining a block are automatically added to the owner's inventory if possible. If the player " +
+    "has a Resource Backpack, items will be added to it before they are added to the inventory.")
 
 //TODO:
-//   - Fix compatibility with Molten Core
 //   - Add support for Backpacks
-//   - Fix the terrible description or get Carter to do it cause I suck at doing them :>
 
 public class Magnetic extends CustomEnchant {
 
@@ -37,7 +35,8 @@ public class Magnetic extends CustomEnchant {
 
   @Override
   public boolean conflictsWith(Enchantment enchant) {
-    return false;
+    // Incompatible with Molten Core enchant due to the immutability of block drops.
+    return enchant.getKey().getKey().equals("molten_core");
   }
 
   @Override
@@ -48,38 +47,21 @@ public class Magnetic extends CustomEnchant {
 
   // Should be highest priority so that it can be aware of all changes to the block's drops
   // done by other listeners, such as Molten Core.
-  @EventHandler(priority = EventPriority.HIGHEST)
+  @EventHandler
   public void onBlockBreak(BlockBreakEvent event) {
 
     if (!canTrigger(event.getPlayer().getInventory(), event)) return;
 
     Player player = event.getPlayer();
     Block block = event.getBlock();
+    Collection<ItemStack> drops = block.getDrops(getItem(player.getInventory()));
 
     event.setCancelled(true);
     block.setType(Material.AIR);
     block.getState().update();
-    block.getDrops(getItem(player.getInventory()))
-        .forEach(item -> tryAddItems(player, block.getLocation(), item));
+
+    drops.forEach(item -> tryAddItems(player, block.getLocation(), item));
   }
-
-/*  @EventHandler
-  public void onItemDrop(ItemSpawnEvent event) {
-
-    NamespacedKey identifier = Enchantments.getEnchantmentManager().getEnchantmentKey("molten_core");
-    if (identifier == null) return;
-
-    Item item = event.getEntity();
-    if (!item.getPersistentDataContainer().has(identifier, PersistentDataType.STRING)) return;
-
-    Player player = Bukkit.getPlayer(item.getPersistentDataContainer().get(identifier, PersistentDataType.STRING));
-    if (player == null || !player.isOnline()) return;
-
-    if (canTrigger(player.getInventory(), event)) {
-      event.setCancelled(true);
-      tryAddItems(player, event.getLocation(), item.getItemStack());
-    }
-  }*/
 
   private void tryAddItems(Player player, Location location, ItemStack items) {
     final Map<Integer, ItemStack> overflow = player.getInventory().addItem(items);
