@@ -2,6 +2,7 @@ package net.jingles.enchantments;
 
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.util.RomanNumerals;
+import org.bukkit.ChatColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
@@ -55,7 +56,9 @@ public class EnchantListener implements Listener {
           ItemMeta meta = event.getItem().getItemMeta();
           List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
 
-          lore.add(enchant.getName() + " " + RomanNumerals.toRoman(entry.getValue()));
+          lore.add((enchant.isCursed() ? ChatColor.RED : ChatColor.RESET)
+              + enchant.getName() + " " + RomanNumerals.toRoman(entry.getValue()));
+
           meta.setLore(lore);
           event.getItem().setItemMeta(meta);
 

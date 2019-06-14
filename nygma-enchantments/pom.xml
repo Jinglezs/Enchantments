@@ -10,11 +10,23 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>nygma-enchantments</artifactId>
 
+    <repositories>
+        <repository>
+            <id>spigot-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>net.jingles</groupId>
             <artifactId>enchantments-core</artifactId>
             <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>1.14.2-R0.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
