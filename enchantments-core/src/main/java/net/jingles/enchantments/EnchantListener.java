@@ -2,16 +2,13 @@ package net.jingles.enchantments;
 
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.util.RomanNumerals;
-import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.enchantment.EnchantItemEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,7 +36,7 @@ public class EnchantListener implements Listener {
 
     enchants.forEach(enchant -> {
 
-      if (Math.random() <  enchant.getEnchantChance()) {
+      if (Math.random() < enchant.getEnchantChance()) {
         customAdditions.set(customAdditions.get() + 1); //Decreases likelihood of multiple custom enchants
         int level = ThreadLocalRandom.current().nextInt(enchant.getStartLevel(), enchant.getMaxLevel() + 1);
         additions.put(enchant, level);
@@ -80,18 +77,6 @@ public class EnchantListener implements Listener {
     });
 
     result.setItemMeta(resultMeta);
-
-  }
-
-  @EventHandler
-  public void onFallDamage(EntityDamageEvent event) {
-    if (event.getCause() != EntityDamageEvent.DamageCause.FALL) return;
-
-    NamespacedKey key = Enchantments.getEnchantmentManager().getFallDamageKey();
-    if (event.getEntity().getPersistentDataContainer().has(key, PersistentDataType.INTEGER)) {
-      event.setCancelled(true);
-      event.getEntity().getPersistentDataContainer().remove(key);
-    }
 
   }
 

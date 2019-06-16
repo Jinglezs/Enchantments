@@ -4,6 +4,8 @@ import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.enchant.TargetGroup;
+import net.jingles.enchantments.statuseffect.EntityStatusEffect;
+import net.jingles.enchantments.statuseffect.container.EntityEffectContainer;
 import net.jingles.enchantments.util.ParticleUtil;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
@@ -12,7 +14,6 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LightningStrike;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -24,12 +25,8 @@ import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.metadata.FixedMetadataValue;
-import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Optional;
 
 @Enchant(name = "Mjolnir", key = "mjolnir", levelRequirement = 30, maxLevel = 1, cooldown = 15, enchantChance = 0.10,
     targetItem = EnchantmentTarget.TOOL, targetGroup = TargetGroup.AXES, description = "Allows the " +
@@ -40,13 +37,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Mjolnir extends CustomEnchant {
 
-  private final String remaining = "%d seconds of flight remaining";
-  private final String charging = "Flight Charge: %d seconds";
-  private final Plugin plugin;
-
   public Mjolnir(NamespacedKey key) {
     super(key);
-    plugin = Bukkit.getPluginManager().getPlugin("Enchantments");
   }
 
   @Override
@@ -58,9 +50,15 @@ public class Mjolnir extends CustomEnchant {
   public boolean canTrigger(Inventory inventory, Event e) {
     Player player = ((PlayerEvent) e).getPlayer();
     ItemStack axe = getItem(inventory);
-    return axe != null && hasEnchantment(axe) &&
-        !Enchantments.getCooldownManager().hasCooldown(player, this) &&
-        !player.hasMetadata("mjolnir");
+
+    if (axe == null || !hasEnchantment(axe) ||
+        Enchantments.getCooldownManager().hasCooldown(player, this)) return false;
+
+    Optional<EntityEffectContainer> container = Enchantments.getStatusEffectManager()
+        .getEntityContainer(player.getUniqueId());
+
+    return !container.isPresent() || (!container.get().hasEffect(MjolnirChargeEffect.class)
+        && !container.get().hasEffect(MjolnirFlightEffect.class));
   }
 
   @EventHandler
@@ -70,34 +68,7 @@ public class Mjolnir extends CustomEnchant {
 
     Player player = event.getPlayer();
 
-    if (player.isSneaking()) {
-
-      AtomicInteger charge = new AtomicInteger();
-      Particle.DustOptions options = new Particle.DustOptions(Color.YELLOW, 1);
-      // Indicates that the player is currently using the ability. Is erased if the player logs off.
-      player.setMetadata("mjolnir", new FixedMetadataValue(plugin, 0));
-
-      new BukkitRunnable() {
-        public void run() {
-
-          int duration = charge.getAndIncrement();
-
-          TextComponent component = new TextComponent(String.format(charging, duration * 2));
-          component.setColor(ChatColor.AQUA);
-          player.spigot().sendMessage(ChatMessageType.ACTION_BAR, component);
-
-          ParticleUtil.sphere(player.getLocation().add(0, 1, 0), 2, Particle.REDSTONE, options);
-          player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1, 0.5F);
-
-          if (!player.isSneaking() || duration > 9) {
-            flight(player, plugin, duration * 2 * 20);
-            this.cancel();
-          }
-
-        }
-      }.runTaskTimer(plugin, 0, 20);
-
-    } else {
+    if (!player.isSneaking()) {
 
       Block targeted = player.getTargetBlockExact(300, FluidCollisionMode.ALWAYS);
       if (targeted != null) {
@@ -107,67 +78,102 @@ public class Mjolnir extends CustomEnchant {
         addCooldown(player);
       }
 
+    } else Enchantments.getStatusEffectManager().add(new MjolnirChargeEffect(player));
+
+  }
+
+  @EventHandler
+  public void onGlideToggle(EntityToggleGlideEvent event) {
+    if (!(event.getEntity() instanceof Player)) return;
+
+    Optional<EntityEffectContainer> container = Enchantments.getStatusEffectManager()
+        .getEntityContainer(event.getEntity().getUniqueId());
+
+    if (container.isPresent() && container.get().hasEffect(MjolnirFlightEffect.class)) {
+      event.setCancelled(true);
     }
 
   }
 
-  @EventHandler // Allows player to keep flight animation.
-  public void onGlideToggle(EntityToggleGlideEvent event) {
-    if (event.getEntityType() != EntityType.PLAYER) return;
-    Player player = (Player) event.getEntity();
+  private class MjolnirChargeEffect extends EntityStatusEffect {
 
-    if (player.hasMetadata("mjolnir")) {
-      event.setCancelled(true);
+    private final Player player;
+    private final Particle.DustOptions options;
+    private final String charging = "Flight Charge: %d seconds";
+
+    private MjolnirChargeEffect(Player player) {
+      super(player, Mjolnir.this, 10 * 20, 20);
+      this.player = player;
+      this.options = new Particle.DustOptions(Color.YELLOW, 1);
+    }
+
+    @Override
+    public void effect() {
+
+      int duration = getTicks() / 20;
+
+      TextComponent component = new TextComponent(String.format(charging, duration * 2));
+      component.setColor(ChatColor.AQUA);
+      player.spigot().sendMessage(ChatMessageType.ACTION_BAR, component);
+
+      ParticleUtil.sphere(player.getLocation().add(0, 1, 0), 2, Particle.REDSTONE, options);
+      player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1, 0.5F);
+
+      if (!player.isSneaking() || duration > 10) {
+        Enchantments.getStatusEffectManager().add(new MjolnirFlightEffect(player, duration * 2 * 20));
+        this.stop();
+      }
+
+    }
+
+  }
+
+  private class MjolnirFlightEffect extends EntityStatusEffect {
+
+    private final Player player;
+    private final Particle.DustOptions options;
+    private final String remaining = "%d seconds of flight remaining";
+
+    private MjolnirFlightEffect(Player player, int maxTicks) {
+      super(player, Mjolnir.this, maxTicks, 1);
+      this.player = player;
+      options = new Particle.DustOptions(Color.WHITE, 3);
+    }
+
+    @Override
+    public void start() {
+      Enchantments.getStatusEffectManager().negateFallDamage(player, Mjolnir.this, getMaxTicks());
+      player.getWorld().playSound(player.getLocation(), Sound.ITEM_ELYTRA_FLYING, 1, 1);
       player.setGliding(true);
     }
-  }
 
-  private void flight(Player player, Plugin plugin, int duration) {
-
-    AtomicInteger timeInFlight = new AtomicInteger();
-    Particle.DustOptions options = new Particle.DustOptions(Color.WHITE, 3);
-
-    //Negates fall damage
-    NamespacedKey key = Enchantments.getEnchantmentManager().getFallDamageKey();
-    player.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, 1);
-
-    player.getWorld().playSound(player.getLocation(), Sound.ITEM_ELYTRA_FLYING, 1, 1);
-    player.setGliding(true);
-
-    new BukkitRunnable() {
-      public void run() {
-
-        int time = timeInFlight.getAndIncrement();
-
-        //Cancel flight if player logs off, they reach the ground, or time runs out.
-        if (!player.isOnline()) {
-          player.removeMetadata("mjolnir", plugin);
-          this.cancel(); return;
-        } else if ((time > 20 && player.isOnGround()) || time > duration) {
-          stopFlight(player);
-          this.cancel(); return;
-        }
-
-        TextComponent component = new TextComponent(String.format(remaining, (duration - time) / 20));
-        component.setColor(ChatColor.GOLD);
-        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, component);
-
-        player.setVelocity(player.getEyeLocation().getDirection().multiply(1.35));
-        player.getWorld().spawnParticle(Particle.REDSTONE, player.getLocation(), 1, options);
-
+    @Override
+    public void effect() {
+      //Cancel flight is player touches the ground after launching.
+      if (getTicks() > 20 && player.isOnGround()) {
+        this.stop();
+        return;
       }
-    }.runTaskTimer(plugin, 0, 0);
 
-  }
+      TextComponent component = new TextComponent(String.format(remaining, (getMaxTicks() - getTicks()) / 20));
+      component.setColor(ChatColor.GOLD);
+      player.spigot().sendMessage(ChatMessageType.ACTION_BAR, component);
 
-  private void stopFlight(Player player) {
+      player.setGliding(true);
+      player.setVelocity(player.getEyeLocation().getDirection().multiply(1.35));
+      player.getWorld().spawnParticle(Particle.REDSTONE, player.getLocation(), 1, options);
+    }
 
-    if (player.isOnGround()) seismicSmash(player);
-    addCooldown(player);
+    @Override
+    public void stop() {
+      if (player.isOnGround()) seismicSmash(player);
+      addCooldown(player);
 
-    player.removeMetadata("mjolnir", plugin);
-    player.setGliding(false);
-    player.stopSound(Sound.ITEM_ELYTRA_FLYING);
+      player.setGliding(false);
+      player.stopSound(Sound.ITEM_ELYTRA_FLYING);
+      super.stop();
+    }
+
   }
 
   private void seismicSmash(Player player) {
@@ -182,7 +188,5 @@ public class Mjolnir extends CustomEnchant {
           entity.setVelocity(entity.getVelocity().setY(1.25));
         });
   }
-
-
 
 }
