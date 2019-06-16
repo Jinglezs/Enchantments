@@ -15,6 +15,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 @Enchant(name = "Luminosity", key = "luminosity", cooldown = 5, enchantChance = 0.5,
   targetItem = EnchantmentTarget.ARMOR_FEET, description = "Replaces the block under the " +
@@ -34,6 +35,9 @@ public class Luminosity extends CustomEnchant {
   @Override
   public boolean canTrigger(Inventory inventory, Event event) {
     Player player = ((PlayerMoveEvent) event).getPlayer();
+    ItemStack boots = getItem(inventory);
+
+    if (boots == null || !hasEnchantment(boots)) return false;
 
     EntityEffectContainer container = Enchantments.getStatusEffectManager()
         .getOrNewEntityContainer(player.getUniqueId());
