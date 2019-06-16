@@ -53,6 +53,14 @@ public abstract class StatusEffect implements Comparable<StatusEffect> {
   }
 
   /**
+   * Gets the amount of ticks remaining util the effect expires.
+   * @return ticks remaining
+   */
+  public int getTicksLeft() {
+    return getMaxTicks() - getTicks();
+  }
+
+  /**
    * Gets the time interval at which the effects will be applied.
    *
    * @return time between each effect trigger.

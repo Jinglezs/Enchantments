@@ -26,6 +26,7 @@ public class StatusEffectManager extends BukkitRunnable implements EffectContain
 
   public StatusEffectManager(Enchantments plugin) {
     this.worldContainer = new WorldEffectContainer();
+    plugin.getServer().getPluginManager().registerEvents(this, plugin);
     runTaskTimer(plugin, 0, 1);
   }
 
