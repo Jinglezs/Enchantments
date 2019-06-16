@@ -4,6 +4,7 @@ import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.statuseffect.EntityStatusEffect;
+import net.jingles.enchantments.statuseffect.container.EntityEffectContainer;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -33,7 +34,11 @@ public class Luminosity extends CustomEnchant {
   @Override
   public boolean canTrigger(Inventory inventory, Event event) {
     Player player = ((PlayerMoveEvent) event).getPlayer();
-    return Enchantments.getCooldownManager().hasCooldown(player, this);
+
+    EntityEffectContainer container = Enchantments.getStatusEffectManager()
+        .getOrNewEntityContainer(player.getUniqueId());
+
+    return player.isOnGround() && !container.hasEffect(LuminosityEffect.class);
   }
 
   @EventHandler
@@ -42,8 +47,6 @@ public class Luminosity extends CustomEnchant {
       !canTrigger(event.getPlayer().getInventory(), event)) return;
 
     Player player = event.getPlayer();
-    if (!player.isOnGround()) return;
-
     Enchantments.getStatusEffectManager().add(new LuminosityEffect(player));
   }
 
@@ -56,7 +59,7 @@ public class Luminosity extends CustomEnchant {
     public LuminosityEffect(Player player) {
       super(player, Luminosity.this, 5 * 20, 1);
       this.player = player;
-      this.location = player.getLocation();
+      this.location = player.getLocation().clone().subtract(0, 1, 0);
     }
 
     @Override

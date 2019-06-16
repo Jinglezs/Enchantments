@@ -41,7 +41,10 @@ public class StatusEffectManager extends BukkitRunnable implements EffectContain
       if (!effect.canTick().isFatal()) {
         effect.effect();
         effect.setNextExecution();
-      } else iterator.remove();
+      } else {
+        effect.stop();
+        iterator.remove();
+      }
 
     }
 
