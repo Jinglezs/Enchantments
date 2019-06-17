@@ -52,7 +52,9 @@ public class EnchantListener implements Listener {
           ItemMeta meta = event.getItem().getItemMeta();
           List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
 
-          lore.add(enchant.getName() + " " + RomanNumerals.toRoman(entry.getValue()));
+          lore.add((enchant.isCursed() ? ChatColor.RED : ChatColor.RESET)
+              + enchant.getName() + " " + RomanNumerals.toRoman(entry.getValue()));
+
           meta.setLore(lore);
           event.getItem().setItemMeta(meta);
 

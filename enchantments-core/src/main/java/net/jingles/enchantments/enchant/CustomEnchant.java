@@ -16,6 +16,7 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -138,13 +139,18 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
     PlayerInventory player = (PlayerInventory) inventory;
 
     switch (getItemTarget()) {
-      case ALL: //Prioritizes main hand, but also checks rest of contents
+      case ALL: //Prioritizes hands, but also checks rest of contents
 
         ItemStack mainHand = player.getItemInMainHand();
         if (mainHand.getType() != Material.AIR && hasEnchantment(mainHand))
           return mainHand;
 
+        ItemStack offHand = player.getItemInOffHand();
+        if (offHand.getType() != Material.AIR && hasEnchantment(offHand))
+          return offHand;
+
         return Stream.of(player.getContents())
+            .filter(Objects::nonNull)
             .filter(this::hasEnchantment)
             .findFirst().orElse(null);
 
