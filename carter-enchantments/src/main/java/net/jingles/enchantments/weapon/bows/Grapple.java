@@ -1,4 +1,4 @@
-package net.jingles.enchantments.weapon;
+package net.jingles.enchantments.weapon.bows;
 
 import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;

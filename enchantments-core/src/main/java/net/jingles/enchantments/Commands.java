@@ -5,6 +5,9 @@ import co.aikar.commands.CommandHelp;
 import co.aikar.commands.annotation.*;
 import net.jingles.enchantments.cooldown.CooldownManager;
 import net.jingles.enchantments.enchant.CustomEnchant;
+import net.jingles.enchantments.statuseffect.StatusEffectManager;
+import net.jingles.enchantments.statuseffect.container.EntityEffectContainer;
+import net.jingles.enchantments.statuseffect.container.WorldEffectContainer;
 import net.jingles.enchantments.util.RomanNumerals;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -21,10 +24,13 @@ import java.util.stream.Collectors;
 public class Commands extends BaseCommand {
 
   private static final String TITLE = ChatColor.DARK_GRAY + "[" + ChatColor.AQUA + "Enchantments" +
-          ChatColor.DARK_GRAY + "] " + ChatColor.RESET;
+      ChatColor.DARK_GRAY + "] " + ChatColor.RESET;
 
   @Dependency
   private CooldownManager cooldownManager;
+
+  @Dependency
+  private StatusEffectManager statusEffectManager;
 
   @HelpCommand
   public void onEnchantHelpCommand(CommandHelp help) {
@@ -32,7 +38,8 @@ public class Commands extends BaseCommand {
     help.showHelp();
   }
 
-  @CommandAlias("enchant") @Conditions("operator")
+  @CommandAlias("enchant")
+  @Conditions("operator")
   @CommandCompletion("@range:1-20 @enchantments")
   @Syntax("<level> <enchantment name>")
   @Description("Applies the custom enchantment with the given level to the item held in the executor's main (right) hand.")
@@ -54,7 +61,8 @@ public class Commands extends BaseCommand {
     player.sendMessage(TITLE + "Successfully added " + enchantment + " to the item.");
   }
 
-  @CommandAlias("disenchant") @Conditions("operator")
+  @CommandAlias("disenchant")
+  @Conditions("operator")
   @CommandCompletion("@enchantments")
   @Syntax("<enchantment name>")
   @Description("Removes the given custom enchantment from the item held in the executor's main (right) hand.")
@@ -95,7 +103,7 @@ public class Commands extends BaseCommand {
       "Enchantment Cooldowns " + ChatColor.DARK_GRAY + "+-------+\n" + ChatColor.RESET;
 
   //Replacements: Name, cooldown, time unit
-  private static final String COOLDOWN_INFO = ChatColor.GOLD + " - " + ChatColor.AQUA + "%s " + ChatColor.GOLD + ": "
+  private static final String INFO = ChatColor.GOLD + " - " + ChatColor.AQUA + "%s " + ChatColor.GOLD + ": "
       + ChatColor.RED + "%d %s";
 
   @CommandAlias("cooldowns")
@@ -104,11 +112,42 @@ public class Commands extends BaseCommand {
     String cooldownMessage = cooldownManager.getCooldowns(player).entrySet().stream()
         .map(entry -> {
           long remaining = entry.getKey().getTimeUnit().convert(entry.getValue() - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
-          return String.format(COOLDOWN_INFO, entry.getKey().getName(), (int) remaining, entry.getKey().getTimeUnit().name().toLowerCase());
+          return String.format(INFO, entry.getKey().getName(), (int) remaining, entry.getKey().getTimeUnit().name().toLowerCase());
         })
         .collect(Collectors.joining("\n"));
 
     player.sendMessage(COOLDOWN_HEADER + (!cooldownMessage.isEmpty() ? cooldownMessage : " - You do not have any active enchantment cooldowns"));
+  }
+
+  private static final String EFFECTS_HEADER = ChatColor.DARK_GRAY + "+-------+ " + ChatColor.AQUA +
+      "Current Status Effects " + ChatColor.DARK_GRAY + "+-------+\n" + ChatColor.RESET;
+
+  @CommandAlias("effects")
+  @Description("Shows the executor all status effects being applied to them")
+  public void onEffectInfo(Player sender) {
+
+    java.util.Optional<EntityEffectContainer> container = statusEffectManager.getEntityContainer(sender.getUniqueId());
+
+    String effectsMessage = (!container.isPresent() || container.get().getStatusEffects().isEmpty()) ? " - You do not have any active status effects" :
+        container.get().getStatusEffects().stream()
+            .map(effect -> String.format(INFO, effect.getClass().getSimpleName(), effect.getTicksLeft() / 20, "seconds"))
+            .collect(Collectors.joining("\n"));
+
+    sender.sendMessage(EFFECTS_HEADER + effectsMessage);
+  }
+
+  @CommandAlias("locationEffects")
+  @Syntax("<radius>")
+  @Description("Displays information about location status effects within the given radius")
+  public void onLocationEffectInfo(Player player, double radius) {
+
+    WorldEffectContainer container = statusEffectManager.getWorldContainer();
+
+    String effectsMessage = container.getEffectsWithinRadius(player.getLocation(), radius, radius, radius).stream()
+        .map(effect -> String.format(INFO, effect.getClass().getSimpleName(), effect.getTicksLeft() / 20, "seconds"))
+        .collect(Collectors.joining("\n"));
+
+    player.sendMessage(EFFECTS_HEADER + (!effectsMessage.isEmpty() ? effectsMessage : " - There are no active location status effects"));
   }
 
 }

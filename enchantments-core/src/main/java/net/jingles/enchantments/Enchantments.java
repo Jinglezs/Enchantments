@@ -7,6 +7,7 @@ import net.jingles.enchantments.cooldown.CooldownManager;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.EnchantmentManager;
 import net.jingles.enchantments.projectile.ProjectileManager;
+import net.jingles.enchantments.statuseffect.StatusEffectManager;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -22,6 +23,7 @@ public class Enchantments extends JavaPlugin {
   private static CooldownManager cooldownManager;
   private static ProjectileManager projectileManager;
   private static EnchantmentManager enchantmentManager;
+  private static StatusEffectManager statusEffectManager;
 
   @Override
   public void onEnable() {
@@ -57,10 +59,12 @@ public class Enchantments extends JavaPlugin {
     enchantmentManager = new EnchantmentManager(this);
     cooldownManager = new CooldownManager(this);
     projectileManager = new ProjectileManager();
+    statusEffectManager = new StatusEffectManager(this);
 
     manager.registerDependency(EnchantmentManager.class, enchantmentManager);
     manager.registerDependency(CooldownManager.class, cooldownManager);
     manager.registerDependency(ProjectileManager.class, projectileManager);
+    manager.registerDependency(StatusEffectManager.class, statusEffectManager);
 
     //----- ARGUMENT COMPLETIONS -----
 
@@ -123,6 +127,10 @@ public class Enchantments extends JavaPlugin {
 
   public static EnchantmentManager getEnchantmentManager() {
     return enchantmentManager;
+  }
+
+  public static StatusEffectManager getStatusEffectManager() {
+    return statusEffectManager;
   }
 
 }
