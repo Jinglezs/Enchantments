@@ -6,7 +6,7 @@ import org.bukkit.util.Vector;
 
 public class ParticleUtil {
 
-  public static  void sphere(Location location, double radius, Particle particle, Object data) {
+  public static void sphere(Location location, double radius, Particle particle, Object data) {
     int d = 3;
     for (double inc = (Math.random()*Math.PI)/5; inc < Math.PI; inc += Math.PI/d){
       for (double azi = (Math.random()*Math.PI)/d; azi < 2*Math.PI; azi += Math.PI/d){
@@ -20,7 +20,6 @@ public class ParticleUtil {
 
       }
     }
-
   }
 
   private static Vector spherToVec(double[] spher, double radius){
@@ -32,5 +31,12 @@ public class ParticleUtil {
     return new Vector(x, y, z);
   }
 
+  public static Vector bounceFromSource(Vector original, Location source) {
+    Vector direction = source.toVector().subtract(original).normalize();
+    double multiplier = 1 + (Math.random() * 5);
+
+    return direction.multiply((original.dot(direction)))
+        .multiply(-2).add(original).multiply(multiplier);
+  }
 
 }

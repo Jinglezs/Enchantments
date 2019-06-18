@@ -142,17 +142,22 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
       case ALL: //Prioritizes hands, but also checks rest of contents
 
         ItemStack mainHand = player.getItemInMainHand();
-        if (mainHand.getType() != Material.AIR && hasEnchantment(mainHand))
-          return mainHand;
+        if (hasEnchantment(mainHand)) return mainHand;
 
         ItemStack offHand = player.getItemInOffHand();
-        if (offHand.getType() != Material.AIR && hasEnchantment(offHand))
-          return offHand;
+        if (hasEnchantment(offHand)) return offHand;
 
-        return Stream.of(player.getContents())
+        ItemStack found = Stream.of(player.getContents())
             .filter(Objects::nonNull)
+            .filter(item -> getTargetGroup().canEnchant(item.getType()))
             .filter(this::hasEnchantment)
             .findFirst().orElse(null);
+
+        // Unless it's wearable, we want to make sure that the player is holding the enchanted item.
+        if (found != null && !EnchantmentTarget.WEARABLE.includes(found) &&
+            (mainHand.equals(found) || offHand.equals(found))) return found;
+
+        return null;
 
       case ARMOR:
         return Stream.of(player.getArmorContents())
@@ -194,6 +199,10 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
       default:
         return null;
     }
+  }
+
+  public int getLevel(ItemStack item) {
+    return item.getItemMeta() == null ? 0 : item.getItemMeta().getEnchantLevel(this);
   }
 
   public static Set<Enchantment> getEnchantmentsByItemType(EnchantmentTarget target) {
