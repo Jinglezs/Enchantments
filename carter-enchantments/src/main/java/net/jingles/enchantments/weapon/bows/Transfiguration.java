@@ -85,7 +85,11 @@ public class Transfiguration extends CustomEnchant {
           return effectContainer != null && effectContainer.hasEffect(TransfigurationEffect.class);
 
           // We already know the entity is instanceof LivingEntity if they have the TransfigurationEffect.
-        }).forEach(entity -> ((LivingEntity) entity).setHealth(0));
+        }).map(entity -> (LivingEntity) entity)
+        .forEach(entity -> {
+          entity.setInvulnerable(false);
+          entity.setHealth(0);
+        });
 
     // Clears the drops of the transfigured entity, so that only the drops of the
     // original entity are dropped.

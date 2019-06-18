@@ -1,4 +1,4 @@
-package net.jingles.enchantments.armor;
+package net.jingles.enchantments.armor.boots;
 
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;

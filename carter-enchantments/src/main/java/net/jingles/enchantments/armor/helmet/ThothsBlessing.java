@@ -1,4 +1,4 @@
-package net.jingles.enchantments.armor;
+package net.jingles.enchantments.armor.helmet;
 
 import net.jingles.enchantments.cooldown.EnchantmentCooldownEvent;
 import net.jingles.enchantments.enchant.CustomEnchant;
