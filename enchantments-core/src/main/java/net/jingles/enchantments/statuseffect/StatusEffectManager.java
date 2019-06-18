@@ -138,7 +138,7 @@ public class StatusEffectManager extends BukkitRunnable implements EffectContain
 
   private void removeStatusEffects(Entity entity) {
     Enchantments.getStatusEffectManager().getEntityContainer(entity.getUniqueId())
-        .ifPresent(container -> container.getStatusEffects().forEach(StatusEffect::cancel));
+        .ifPresent(container -> container.getStatusEffects().forEach(StatusEffect::stop));
   }
 
 }

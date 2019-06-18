@@ -46,7 +46,7 @@ public interface EffectContainer<T extends StatusEffect> {
   default void removeEffects(CustomEnchant source) {
     getStatusEffects().stream()
         .filter(statusEffect -> statusEffect.getSource().equals(source))
-        .forEach(StatusEffect::cancel);
+        .forEach(StatusEffect::stop);
   }
 
 }
