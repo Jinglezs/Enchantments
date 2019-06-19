@@ -11,10 +11,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.inventory.Inventory;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -41,8 +39,7 @@ public class Vibranium extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Inventory inventory, Event event) {
-    Player player = (Player) ((EntityDamageByEntityEvent) event).getEntity();
+  public boolean canTrigger(Player player) {
     if (Enchantments.getCooldownManager().hasCooldown(player, this)) return false;
     // Only returns true if every armor piece has the enchantment.
     return Stream.of(player.getInventory().getArmorContents())
@@ -53,7 +50,7 @@ public class Vibranium extends CustomEnchant {
   @EventHandler
   public void onEntityDamage(EntityDamageByEntityEvent event) {
     if (!(event.getEntity() instanceof Player) ||
-        !canTrigger(null, event)) return;
+        !canTrigger((Player) event.getEntity())) return;
 
     Player player = (Player) event.getEntity();
     UUID id = player.getUniqueId();

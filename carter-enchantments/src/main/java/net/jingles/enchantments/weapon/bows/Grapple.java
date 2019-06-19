@@ -12,12 +12,10 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
@@ -38,15 +36,15 @@ public class Grapple extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Inventory inventory, Event event) {
-    ItemStack bow = getItem(inventory);
+  public boolean canTrigger(Player player) {
+    ItemStack bow = getItem(player.getInventory());
     return bow != null && hasEnchantment(bow);
   }
 
   @EventHandler
   public void onBowLeftClick(PlayerInteractEvent event) {
     if (event.getAction() != Action.LEFT_CLICK_AIR ||
-        !canTrigger(event.getPlayer().getInventory(), event)) return;
+        !canTrigger(event.getPlayer())) return;
 
     Player player = event.getPlayer();
 
@@ -71,7 +69,7 @@ public class Grapple extends CustomEnchant {
     Arrow arrow = (Arrow) event.getEntity();
 
     if (!arrow.getPersistentDataContainer().has(getKey(), PersistentDataType.INTEGER) ||
-        !canTrigger(player.getInventory(), event)) return;
+        !canTrigger(player)) return;
 
     if (player.getLocation().distance(arrow.getLocation()) > 75) return;
 

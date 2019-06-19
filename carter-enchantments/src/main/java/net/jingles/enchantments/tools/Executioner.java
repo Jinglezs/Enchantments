@@ -8,10 +8,8 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 
@@ -31,8 +29,8 @@ public class Executioner extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Inventory inventory, Event e) {
-    ItemStack axe = getItem(inventory);
+  public boolean canTrigger(Player player) {
+    ItemStack axe = getItem(player.getInventory());
     return isAxe(axe.getType()) && hasEnchantment(axe);
   }
 
@@ -46,7 +44,7 @@ public class Executioner extends CustomEnchant {
     if (!(event.getDamager() instanceof Player)) return;
 
     PlayerInventory inventory = ((Player) event.getDamager()).getInventory();
-    if (!canTrigger(((Player) event.getDamager()).getInventory(), event)) return;
+    if (!canTrigger((Player) event.getDamager())) return;
 
     int level = getItem(inventory).getItemMeta().getEnchantLevel(this);
 

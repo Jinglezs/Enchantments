@@ -14,11 +14,9 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.*;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -46,10 +44,8 @@ public class Transfiguration extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Inventory inventory, Event event) {
-    Player player = (Player) ((ProjectileHitEvent) event).getEntity().getShooter();
-    ItemStack bow = getItem(inventory);
-
+  public boolean canTrigger(Player player) {
+    ItemStack bow = getItem(player.getInventory());
     return bow != null && hasEnchantment(bow) && !Enchantments.getCooldownManager()
         .hasCooldown(player, this);
   }
@@ -61,7 +57,7 @@ public class Transfiguration extends CustomEnchant {
         !(event.getEntity().getShooter() instanceof Player)) return;
 
     Player player = (Player) event.getEntity().getShooter();
-    if (!canTrigger(player.getInventory(), event)) return;
+    if (!canTrigger(player)) return;
 
     LivingEntity entity = (LivingEntity) event.getHitEntity();
     if (entity.isDead() || entity.getClass().isAssignableFrom(Boss.class)) return;

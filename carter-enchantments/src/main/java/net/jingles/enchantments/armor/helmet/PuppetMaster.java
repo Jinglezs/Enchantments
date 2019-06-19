@@ -8,10 +8,8 @@ import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 @Enchant(name = "Puppet Master", key = "puppet_master", levelRequirement = 30, maxLevel = 3, enchantChance = 0.25,
@@ -30,8 +28,8 @@ public class PuppetMaster extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Inventory inventory, Event event) {
-    ItemStack helm = getItem(inventory);
+  public boolean canTrigger(Player player) {
+    ItemStack helm = getItem(player.getInventory());
     return helm != null && hasEnchantment(helm);
   }
 
@@ -40,7 +38,7 @@ public class PuppetMaster extends CustomEnchant {
     if (!(event.getDamager() instanceof Player) || !(event.getEntity() instanceof LivingEntity)) return;
 
     Player player = (Player) event.getDamager();
-    if (!canTrigger(player.getInventory(), event)) return;
+    if (!canTrigger(player)) return;
 
     int level = getItem(player.getInventory()).getItemMeta().getEnchantLevel(this);
     double probability = 0.25 + ((level * 15) / 100D);

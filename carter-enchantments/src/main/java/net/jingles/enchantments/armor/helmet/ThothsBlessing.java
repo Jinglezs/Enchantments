@@ -6,9 +6,8 @@ import net.jingles.enchantments.enchant.Enchant;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
-import org.bukkit.event.Event;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 @Enchant(name = "Thoth's Blessing", key = "thoths_blessing", levelRequirement = 30, maxLevel = 3, enchantChance = 0.25,
@@ -27,14 +26,14 @@ public class ThothsBlessing extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Inventory inventory, Event event) {
-    ItemStack helm = getItem(inventory);
+  public boolean canTrigger(Player player) {
+    ItemStack helm = getItem(player.getInventory());
     return helm != null && hasEnchantment(helm);
   }
 
   @EventHandler
   public void onEnchantmentAddtion(EnchantmentCooldownEvent event) {
-    if (canTrigger(event.getPlayer().getInventory(), event)) {
+    if (canTrigger(event.getPlayer())) {
       ItemStack helmet = getItem(event.getPlayer().getInventory());
       double reduction = (10 * helmet.getItemMeta().getEnchantLevel(this)) / 100;
       event.setRawCooldown((long) (event.getRawCooldown() - (event.getRawCooldown() * reduction)));

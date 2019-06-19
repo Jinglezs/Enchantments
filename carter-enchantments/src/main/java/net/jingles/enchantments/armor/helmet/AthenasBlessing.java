@@ -8,10 +8,9 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
-import org.bukkit.event.Event;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerExpChangeEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 @Enchant(name = "Athena's Blessing", key = "athenas_blessing", levelRequirement = 30,
@@ -30,14 +29,14 @@ public class AthenasBlessing extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Inventory inventory, Event event) {
-    ItemStack helm = getItem(inventory);
+  public boolean canTrigger(Player player) {
+    ItemStack helm = getItem(player.getInventory());
     return helm != null && hasEnchantment(helm);
   }
 
   @EventHandler
   public void onExperienceGain(PlayerExpChangeEvent event) {
-    if (!canTrigger(event.getPlayer().getInventory(), event)) return;
+    if (!canTrigger(event.getPlayer())) return;
 
     double original = event.getAmount();
     int level = getItem(event.getPlayer().getInventory()).getItemMeta().getEnchantLevel(this);

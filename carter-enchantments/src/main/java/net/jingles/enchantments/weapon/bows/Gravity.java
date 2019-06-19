@@ -12,10 +12,8 @@ import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -42,10 +40,10 @@ public class Gravity extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Inventory inventory, Event event) {
-    ItemStack bow = getItem(inventory);
+  public boolean canTrigger(Player player) {
+    ItemStack bow = getItem(player.getInventory());
     return bow != null && hasEnchantment(bow) && !Enchantments.getCooldownManager()
-        .hasCooldown(((Player) inventory.getHolder()), this);
+        .hasCooldown(player, this);
   }
 
   @EventHandler
@@ -54,7 +52,7 @@ public class Gravity extends CustomEnchant {
         !(event.getEntity().getShooter() instanceof Player)) return;
 
     Player player = (Player) event.getEntity().getShooter();
-    if (!canTrigger(player.getInventory(), event)) return;
+    if (!canTrigger(player)) return;
 
     Location hitLoc = event.getHitEntity() != null ? event.getHitEntity().getLocation() :
         event.getHitBlock().getLocation();

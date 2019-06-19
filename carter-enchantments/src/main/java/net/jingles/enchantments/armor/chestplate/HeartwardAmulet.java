@@ -12,10 +12,8 @@ import org.bukkit.block.Chest;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Arrays;
@@ -39,14 +37,14 @@ public class HeartwardAmulet extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Inventory inventory, Event event) {
-    ItemStack chestplate = getItem(inventory);
+  public boolean canTrigger(Player player) {
+    ItemStack chestplate = getItem(player.getInventory());
     return chestplate != null && hasEnchantment(chestplate);
   }
 
   @EventHandler
   public void onPlayerDeath(PlayerDeathEvent event) {
-    if (!canTrigger(event.getEntity().getInventory(), event)) return;
+    if (!canTrigger(event.getEntity())) return;
 
     Player player = event.getEntity();
 

@@ -11,10 +11,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -34,11 +32,10 @@ public class Eluding extends CustomEnchant {
   public boolean conflictsWith(Enchantment other) { return false; }
 
   @Override
-  public boolean canTrigger(Inventory inventory, Event event) {
-    ItemStack boots = getItem(inventory);
+  public boolean canTrigger(Player player) {
+    ItemStack boots = getItem(player.getInventory());
     return boots != null && hasEnchantment(boots) &&
-        !Enchantments.getCooldownManager()
-                .hasCooldown(((Player) inventory.getHolder()), this);
+        !Enchantments.getCooldownManager().hasCooldown(player, this);
   }
 
   @EventHandler
@@ -47,7 +44,7 @@ public class Eluding extends CustomEnchant {
     if (!(event.getEntity() instanceof Player) || ((Player) event.getEntity()).getHealth() > 10) return;
 
     Player player = (Player) event.getEntity();
-    if (!canTrigger(player.getInventory(), event)) return;
+    if (!canTrigger(player)) return;
 
     int level = getItem(player.getInventory()).getItemMeta().getEnchantLevel(this);
     double probability = 0.25 + ((level * 5) / 100D);

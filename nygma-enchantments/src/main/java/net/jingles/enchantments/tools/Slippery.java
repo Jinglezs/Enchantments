@@ -11,11 +11,9 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Map;
@@ -37,24 +35,21 @@ public class Slippery extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Inventory inventory, Event e) {
-    ItemStack item = (e instanceof PlayerItemHeldEvent) ?
-        inventory.getItem(((PlayerItemHeldEvent) e).getNewSlot()) : getItem(inventory);
+  public boolean canTrigger(Player player) {
+    ItemStack item = getItem(player.getInventory());
     return item != null && hasEnchantment(item);
   }
 
   @EventHandler
   public void onMainHandSwitch(PlayerItemHeldEvent event) {
     Player player = event.getPlayer();
-    if (canTrigger(player.getInventory(), event))
-      tryDrop(player, getItem(player.getInventory()));
+    if (canTrigger(player)) tryDrop(player, getItem(player.getInventory()));
   }
 
   @EventHandler
   public void onSwitchToOffhand(PlayerSwapHandItemsEvent event) {
     Player player = event.getPlayer();
-    if (canTrigger(player.getInventory(), event))
-      tryDrop(player, getItem(player.getInventory()));
+    if (canTrigger(player)) tryDrop(player, getItem(player.getInventory()));
   }
 
   private void tryDrop(Player player, ItemStack item) {

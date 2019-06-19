@@ -12,10 +12,8 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Optional;
@@ -36,12 +34,11 @@ public class Thiccness extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Inventory inventory, Event event) {
-    ItemStack leggings = getItem(inventory);
-    Player player = ((PlayerToggleSneakEvent) event).getPlayer();
+  public boolean canTrigger(Player player) {
 
+    ItemStack leggings = getItem(player.getInventory());
     if (leggings == null || !hasEnchantment(leggings) ||
-        Enchantments.getCooldownManager().hasCooldown(((Player) inventory.getHolder()), this))
+        Enchantments.getCooldownManager().hasCooldown(player, this))
       return false;
 
     Optional<EntityEffectContainer> container = Enchantments.getStatusEffectManager()
@@ -53,7 +50,7 @@ public class Thiccness extends CustomEnchant {
   @EventHandler
   public void onPlayerCrouch(PlayerToggleSneakEvent event) {
 
-    if (!canTrigger(event.getPlayer().getInventory(), event)) return;
+    if (!canTrigger(event.getPlayer())) return;
 
     Player player = event.getPlayer();
 

@@ -8,10 +8,9 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
-import org.bukkit.event.Event;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Collection;
@@ -50,15 +49,15 @@ public class MoltenCore extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Inventory inventory, Event event) {
-    ItemStack held = getItem(inventory);
+  public boolean canTrigger(Player player) {
+    ItemStack held = getItem(player.getInventory());
     return held != null && hasEnchantment(held);
   }
 
   @EventHandler
   public void onSmeltableBreak(BlockBreakEvent event) {
 
-    if (!canTrigger(event.getPlayer().getInventory(), event) ||
+    if (!canTrigger(event.getPlayer()) ||
         !SMELTABLE.containsKey(event.getBlock().getType())) return;
 
     Block block = event.getBlock();

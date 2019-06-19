@@ -14,11 +14,9 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.RayTraceResult;
 
@@ -39,17 +37,16 @@ public class Pyromancer extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Inventory inventory, Event e) {
-    PlayerInteractEvent event = (PlayerInteractEvent) e;
-    ItemStack sword = event.getItem();
+  public boolean canTrigger(Player player) {
+    ItemStack sword = getItem(player.getInventory());
     return sword != null && hasEnchantment(sword) &&
-        !Enchantments.getCooldownManager().hasCooldown(event.getPlayer(), this);
+        !Enchantments.getCooldownManager().hasCooldown(player, this);
   }
 
   @EventHandler
   public void onEntityTarget(PlayerInteractEvent event) {
     if (event.getAction() != Action.RIGHT_CLICK_AIR ||
-        !canTrigger(event.getPlayer().getInventory(), event)) return;
+        !canTrigger(event.getPlayer())) return;
 
     Player player = event.getPlayer();
     RayTraceResult result = player.getWorld().rayTraceEntities(player.getEyeLocation(),

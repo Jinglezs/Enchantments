@@ -11,10 +11,8 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 @Enchant(name = "Luminosity", key = "luminosity", cooldown = 5, enchantChance = 0.5,
@@ -33,9 +31,8 @@ public class Luminosity extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Inventory inventory, Event event) {
-    Player player = ((PlayerMoveEvent) event).getPlayer();
-    ItemStack boots = getItem(inventory);
+  public boolean canTrigger(Player player) {
+    ItemStack boots = getItem(player.getInventory());
 
     if (boots == null || !hasEnchantment(boots)) return false;
 
@@ -48,7 +45,7 @@ public class Luminosity extends CustomEnchant {
   @EventHandler
   public void onPlayerVoid(PlayerMoveEvent event) {
     if (event.getTo().getBlock().equals(event.getFrom().getBlock()) ||
-      !canTrigger(event.getPlayer().getInventory(), event)) return;
+      !canTrigger(event.getPlayer())) return;
 
     Player player = event.getPlayer();
     Enchantments.getStatusEffectManager().add(new LuminosityEffect(player));

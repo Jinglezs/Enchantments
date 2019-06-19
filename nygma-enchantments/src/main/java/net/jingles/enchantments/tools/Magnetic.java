@@ -10,10 +10,8 @@ import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Collection;
@@ -40,8 +38,8 @@ public class Magnetic extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Inventory inventory, Event event) {
-    ItemStack tool = getItem(inventory);
+  public boolean canTrigger(Player player) {
+    ItemStack tool = getItem(player.getInventory());
     return tool != null && hasEnchantment(tool);
   }
 
@@ -50,7 +48,7 @@ public class Magnetic extends CustomEnchant {
   @EventHandler
   public void onBlockBreak(BlockBreakEvent event) {
 
-    if (!canTrigger(event.getPlayer().getInventory(), event)) return;
+    if (!canTrigger(event.getPlayer())) return;
 
     Player player = event.getPlayer();
     Block block = event.getBlock();

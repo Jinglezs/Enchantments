@@ -17,13 +17,10 @@ import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.LightningStrike;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
-import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Optional;
@@ -47,9 +44,8 @@ public class Mjolnir extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Inventory inventory, Event e) {
-    Player player = ((PlayerEvent) e).getPlayer();
-    ItemStack axe = getItem(inventory);
+  public boolean canTrigger(Player player) {
+    ItemStack axe = getItem(player.getInventory());
 
     if (axe == null || !hasEnchantment(axe) ||
         Enchantments.getCooldownManager().hasCooldown(player, this)) return false;
@@ -64,7 +60,7 @@ public class Mjolnir extends CustomEnchant {
   @EventHandler
   public void onPlayerInteract(PlayerInteractEvent event) {
     if (event.getAction() != Action.RIGHT_CLICK_AIR ||
-        !canTrigger(event.getPlayer().getInventory(), event)) return;
+        !canTrigger(event.getPlayer())) return;
 
     Player player = event.getPlayer();
 

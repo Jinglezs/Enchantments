@@ -8,12 +8,10 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
-import org.bukkit.event.Event;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,14 +36,14 @@ public class Excavator extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Inventory inventory, Event event) {
-    return hasEnchantment(((PlayerInventory) inventory).getItemInMainHand());
+  public boolean canTrigger(Player player) {
+    return hasEnchantment(player.getInventory().getItemInMainHand());
   }
 
   @EventHandler
   public void onBlockBreak(BlockBreakEvent event) {
 
-    if (!canTrigger(event.getPlayer().getInventory(), event)) return;
+    if (!canTrigger(event.getPlayer())) return;
 
     Block center = event.getBlock();
     List<Block> blocks = new ArrayList<>();

@@ -6,7 +6,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.HorseInventory;
 import org.bukkit.inventory.Inventory;
@@ -129,7 +128,7 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
 
   public abstract boolean conflictsWith(Enchantment other);
 
-  public abstract boolean canTrigger(Inventory inventory, Event event);
+  public abstract boolean canTrigger(Player player);
 
   public ItemStack getItem(Inventory inventory) {
     //Why the fuck does a llama have my enchantment?
