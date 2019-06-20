@@ -19,7 +19,7 @@ import org.bukkit.projectiles.ProjectileSource;
 
 import java.util.UUID;
 
-@Enchant(name = "Backstab", key = "backstab", levelRequirement = 30, enchantChance = 0.15,
+@Enchant(name = "Backstab", key = "backstab", levelRequirement = 30, enchantChance = 0.15, maxLevel = 1,
     cooldown = 7, targetItem = EnchantmentTarget.WEAPON, description = "If the user is attacked " +
     "while holding crouch and the enchanted blade, then they will teleport behind the attacking " +
     "entity and their next melee attack will deal 150% of the damage initially dealt to them.")

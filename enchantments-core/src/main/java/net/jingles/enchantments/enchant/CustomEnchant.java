@@ -114,7 +114,7 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
 
   @Override
   public boolean canEnchantItem(@NotNull ItemStack itemStack) {
-    return getItemTarget().includes(itemStack) &&
+    return itemStack.getType() == Material.BOOK || getItemTarget().includes(itemStack) &&
         getTargetGroup().canEnchant(itemStack.getType());
   }
 
