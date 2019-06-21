@@ -73,10 +73,7 @@ public class Grapple extends CustomEnchant {
 
     if (player.getLocation().distance(arrow.getLocation()) > 75) return;
 
-    //Negate fall damage
-    NamespacedKey key = Enchantments.getEnchantmentManager().getFallDamageKey();
-    player.getPersistentDataContainer().set(key, PersistentDataType.INTEGER, 1);
-
+    Enchantments.getStatusEffectManager().negateFallDamage(player, this, 100);
     Vector difference = arrow.getLocation().toVector().subtract(player.getLocation().toVector());
     player.setVelocity(difference.multiply(0.15));
   }
