@@ -1,9 +1,9 @@
 package net.jingles.enchantments.tools;
 
+import net.jingles.backpacks.BackpackUtils;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.enchant.TargetGroup;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -15,7 +15,6 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Collection;
-import java.util.Map;
 
 @Enchant(name = "Magnetic", key = "magnetic", levelRequirement = 30, maxLevel = 1, enchantChance = 0.40,
     targetItem = EnchantmentTarget.TOOL, targetGroup = TargetGroup.DIGGING, description = "All item drops " +
@@ -58,13 +57,7 @@ public class Magnetic extends CustomEnchant {
     block.setType(Material.AIR);
     block.getState().update();
 
-    drops.forEach(item -> tryAddItems(player, block.getLocation(), item));
+    drops.forEach(item -> BackpackUtils.addToResourceBackpacks(item, player.getInventory(), block.getLocation()));
   }
 
-  private void tryAddItems(Player player, Location location, ItemStack items) {
-    final Map<Integer, ItemStack> overflow = player.getInventory().addItem(items);
-    if (!overflow.isEmpty()) {
-      player.getWorld().dropItemNaturally(location, items);
-    }
-  }
 }
