@@ -55,8 +55,11 @@ public class Backstab extends CustomEnchant {
             BackstabEffect effect = (BackstabEffect) container.getEffectsBySource(this)
                 .stream().findFirst().get();
 
-            if (event.getEntity().getUniqueId().equals(effect.getAttacker()))
+            if (event.getEntity().getUniqueId().equals(effect.getAttacker())) {
               event.setDamage(event.getDamage() + effect.getDamage());
+              container.removeEffects(this);
+            }
+
           });
 
     }
