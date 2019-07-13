@@ -43,10 +43,12 @@ public class Vibranium extends CustomEnchant {
   public boolean canTrigger(Player player) {
     if (Enchantments.getCooldownManager().hasCooldown(player, this)) return false;
     // Only returns true if every armor piece has the enchantment.
-    Stream<ItemStack> armor = Stream.of(player.getInventory().getArmorContents())
-        .filter(Objects::nonNull);
 
-    return armor.count() > 0 && armor.allMatch(this::hasEnchantment);
+    Optional<ItemStack> nonMatch = Stream.of(player.getInventory().getArmorContents())
+        .filter(item -> !hasEnchantment(item))
+        .findAny();
+
+    return !nonMatch.isPresent();
   }
 
   @EventHandler
