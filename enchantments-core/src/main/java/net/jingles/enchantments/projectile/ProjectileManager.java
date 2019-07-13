@@ -1,5 +1,6 @@
 package net.jingles.enchantments.projectile;
 
+import net.jingles.enchantments.Enchantments;
 import org.bukkit.Location;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BoundingBox;
@@ -12,6 +13,10 @@ import java.util.stream.Collectors;
 public class ProjectileManager extends BukkitRunnable {
 
   private final Set<Projectile> projectiles = new ConcurrentSkipListSet<>();
+
+  public ProjectileManager(Enchantments plugin) {
+    runTaskTimer(plugin, 0, 1);
+  }
 
   public void register(Projectile projectile) {
     projectiles.add(projectile);

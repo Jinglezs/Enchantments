@@ -58,7 +58,7 @@ public class Enchantments extends JavaPlugin {
 
     enchantmentManager = new EnchantmentManager(this);
     cooldownManager = new CooldownManager(this);
-    projectileManager = new ProjectileManager();
+    projectileManager = new ProjectileManager(this);
     statusEffectManager = new StatusEffectManager(this);
 
     manager.registerDependency(EnchantmentManager.class, enchantmentManager);
