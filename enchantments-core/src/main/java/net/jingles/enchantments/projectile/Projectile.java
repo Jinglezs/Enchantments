@@ -52,7 +52,7 @@ public class Projectile implements Comparable<Projectile> {
     display();
     target();
 
-    if (distanceTraveled > maxDistance) Enchantments.getProjectileManager().unregister(this);
+    if (distanceTraveled > maxDistance) cancel();
   }
 
   public void move() {
@@ -103,6 +103,10 @@ public class Projectile implements Comparable<Projectile> {
         });
 
     if (canLaunch) Enchantments.getProjectileManager().register(this);
+  }
+
+  public void cancel() {
+    Enchantments.getProjectileManager().unregister(this);
   }
 
   /**
