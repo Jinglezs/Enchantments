@@ -1,15 +1,15 @@
 package net.jingles.enchantments.projectile;
 
+import com.google.common.primitives.Doubles;
 import net.jingles.enchantments.Enchantments;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.List;
@@ -19,7 +19,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class Projectile extends BukkitRunnable {
+public class Projectile implements Comparable<Projectile> {
 
   private final Set<Predicate<Block>> blockFilters;
   private final Set<Predicate<Entity>> entityFilters;
@@ -46,14 +46,13 @@ public class Projectile extends BukkitRunnable {
     Enchantments.getProjectileManager().register(this);
   }
 
-  @Override
   public void run() {
     this.onTick.run();
     move();
     display();
     target();
 
-    if (distanceTraveled > maxDistance) this.cancel();
+    if (distanceTraveled > maxDistance) Enchantments.getProjectileManager().unregister(this);
   }
 
   public void move() {
@@ -103,7 +102,7 @@ public class Projectile extends BukkitRunnable {
           }
         });
 
-    if (canLaunch) runTaskTimer(Bukkit.getPluginManager().getPlugin("Enchantments"), 0, 1);
+    if (canLaunch) Enchantments.getProjectileManager().register(this);
   }
 
   /**
@@ -286,6 +285,11 @@ public class Projectile extends BukkitRunnable {
 
   public boolean isNoClip() {
     return this.noClip;
+  }
+
+  @Override
+  public int compareTo(@NotNull Projectile o) {
+    return Doubles.compare(this.distanceTraveled, o.getDistanceTraveled());
   }
 
 }

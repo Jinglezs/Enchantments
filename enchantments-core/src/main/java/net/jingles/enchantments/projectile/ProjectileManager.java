@@ -1,19 +1,24 @@
 package net.jingles.enchantments.projectile;
 
 import org.bukkit.Location;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.stream.Collectors;
 
-public class ProjectileManager {
+public class ProjectileManager extends BukkitRunnable {
 
-  private final Set<Projectile> projectiles = new HashSet<>();
+  private final Set<Projectile> projectiles = new ConcurrentSkipListSet<>();
 
   public void register(Projectile projectile) {
     projectiles.add(projectile);
+  }
+
+  public void unregister(Projectile projectile) {
+    projectiles.remove(projectile);
   }
 
   public Set<Projectile> getNearbyProjectiles(Location center, double radius) {
@@ -36,5 +41,9 @@ public class ProjectileManager {
   }
 
 
+  @Override
+  public void run() {
+    projectiles.forEach(Projectile::run);
+  }
 
 }

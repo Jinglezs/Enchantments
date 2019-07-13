@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class EnchantListener implements Listener {
@@ -33,12 +32,10 @@ public class EnchantListener implements Listener {
 
     Collections.shuffle(enchants);
     Map<Enchantment, Integer> additions = event.getEnchantsToAdd();
-    AtomicInteger customAdditions = new AtomicInteger(1);
 
     enchants.forEach(enchant -> {
 
       if (Math.random() < enchant.getEnchantChance()) {
-        customAdditions.set(customAdditions.get() + 1); //Decreases likelihood of multiple custom enchants
         int level = ThreadLocalRandom.current().nextInt(enchant.getStartLevel(), enchant.getMaxLevel() + 1);
         additions.put(enchant, level);
       }
@@ -53,7 +50,7 @@ public class EnchantListener implements Listener {
           ItemMeta meta = event.getItem().getItemMeta();
           List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
 
-          lore.add((enchant.isCursed() ? ChatColor.RED : ChatColor.RESET)
+          lore.add((enchant.isCursed() ? ChatColor.RED : ChatColor.GRAY)
               + enchant.getName() + " " + RomanNumerals.toRoman(entry.getValue()));
 
           meta.setLore(lore);

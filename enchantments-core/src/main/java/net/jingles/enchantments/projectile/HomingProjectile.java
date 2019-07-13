@@ -1,5 +1,6 @@
 package net.jingles.enchantments.projectile;
 
+import net.jingles.enchantments.Enchantments;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -18,8 +19,9 @@ public class HomingProjectile extends Projectile {
 
   @Override
   public void move() {
+
     if (target == null) {
-      cancel();
+      Enchantments.getProjectileManager().unregister(this);
       return;
     }
 

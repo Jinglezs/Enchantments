@@ -119,7 +119,7 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
   }
 
   public boolean hasEnchantment(ItemStack item) {
-    return item.getItemMeta() != null && item.getItemMeta().hasEnchant(this);
+    return item != null && item.getItemMeta() != null && item.getItemMeta().hasEnchant(this);
   }
 
   public TargetGroup getTargetGroup() {
