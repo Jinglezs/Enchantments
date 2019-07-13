@@ -13,6 +13,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Collection;
 
@@ -51,13 +53,25 @@ public class Magnetic extends CustomEnchant {
 
     Player player = event.getPlayer();
     Block block = event.getBlock();
-    Collection<ItemStack> drops = block.getDrops(getItem(player.getInventory()));
+    ItemStack tool = getItem(player.getInventory());
+    Collection<ItemStack> drops = block.getDrops(tool);
 
     event.setCancelled(true);
     block.setType(Material.AIR);
     block.getState().update();
 
+    int level = tool.getItemMeta().getEnchantLevel(Enchantment.DURABILITY);
+    // Adds one damage to the tool.
+    if (level == 0 || Math.random() < (1.0 / (level + 1))) addDamage(tool);
+
     drops.forEach(item -> BackpackUtils.addToResourceBackpacks(item, player.getInventory(), block.getLocation()));
+  }
+
+  private void addDamage(ItemStack item) {
+    ItemMeta meta = item.getItemMeta();
+    int durability = ((Damageable) meta).getDamage() + 1;
+    ((Damageable) meta).setDamage(durability);
+    item.setItemMeta(meta);
   }
 
 }
