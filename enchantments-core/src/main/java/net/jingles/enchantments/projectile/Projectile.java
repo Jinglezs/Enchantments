@@ -92,6 +92,8 @@ public class Projectile implements Comparable<Projectile> {
 
     //Ensures that none of the necessary fields are null.
     boolean canLaunch = Stream.of(Projectile.class.getDeclaredFields())
+        // Object fields are for extra data such as ParticleOptions that are
+        // not required to successfully display the particle.
         .filter(field -> field.getType() != Object.class)
         .allMatch(field -> {
           try {

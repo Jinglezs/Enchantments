@@ -67,12 +67,14 @@
                 <configuration>
                     <dependencyReducedPomLocation>../enchantments-core/target/dependency-reduced-pom.xml
                     </dependencyReducedPomLocation>
-                    <relocations>
-                        <relocation>
-                            <pattern>co.aikar.commands</pattern>
-                            <shadedPattern>net.jingles.enchantments.acf</shadedPattern>
-                        </relocation>
-                    </relocations>
+                    <!-- Prevents ACF and its dependencies from being shaded into the jar.
+                         This will only allow Reflections and its dependencies to be shaded. -->
+                    <artifactSet>
+                        <includes>
+                            <include>org.reflections:reflections</include>
+                            <include>org.javassist:javassist</include>
+                        </includes>
+                    </artifactSet>
                 </configuration>
                 <executions>
                     <execution>

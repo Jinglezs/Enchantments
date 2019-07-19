@@ -3,3 +3,4 @@ author: Jingles
 main: net.jingles.enchantments.Enchantments
 version: 1.0.0
 api-version: "1.14"
+depend: [ACF]
