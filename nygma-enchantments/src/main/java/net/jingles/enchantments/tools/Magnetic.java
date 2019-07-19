@@ -4,8 +4,10 @@ import net.jingles.backpacks.BackpackUtils;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.enchant.TargetGroup;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
@@ -17,6 +19,7 @@ import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Collection;
+import java.util.Map;
 
 @Enchant(name = "Magnetic", key = "magnetic", levelRequirement = 30, maxLevel = 1, enchantChance = 0.40,
     targetItem = EnchantmentTarget.TOOL, targetGroup = TargetGroup.DIGGING, description = "All item drops " +
@@ -64,7 +67,24 @@ public class Magnetic extends CustomEnchant {
     // Adds one damage to the tool.
     if (level == 0 || Math.random() < (1.0 / (level + 1))) addDamage(tool);
 
-    drops.forEach(item -> BackpackUtils.addToResourceBackpacks(item, player.getInventory(), block.getLocation()));
+    // Check if plugin is present before accessing the utils class.
+    if (Bukkit.getPluginManager().getPlugin("Backpacks") != null) {
+
+      drops.forEach(item -> BackpackUtils.addToResourceBackpacks(item, player.getInventory(), block.getLocation()));
+
+    } else {
+
+      Map<Integer, ItemStack> leftover = player.getInventory().addItem(drops.toArray(new ItemStack[0]));
+
+      // Drop the leftovers that couldn't fit anywhere.
+      if (!leftover.isEmpty()) {
+
+        leftover.values().forEach(item -> player.getWorld().dropItemNaturally(block.getLocation(), item));
+
+      } else player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1, 1);
+
+    }
+
   }
 
   private void addDamage(ItemStack item) {
