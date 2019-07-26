@@ -33,11 +33,17 @@ public class ThothsBlessing extends CustomEnchant {
 
   @EventHandler
   public void onEnchantmentAddtion(EnchantmentCooldownEvent event) {
-    if (canTrigger(event.getPlayer())) {
-      ItemStack helmet = getItem(event.getPlayer().getInventory());
+
+    if (!(event.getHolder() instanceof Player)) return;
+
+    Player player = (Player) event.getHolder();
+
+    if (canTrigger(player)) {
+      ItemStack helmet = getItem(player.getInventory());
       double reduction = (10 * helmet.getItemMeta().getEnchantLevel(this)) / 100;
       event.setRawCooldown((long) (event.getRawCooldown() - (event.getRawCooldown() * reduction)));
     }
+
   }
 
 }
