@@ -19,6 +19,7 @@ public enum TargetGroup {
   NON_WEARABLE(material -> !EnchantmentTarget.WEARABLE.includes(material)),
   ELYTRA(material -> material == Material.ELYTRA),
   BOWS(material -> material == Material.BOW || material == Material.CROSSBOW),
+  SHIELD(material -> material == Material.SHIELD),
   NONE(material -> true);
 
   private Predicate<Material> includes;

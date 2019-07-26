@@ -97,11 +97,12 @@ public class StatusEffectManager extends BukkitRunnable implements EffectContain
 
   public void add(StatusEffect effect) {
     //Creates a new entity container if not exists.
-    if (effect instanceof EntityStatusEffect)
+    if (effect instanceof EntityStatusEffect) {
       getOrNewEntityContainer(((EntityStatusEffect) effect).getTargetId());
+    }
 
-      getStatusEffects().add(effect);
-      effect.start();
+    getStatusEffects().add(effect);
+    effect.start();
   }
 
   /**
