@@ -87,8 +87,6 @@ public class Reinforcement extends CustomEnchant {
       Location circle = getLocation(playerLoc, 0.75);
       circle.setDirection(getTarget().getEyeLocation().getDirection());
 
-      //TODO: Rotate circle so that it is angled towards player's where player is looking.
-
       // Display a particle at each point on the circle
       for (int i = 0; i < 360; i++) {
         // Calculate the x and z positions.

@@ -7,8 +7,6 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.HorseInventory;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
@@ -130,13 +128,8 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
 
   public abstract boolean canTrigger(Player player);
 
-  public ItemStack getItem(Inventory inventory) {
+  public ItemStack getItem(PlayerInventory player) {
     //Why the fuck does a llama have my enchantment?
-    if (!(inventory instanceof PlayerInventory) && !(inventory instanceof HorseInventory)) return null;
-
-    if (inventory instanceof HorseInventory) return ((HorseInventory) inventory).getArmor();
-    PlayerInventory player = (PlayerInventory) inventory;
-
     switch (getItemTarget()) {
       case ALL: //Prioritizes hands, but also checks rest of contents
 

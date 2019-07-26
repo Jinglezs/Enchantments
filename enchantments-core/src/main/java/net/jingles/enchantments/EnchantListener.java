@@ -1,17 +1,24 @@
 package net.jingles.enchantments;
 
+import net.jingles.enchantments.enchant.BlockEnchant;
 import net.jingles.enchantments.enchant.CustomEnchant;
-import net.jingles.enchantments.util.RomanNumerals;
-import org.bukkit.ChatColor;
+import net.jingles.enchantments.util.InventoryUtils;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -45,21 +52,14 @@ public class EnchantListener implements Listener {
     additions.entrySet().stream()
         .filter(entry -> entry.getKey() instanceof CustomEnchant)
         .forEach(entry -> {
-
           CustomEnchant enchant = (CustomEnchant) entry.getKey();
-          ItemMeta meta = event.getItem().getItemMeta();
-          List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
-
-          lore.add((enchant.isCursed() ? ChatColor.RED : ChatColor.GRAY)
-              + enchant.getName() + " " + RomanNumerals.toRoman(entry.getValue()));
-
-          meta.setLore(lore);
-          event.getItem().setItemMeta(meta);
-
+          InventoryUtils.addEnchantLore(event.getItem(), Collections.singleton(enchant));
         });
 
   }
 
+  // This fixes an issue where repairing an item or adding any enchantment to an
+  // item with custom enchants caused all custom enchants to be erased.
   @EventHandler
   public void onAvilEnchantment(PrepareAnvilEvent event) {
 
@@ -77,6 +77,54 @@ public class EnchantListener implements Listener {
     });
 
     result.setItemMeta(resultMeta);
+  }
+
+  @EventHandler
+  public void onEnchantedBlockPlace(BlockPlaceEvent event) {
+
+    ItemStack item = event.getItemInHand();
+    BlockState state = event.getBlockPlaced().getState();
+
+    // BlockEnchants can only affect BlockStates that extend Container
+    if (!(state instanceof Container)) return;
+
+    PersistentDataContainer container = ((Container) state).getPersistentDataContainer();
+    // Save the enchantment level to the container with the corresponding key.
+    BlockEnchant.getBlockEnchants(item).forEach((enchant, level) ->
+        container.set(enchant.getKey(), PersistentDataType.INTEGER, level));
+  }
+
+  @EventHandler
+  public void onEnchantedBlockBreak(BlockBreakEvent event) {
+
+    BlockState state = event.getBlock().getState();
+    if (!(state instanceof Container)) return;
+
+    PersistentDataContainer container = ((Container) state).getPersistentDataContainer();
+    Map<BlockEnchant, Integer> enchants = BlockEnchant.getBlockEnchants(container);
+
+    if (enchants.isEmpty()) return;
+    event.setCancelled(true);
+
+    Block block = event.getBlock();
+    Collection<ItemStack> items = block.getDrops();
+
+    items.forEach(item -> {
+
+      if (item.getType() == block.getType()) {
+        // Add the enchantments themselves
+        ItemMeta meta = item.getItemMeta();
+        enchants.forEach((enchant, level) -> meta.addEnchant(enchant, level, true));
+        item.setItemMeta(meta);
+
+        // Add the enchantment lore
+        InventoryUtils.addEnchantLore(item, enchants.keySet());
+      }
+
+      // Manually drop each block.
+      block.getWorld().dropItemNaturally(block.getLocation(), item);
+
+    });
 
   }
 

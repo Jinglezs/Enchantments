@@ -24,7 +24,6 @@ public final class EnchantmentManager {
 
   private final Set<Class<? extends CustomEnchant>> enchantmentClasses = new HashSet<>();
   private final Set<CustomEnchant> registered = new HashSet<>();
-  private final NamespacedKey fallDamage;
 
   private final Enchantments plugin;
   private Reflections reflections;
@@ -33,8 +32,6 @@ public final class EnchantmentManager {
     this.plugin = plugin;
     if (!plugin.getDataFolder().exists()) plugin.getDataFolder().mkdirs();
     loadClasses(plugin.getDataFolder());
-
-    fallDamage = new NamespacedKey(plugin, "fall_damage");
   }
 
   public Set<CustomEnchant> getRegisteredEnchants() {
@@ -101,25 +98,15 @@ public final class EnchantmentManager {
 
   }
 
-  public CustomEnchant getEnchantmentByKey(String key) {
+  /**
+   * Gets all registered CustomEnchants that extend BlockEnchant
+   * @return registered BlockEnchants
+   */
+  public Set<BlockEnchant> getRegisteredBlockEnchants() {
     return getRegisteredEnchants().stream()
-        .filter(customEnchant -> customEnchant.getKeyName().equalsIgnoreCase(key))
-        .findFirst().orElse(null);
-  }
-
-  public NamespacedKey newNamespacedKey(String key) {
-    return new NamespacedKey(plugin, key);
-  }
-
-  public NamespacedKey getEnchantmentKey(String key) {
-    CustomEnchant enchant = getEnchantmentByKey(key);
-    return enchant != null ? enchant.getKey() : null;
-  }
-
-  // This key is used in unity with the Persistent Data API to
-  // negate fall damage with only a single listener.
-  public NamespacedKey getFallDamageKey() {
-    return this.fallDamage;
+        .filter(enchant -> enchant instanceof BlockEnchant)
+        .map(enchant -> (BlockEnchant) enchant)
+        .collect(Collectors.toSet());
   }
 
 }
