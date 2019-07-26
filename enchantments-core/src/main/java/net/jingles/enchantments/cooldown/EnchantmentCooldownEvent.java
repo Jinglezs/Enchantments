@@ -1,10 +1,10 @@
 package net.jingles.enchantments.cooldown;
 
 import net.jingles.enchantments.enchant.CustomEnchant;
-import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.bukkit.event.player.PlayerEvent;
+import org.bukkit.persistence.PersistentDataHolder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.TimeUnit;
@@ -15,19 +15,30 @@ import java.util.concurrent.TimeUnit;
  * The cooldown can be edited through a normal event listener as the listener
  * pleases, or the cooldown addition can be cancelled entirely.
  */
-public class EnchantmentCooldownEvent extends PlayerEvent implements Cancellable {
+public class EnchantmentCooldownEvent extends Event implements Cancellable {
 
   private static final HandlerList handlers = new HandlerList();
+
   private final CustomEnchant enchant;
+  private final PersistentDataHolder holder;
   private long cooldown;
   private TimeUnit unit;
   private boolean cancelled;
 
-  public EnchantmentCooldownEvent(Player player, CustomEnchant enchant, long cooldown, TimeUnit unit) {
-    super(player);
+  public EnchantmentCooldownEvent(PersistentDataHolder holder, CustomEnchant enchant, long cooldown, TimeUnit unit) {
+    this.holder = holder;
     this.enchant = enchant;
     this.cooldown = cooldown;
     this.unit = unit;
+  }
+
+  /**
+   * Returns the PersistentDataHolder that the cooldown will
+   * be applied to.
+   * @return the cooldown target.
+   */
+  public PersistentDataHolder getHolder() {
+    return this.holder;
   }
 
   /**

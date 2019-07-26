@@ -3,6 +3,7 @@ package net.jingles.enchantments.enchant;
 import net.jingles.enchantments.Enchantments;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Container;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -15,6 +16,18 @@ public abstract class BlockEnchant extends CustomEnchant {
 
   public BlockEnchant(NamespacedKey key) {
     super(key);
+  }
+
+  public abstract boolean canTrigger(Container container);
+
+  @Override
+  public boolean canTrigger(Player player) {
+    return false;
+  }
+
+  public int getLevel(Container container) {
+    return !hasEnchant(container) ? 0 :
+        container.getPersistentDataContainer().get(getKey(), PersistentDataType.INTEGER);
   }
 
   public static Map<BlockEnchant, Integer> getBlockEnchants(ItemStack item) {

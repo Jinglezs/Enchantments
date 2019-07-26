@@ -10,6 +10,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
 
 import java.util.HashMap;
@@ -28,20 +29,20 @@ public class CooldownManager implements Listener {
   /**
    * Adds a new cooldown or overwrites an existing one.
    *
-   * @param player  the player to apply the cooldown on
+   * @param holder  the holder to apply the cooldown to
    * @param enchant the enchantment the cooldown is being applied to
    * @param time    the length of the cooldown **PRIOR** to conversions.
    * @param unit    the time unit of the cooldown, such as SECONDS or MINUTES
    */
-  public void addCooldown(Player player, CustomEnchant enchant, long time, TimeUnit unit) {
+  public void addCooldown(PersistentDataHolder holder, CustomEnchant enchant, long time, TimeUnit unit) {
 
-    EnchantmentCooldownEvent event = new EnchantmentCooldownEvent(player, enchant, time, unit);
+    EnchantmentCooldownEvent event = new EnchantmentCooldownEvent(holder, enchant, time, unit);
     plugin.getServer().getPluginManager().callEvent(event);
 
     if (!event.isCancelled()) {
       long cooldown = System.currentTimeMillis() + TimeUnit.MILLISECONDS
           .convert(event.getRawCooldown(), event.getTimeUnit());
-      player.getPersistentDataContainer().set(enchant.getKey(), PersistentDataType.LONG, cooldown);
+      holder.getPersistentDataContainer().set(enchant.getKey(), PersistentDataType.LONG, cooldown);
     }
 
   }
@@ -49,53 +50,57 @@ public class CooldownManager implements Listener {
   /**
    * Checks if the player has an active cooldown for the given enchantment.
    *
-   * @param player  the player in question
+   * @param holder  the holder in question
    * @param enchant the enchantment in question
    * @return whether or not an active cooldown is present.
    */
-  public boolean hasCooldown(Player player, CustomEnchant enchant) {
-    if (!hasCooldownNoMessage(player, enchant)) return false;
+  public boolean hasCooldown(PersistentDataHolder holder, CustomEnchant enchant) {
+    if (!hasCooldownNoMessage(holder, enchant)) return false;
 
-    long cooldown = getCooldown(player, enchant);
+    if (holder instanceof Player) {
 
-    long remainingTime = TimeUnit.SECONDS.convert(
-        cooldown - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+      long cooldown = getCooldown(holder, enchant);
 
-    String message = String.format("%s is on cooldown for %d %s", enchant.getName(),
-        remainingTime, enchant.getTimeUnit().name().toLowerCase());
+      long remainingTime = TimeUnit.SECONDS.convert(
+          cooldown - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
 
-    TextComponent component = new TextComponent(message);
-    component.setColor(ChatColor.RED);
-    player.spigot().sendMessage(ChatMessageType.ACTION_BAR, component);
+      String message = String.format("%s is on cooldown for %d %s", enchant.getName(),
+          remainingTime, enchant.getTimeUnit().name().toLowerCase());
+
+      TextComponent component = new TextComponent(message);
+      component.setColor(ChatColor.RED);
+      ((Player) holder).spigot().sendMessage(ChatMessageType.ACTION_BAR, component);
+
+    }
 
     return true;
   }
 
-  private boolean hasCooldownNoMessage(Player player, CustomEnchant enchant) {
-    if (!player.getPersistentDataContainer().has(enchant.getKey(), PersistentDataType.LONG)) return false;
+  private boolean hasCooldownNoMessage(PersistentDataHolder holder, CustomEnchant enchant) {
+    if (!holder.getPersistentDataContainer().has(enchant.getKey(), PersistentDataType.LONG)) return false;
 
-    long cooldown = getCooldown(player, enchant);
+    long cooldown = getCooldown(holder, enchant);
 
     if (System.currentTimeMillis() > cooldown) {
-      removeCooldown(player, enchant);
+      removeCooldown(holder, enchant);
       return false;
     }
 
     return true;
   }
 
-  public long getCooldown(Player player, CustomEnchant enchant) {
-    return player.getPersistentDataContainer().getOrDefault(enchant.getKey(), PersistentDataType.LONG, 0L);
+  public long getCooldown(PersistentDataHolder holder, CustomEnchant enchant) {
+    return holder.getPersistentDataContainer().getOrDefault(enchant.getKey(), PersistentDataType.LONG, 0L);
   }
 
   /**
    * Removes a cooldown for the given enchantment.
    *
-   * @param player  the player
+   * @param holder  the holder
    * @param enchant the enchantment in question.
    */
-  public void removeCooldown(Player player, CustomEnchant enchant) {
-    player.getPersistentDataContainer().remove(enchant.getKey());
+  public void removeCooldown(PersistentDataHolder holder, CustomEnchant enchant) {
+    holder.getPersistentDataContainer().remove(enchant.getKey());
   }
 
   public Map<CustomEnchant, Long> getCooldowns(Player player) {
