@@ -8,7 +8,6 @@ import net.jingles.enchantments.util.InventoryUtils;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.block.Container;
 import org.bukkit.block.TileState;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentOffer;
@@ -150,9 +149,9 @@ public class EnchantListener implements Listener {
     BlockState state = event.getBlockPlaced().getState();
 
     // BlockEnchants can only affect BlockStates that extend Container
-    if (!(state instanceof Container)) return;
+    if (!(state instanceof TileState)) return;
 
-    PersistentDataContainer container = ((Container) state).getPersistentDataContainer();
+    PersistentDataContainer container = ((TileState) state).getPersistentDataContainer();
     // Save the enchantment level to the container with the corresponding key.
     BlockEnchant.getBlockEnchants(item).forEach((enchant, level) ->
         container.set(enchant.getKey(), PersistentDataType.INTEGER, level));
