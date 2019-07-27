@@ -12,11 +12,12 @@ import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.FurnaceBurnEvent;
 import org.bukkit.event.inventory.FurnaceSmeltEvent;
+import org.bukkit.inventory.ItemStack;
 
 @Enchant(name = "Efficiency", key = "efficiency", enchantChance = 0.45, levelRequirement = 20,
-    targetItem = EnchantmentTarget.ALL, targetGroup = TargetGroup.CONTAINER, maxLevel = 10,
-    description = "Increases how long fuel burns for by 20% per level. Additionally, smelting " +
-        "progress automatically jumps to (20 * level)%, effectively reducing smelting times.")
+    targetItem = EnchantmentTarget.ALL, targetGroup = TargetGroup.CONTAINER,
+    description = "Increases how long fuel burns for by 20% per level. Additionally, there is a " +
+        "20% chance per level that the amount of items smelted at once is doubled.")
 
 public class Efficiency extends BlockEnchant {
 
@@ -35,8 +36,7 @@ public class Efficiency extends BlockEnchant {
     return false;
   }
 
-  // Applies the buffed burn and cook times
-  // Decreasing CookTimeTotal led to weird bugs so let's just do this instead >_>
+  // Applies the buffed burn times to the furnace state
   @EventHandler
   public void onItemBurn(FurnaceBurnEvent event) {
 
@@ -44,31 +44,31 @@ public class Efficiency extends BlockEnchant {
 
     Furnace furnace = (Furnace) event.getBlock().getState();
 
-    furnace.setBurnTime(getNewBurnTime(furnace));
-    if (furnace.getCookTime() == 0) furnace.setCookTime(getNewCookTime(furnace));
-    furnace.update(true);
+    double multiplier = (getLevel(furnace) * 20) / 100;
+    short burnTime = (short) Math.min(Short.MAX_VALUE, furnace.getBurnTime() + (furnace.getBurnTime() * multiplier));
+
+    furnace.setBurnTime(burnTime);
+    furnace.update();
 
   }
 
   @EventHandler
   public void onItemSmelt(FurnaceSmeltEvent event) {
 
-    if (!canTrigger((Container) event.getBlock().getState())) return;
-
     Furnace furnace = (Furnace) event.getBlock().getState();
-    furnace.setCookTime(getNewCookTime(furnace));
-    furnace.update(true);
+    if (!canTrigger(furnace)) return;
 
-  }
+    if (Math.random() > (getLevel(furnace) * 20) / 100D) return;
 
-  private short getNewBurnTime(Furnace furnace) {
-    double multiplier = (getLevel(furnace) * 20) / 100;
-    return (short) Math.min(Short.MAX_VALUE, furnace.getBurnTime() + (furnace.getBurnTime() * multiplier));
-  }
+    ItemStack smelting = furnace.getInventory().getSmelting();
+    ItemStack result = furnace.getInventory().getResult();
 
-  private short getNewCookTime(Furnace furnace) {
-    double multiplier = (getLevel(furnace) * 10) / 100;
-    return (short) Math.min(90, furnace.getCookTimeTotal() * multiplier);
+    if (smelting == null || smelting.getAmount() == 1 ||
+        result == null || result.getAmount() + 1 > result.getMaxStackSize()) return;
+
+    smelting.setAmount(smelting.getAmount() - 1);
+    result.setAmount(result.getAmount() + 1);
+
   }
 
 }

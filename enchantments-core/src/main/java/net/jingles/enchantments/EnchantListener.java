@@ -147,10 +147,13 @@ public class EnchantListener implements Listener {
     Map<BlockEnchant, Integer> enchants = BlockEnchant.getBlockEnchants(container);
 
     if (enchants.isEmpty()) return;
-    event.setCancelled(true);
 
+    event.setCancelled(true);
     Block block = event.getBlock();
     Collection<ItemStack> items = block.getDrops();
+
+    // Remove all status effects to prevent duplication bugs due to updating block states.
+    enchants.keySet().forEach(enchant -> Enchantments.getStatusEffectManager().removeEffects(enchant));
 
     items.forEach(item -> {
 

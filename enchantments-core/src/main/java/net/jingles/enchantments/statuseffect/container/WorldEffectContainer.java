@@ -5,6 +5,7 @@ import net.jingles.enchantments.statuseffect.LocationStatusEffect;
 import org.bukkit.Location;
 import org.bukkit.util.BoundingBox;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -14,6 +15,17 @@ public class WorldEffectContainer implements EffectContainer<LocationStatusEffec
     return getStatusEffects().stream()
         .filter(effect -> effect.getLocation().equals(location))
         .collect(Collectors.toSet());
+  }
+
+  public boolean hasEffectAtLocation(Location location, Class<? extends LocationStatusEffect> effect) {
+    return getEffectsAtLocation(location).stream().anyMatch(statusEffect ->  statusEffect.getClass() == effect);
+  }
+
+  public <T extends LocationStatusEffect> Optional<T> getEffect(Location location, Class<T> clazz) {
+    return getEffectsAtLocation(location).stream()
+        .filter(effect -> effect.getClass() == clazz)
+        .map(effect -> (T) effect)
+        .findFirst();
   }
 
   public Set<? extends LocationStatusEffect> getEffectsWithinRadius(Location center, double x, double y, double z) {
