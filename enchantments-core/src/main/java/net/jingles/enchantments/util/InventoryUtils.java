@@ -8,10 +8,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,13 +38,13 @@ public class InventoryUtils {
 
   }
 
-  public static void addEnchantLore(ItemStack item, Set<? extends CustomEnchant> enchants) {
+  public static void addEnchantLore(ItemStack item, Map<? extends CustomEnchant, Integer> enchants) {
 
     ItemMeta meta = item.getItemMeta();
     List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
 
-    enchants.forEach(enchant -> lore.add((enchant.isCursed() ? ChatColor.RED : ChatColor.GRAY)
-        + enchant.getName() + " " + RomanNumerals.toRoman(enchant.getLevel(item))));
+    enchants.forEach((enchant, level) -> lore.add((enchant.isCursed() ? ChatColor.RED : ChatColor.GRAY)
+        + enchant.getName() + " " + RomanNumerals.toRoman(level)));
 
     meta.setLore(lore);
     item.setItemMeta(meta);

@@ -3,6 +3,7 @@ package net.jingles.enchantments.enchant;
 import net.jingles.enchantments.Enchantments;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Container;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -34,9 +35,9 @@ public abstract class BlockEnchant extends CustomEnchant {
     if (item.getItemMeta() == null || item.getItemMeta().getEnchants().isEmpty())
       return Collections.emptyMap();
 
-    return item.getItemMeta().getEnchants().entrySet().stream()
-        .filter(entry -> entry.getKey() instanceof BlockEnchant)
-        .collect(Collectors.toMap(entry -> (BlockEnchant) entry.getKey(), Map.Entry::getValue));
+    return item.getEnchantments().entrySet().stream()
+        .filter(entry -> BlockEnchant.isBlockEnchant(entry.getKey()))
+        .collect(Collectors.toMap(entry -> getBlockEnchant(entry.getKey().getKey()), Map.Entry::getValue));
   }
 
   /**
@@ -49,6 +50,17 @@ public abstract class BlockEnchant extends CustomEnchant {
         .filter(enchant -> container.has(enchant.getKey(), PersistentDataType.INTEGER))
         .collect(Collectors.toMap(enchant -> enchant,
             enchant -> container.get(enchant.getKey(), PersistentDataType.INTEGER)));
+  }
+
+  public static boolean isBlockEnchant(Enchantment enchantment) {
+    return Enchantments.getEnchantmentManager().getRegisteredBlockEnchants().stream()
+        .anyMatch(enchant -> enchant.getKey().equals(enchantment.getKey()));
+  }
+
+  public static BlockEnchant getBlockEnchant(NamespacedKey key) {
+    return Enchantments.getEnchantmentManager().getRegisteredBlockEnchants().stream()
+        .filter(enchant -> enchant.getKey().equals(key))
+        .findFirst().orElse(null);
   }
 
   public boolean hasEnchant(Container container) {

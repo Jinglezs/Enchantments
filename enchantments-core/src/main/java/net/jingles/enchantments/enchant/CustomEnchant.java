@@ -203,7 +203,7 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
         .collect(Collectors.toSet());
   }
 
-  public static Set<Enchantment> getApplicableEnchants(ItemStack item) {
+  public static Set<CustomEnchant> getApplicableEnchants(ItemStack item) {
     return Enchantments.getEnchantmentManager().getRegisteredEnchants().stream()
         .filter(enchantment -> enchantment.canEnchantItem(item))
         .collect(Collectors.toSet());

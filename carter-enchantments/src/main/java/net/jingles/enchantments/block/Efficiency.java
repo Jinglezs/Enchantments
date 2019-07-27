@@ -11,11 +11,12 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.FurnaceBurnEvent;
+import org.bukkit.event.inventory.FurnaceSmeltEvent;
 
 @Enchant(name = "Efficiency", key = "efficiency", enchantChance = 0.45, levelRequirement = 20,
     targetItem = EnchantmentTarget.ALL, targetGroup = TargetGroup.CONTAINER, maxLevel = 10,
-    description = "Increases how long fuel burns for by 10% per level and decreases the time " +
-        "it takes to smelt any item by 10% per level.")
+    description = "Increases how long fuel burns for by 20% per level. Additionally, smelting " +
+        "progress automatically jumps to (20 * level)%, effectively reducing smelting times.")
 
 public class Efficiency extends BlockEnchant {
 
@@ -34,18 +35,40 @@ public class Efficiency extends BlockEnchant {
     return false;
   }
 
+  // Applies the buffed burn and cook times
+  // Decreasing CookTimeTotal led to weird bugs so let's just do this instead >_>
   @EventHandler
   public void onItemBurn(FurnaceBurnEvent event) {
 
+    if (!canTrigger((Container) event.getBlock().getState())) return;
+
     Furnace furnace = (Furnace) event.getBlock().getState();
-    int level = getLevel(furnace) * 10;
 
-    int burnTime = event.getBurnTime() + (event.getBurnTime() * (level / 100));
-    int cookTime = furnace.getCookTimeTotal() - (furnace.getCookTimeTotal() * (level / 100));
+    furnace.setBurnTime(getNewBurnTime(furnace));
+    if (furnace.getCookTime() == 0) furnace.setCookTime(getNewCookTime(furnace));
+    furnace.update(true);
 
-    event.setBurnTime(burnTime);
-    furnace.setCookTimeTotal(cookTime);
+  }
 
+  @EventHandler
+  public void onItemSmelt(FurnaceSmeltEvent event) {
+
+    if (!canTrigger((Container) event.getBlock().getState())) return;
+
+    Furnace furnace = (Furnace) event.getBlock().getState();
+    furnace.setCookTime(getNewCookTime(furnace));
+    furnace.update(true);
+
+  }
+
+  private short getNewBurnTime(Furnace furnace) {
+    double multiplier = (getLevel(furnace) * 20) / 100;
+    return (short) Math.min(Short.MAX_VALUE, furnace.getBurnTime() + (furnace.getBurnTime() * multiplier));
+  }
+
+  private short getNewCookTime(Furnace furnace) {
+    double multiplier = (getLevel(furnace) * 10) / 100;
+    return (short) Math.min(90, furnace.getCookTimeTotal() * multiplier);
   }
 
 }
