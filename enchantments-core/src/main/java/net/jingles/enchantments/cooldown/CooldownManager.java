@@ -5,6 +5,7 @@ import net.jingles.enchantments.enchant.CustomEnchant;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.block.TileState;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -43,6 +44,7 @@ public class CooldownManager implements Listener {
       long cooldown = System.currentTimeMillis() + TimeUnit.MILLISECONDS
           .convert(event.getRawCooldown(), event.getTimeUnit());
       holder.getPersistentDataContainer().set(enchant.getKey(), PersistentDataType.LONG, cooldown);
+      if (holder instanceof TileState) ((TileState) holder).update();
     }
 
   }
@@ -101,6 +103,7 @@ public class CooldownManager implements Listener {
    */
   public void removeCooldown(PersistentDataHolder holder, CustomEnchant enchant) {
     holder.getPersistentDataContainer().remove(enchant.getKey());
+    if (holder instanceof TileState) ((TileState) holder).update();
   }
 
   public Map<CustomEnchant, Long> getCooldowns(Player player) {

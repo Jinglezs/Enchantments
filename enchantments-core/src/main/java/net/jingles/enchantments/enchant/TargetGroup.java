@@ -43,7 +43,7 @@ public enum TargetGroup {
    */
   ALL_ARMOR(EnchantmentTarget.ARMOR::includes),
   /**
-   * Targets items that can be worn by the player
+   * Targets items that can't be worn by the player
    */
   NON_WEARABLE(material -> !EnchantmentTarget.WEARABLE.includes(material)),
   /**
@@ -68,6 +68,18 @@ public enum TargetGroup {
   CONTAINER(material -> material == Material.CHEST || material == Material.BARREL || material == Material.FURNACE ||
       material == Material.BLAST_FURNACE || material == Material.BREWING_STAND || material == Material.SMOKER ||
       material == Material.HOPPER || material == Material.DISPENSER || material == Material.DROPPER || material == Material.SHULKER_BOX),
+  /**
+   * Represents all items that have tile entities at their location when placed. This includes all of the materials listed under CONTAINER
+   */
+  TILE_ENTITY(material -> CONTAINER.canEnchant(material) || material.name().endsWith("_BANNER") || material.name().endsWith("_BED") ||
+      material.name().endsWith("_SIGN") || material.name().endsWith("_SKULL") || material == Material.CONDUIT || material == Material.END_CRYSTAL ||
+      material == Material.COMPARATOR || material == Material.JUKEBOX || material == Material.LECTERN || material == Material.BEACON ||
+      material == Material.CAMPFIRE),
+  /**
+   * Represents all items that can be enchanted through this plugin, but cannot be enchanted normally in vanilla.
+   */
+  NON_VANILLA(material -> TILE_ENTITY.canEnchant(material) || BLOCK.canEnchant(material) || ELYTRA.canEnchant(material) ||
+      SHIELD.canEnchant(material) || SHEARS.canEnchant(material) || FLINT_AND_STEEL.canEnchant(material)),
   /**
    * The enchant can target any material.
    */

@@ -2,7 +2,7 @@ package net.jingles.enchantments.enchant;
 
 import net.jingles.enchantments.Enchantments;
 import org.bukkit.NamespacedKey;
-import org.bukkit.block.Container;
+import org.bukkit.block.TileState;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -19,16 +19,16 @@ public abstract class BlockEnchant extends CustomEnchant {
     super(key);
   }
 
-  public abstract boolean canTrigger(Container container);
+  public abstract boolean canTrigger(TileState tile);
 
   @Override
   public boolean canTrigger(Player player) {
     return false;
   }
 
-  public int getLevel(Container container) {
-    return !hasEnchant(container) ? 0 :
-        container.getPersistentDataContainer().get(getKey(), PersistentDataType.INTEGER);
+  public int getLevel(TileState tile) {
+      return !hasEnchant(tile) ? 0 :
+        tile.getPersistentDataContainer().get(getKey(), PersistentDataType.INTEGER);
   }
 
   public static Map<BlockEnchant, Integer> getBlockEnchants(ItemStack item) {
@@ -63,8 +63,12 @@ public abstract class BlockEnchant extends CustomEnchant {
         .findFirst().orElse(null);
   }
 
-  public boolean hasEnchant(Container container) {
-    return container.getPersistentDataContainer().has(getKey(), PersistentDataType.INTEGER);
+  public boolean hasEnchant(TileState tile) {
+    return tile.getPersistentDataContainer().has(getKey(), PersistentDataType.INTEGER);
+  }
+
+  public void addCooldown(TileState tile) {
+    Enchantments.getCooldownManager().addCooldown(tile, this, getCooldown(), getTimeUnit());
   }
 
 }

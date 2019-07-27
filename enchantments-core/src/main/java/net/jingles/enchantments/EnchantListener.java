@@ -3,11 +3,13 @@ package net.jingles.enchantments;
 import net.jingles.enchantments.enchant.BlockEnchant;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.TargetGroup;
+import net.jingles.enchantments.statuseffect.LocationStatusEffect;
 import net.jingles.enchantments.util.InventoryUtils;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
+import org.bukkit.block.TileState;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentOffer;
 import org.bukkit.event.EventHandler;
@@ -18,6 +20,7 @@ import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -47,7 +50,7 @@ public class EnchantListener implements Listener {
 
     // In the PrepareItemEnchantEvent, fake offers were added to the table so that enchantment was possible.
     // This casually removes those while still allowing custom enchantments to be applied to the item.
-    if (TargetGroup.CONTAINER.canEnchant(item.getType()) || TargetGroup.BLOCK.canEnchant(item.getType())) {
+    if (TargetGroup.NON_VANILLA.canEnchant(item.getType())) {
       additions.clear();
     }
 
@@ -60,10 +63,32 @@ public class EnchantListener implements Listener {
 
     });
 
-    additions.entrySet().stream()
-        .filter(entry -> entry.getKey() instanceof CustomEnchant)
-        .map(entry -> Collections.singletonMap((CustomEnchant) entry.getKey(), entry.getValue()))
-        .forEach(map -> InventoryUtils.addEnchantLore(item, map));
+    if (item.getType() == Material.BOOK) {
+
+      Map<CustomEnchant, Integer> customAddtions = additions.entrySet().stream()
+          .filter(entry -> entry.getKey() instanceof CustomEnchant)
+          .collect(Collectors.toMap(entry -> (CustomEnchant) entry.getKey(), Map.Entry::getValue));
+
+      if (!customAddtions.isEmpty()) {
+
+        item.setType(Material.ENCHANTED_BOOK);
+        EnchantmentStorageMeta meta = (EnchantmentStorageMeta) item.getItemMeta();
+
+        customAddtions.forEach((key, value) -> meta.addStoredEnchant(key, value, true));
+        item.setItemMeta(meta);
+        InventoryUtils.addEnchantLore(item, customAddtions);
+
+        customAddtions.keySet().forEach(additions::remove);
+
+      }
+
+    } else {
+
+      InventoryUtils.addEnchantLore(item, additions.entrySet().stream()
+          .filter(entry -> entry.getKey() instanceof CustomEnchant)
+          .collect(Collectors.toMap(entry -> (CustomEnchant) entry.getKey(), Map.Entry::getValue)));
+
+    }
 
   }
 
@@ -74,8 +99,7 @@ public class EnchantListener implements Listener {
 
     ItemStack item = event.getItem();
     // We're only interested if the item cannot be enchanted normally and is not already enchanted.
-    if (!item.getEnchantments().isEmpty() || !TargetGroup.CONTAINER.canEnchant(item.getType()) ||
-        !TargetGroup.BLOCK.canEnchant(item.getType())) return;
+    if (item.getEnchantments().isEmpty() && !TargetGroup.NON_VANILLA.canEnchant(item.getType())) return;
 
     // Event must be un-cancelled because the item cannot be enchanted by default.
     event.setCancelled(false);
@@ -91,7 +115,7 @@ public class EnchantListener implements Listener {
       Enchantment filler = Enchantment.values()[ThreadLocalRandom.current().nextInt(bound)];
       // Generates a random level (based on the enchant's max level) and cost
       int level = ThreadLocalRandom.current().nextInt(1, filler.getMaxLevel() + 1);
-      int cost = ThreadLocalRandom.current().nextInt(1, 5);
+      int cost = ThreadLocalRandom.current().nextInt(1, 4);
       offers[i] = new EnchantmentOffer(filler, level, cost);
 
     }
@@ -141,19 +165,20 @@ public class EnchantListener implements Listener {
   public void onEnchantedBlockBreak(BlockBreakEvent event) {
 
     BlockState state = event.getBlock().getState();
-    if (!(state instanceof Container)) return;
+    if (!(state instanceof TileState)) return;
 
-    PersistentDataContainer container = ((Container) state).getPersistentDataContainer();
+    PersistentDataContainer container = ((TileState) state).getPersistentDataContainer();
     Map<BlockEnchant, Integer> enchants = BlockEnchant.getBlockEnchants(container);
 
     if (enchants.isEmpty()) return;
 
+    // Cancels all status effects originating from the block.
+    Enchantments.getStatusEffectManager().getWorldContainer().getEffectsAtLocation(state.getLocation())
+        .forEach(LocationStatusEffect::cancel);
+
     event.setCancelled(true);
     Block block = event.getBlock();
     Collection<ItemStack> items = block.getDrops();
-
-    // Remove all status effects to prevent duplication bugs due to updating block states.
-    enchants.keySet().forEach(enchant -> Enchantments.getStatusEffectManager().removeEffects(enchant));
 
     items.forEach(item -> {
 
