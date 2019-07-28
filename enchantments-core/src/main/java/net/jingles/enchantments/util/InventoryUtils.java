@@ -4,6 +4,7 @@ import net.jingles.enchantments.enchant.CustomEnchant;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Tag;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -38,17 +39,17 @@ public class InventoryUtils {
 
   }
 
-  public static void addEnchantLore(ItemStack item, Map<? extends CustomEnchant, Integer> enchants) {
+  public static void addEnchantLore(ItemStack item, Map<? extends Enchantment, Integer> enchants) {
+    addEnchantLore(item.getItemMeta(), enchants);
+  }
 
-    ItemMeta meta = item.getItemMeta();
+  public static void addEnchantLore(ItemMeta meta, Map<? extends Enchantment, Integer> enchants) {
     List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
 
     enchants.forEach((enchant, level) -> lore.add((enchant.isCursed() ? ChatColor.RED : ChatColor.GRAY)
         + enchant.getName() + " " + RomanNumerals.toRoman(level)));
 
     meta.setLore(lore);
-    item.setItemMeta(meta);
-
   }
 
   public static void removeEnchantLore(ItemStack item) {
