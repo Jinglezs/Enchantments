@@ -20,7 +20,7 @@ import java.util.Collections;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Stream;
 
-@Enchant(name = "Enchanter", key = "enchanter", levelRequirement = 30, maxLevel = 7,
+@Enchant(name = "Enchanter", key = "enchanter", levelRequirement = 30, maxLevel = 1,
     enchantChance = 0.7, targetItem = EnchantmentTarget.ALL, targetGroup = TargetGroup.LECTERN,
     description = "Allows player to receive a specific enchantment with a random level by writing its name in " +
         "a book and quill, placing it on the enchanted Lectern, and removing it.")
