@@ -62,26 +62,14 @@ public class EnchantListener implements Listener {
 
     });
 
-    if (item.getType() == Material.BOOK) {
 
-      item.setType(Material.ENCHANTED_BOOK);
-      EnchantmentStorageMeta meta = (EnchantmentStorageMeta) item.getItemMeta();
+    ItemMeta meta = item.getItemMeta();
 
-     additions.entrySet().stream()
-          .filter(entry -> CustomEnchant.isCustomEnchant(entry.getKey()))
-          .forEach(entry -> InventoryUtils.addEnchantLore(meta, Collections.singletonMap(entry.getKey(), entry.getValue())));
+    InventoryUtils.addEnchantLore(meta, additions.entrySet().stream()
+        .filter(entry -> CustomEnchant.isCustomEnchant(entry.getKey()))
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
-    } else {
-
-      ItemMeta meta = item.getItemMeta();
-
-      InventoryUtils.addEnchantLore(meta, additions.entrySet().stream()
-          .filter(entry -> CustomEnchant.isCustomEnchant(entry.getKey()))
-          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-
-      item.setItemMeta(meta);
-
-    }
+    item.setItemMeta(meta);
 
   }
 
@@ -90,9 +78,10 @@ public class EnchantListener implements Listener {
   @EventHandler
   public void onEnchantPrepare(PrepareItemEnchantEvent event) {
 
-    ItemStack item = event.getItem();
+    ItemStack item = event.getInventory().getItem(0);
+
     // We're only interested if the item cannot be enchanted normally and is not already enchanted.
-    if (item.getEnchantments().isEmpty() && !TargetGroup.NON_VANILLA.canEnchant(item.getType())) return;
+    if (item == null || !item.getEnchantments().isEmpty() || !TargetGroup.NON_VANILLA.canEnchant(item.getType())) return;
 
     // Event must be un-cancelled because the item cannot be enchanted by default.
     event.setCancelled(false);
