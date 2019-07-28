@@ -7,6 +7,7 @@ import net.jingles.enchantments.enchant.TargetGroup;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Container;
 import org.bukkit.block.Furnace;
+import org.bukkit.block.TileState;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.event.EventHandler;
@@ -15,8 +16,8 @@ import org.bukkit.event.inventory.FurnaceSmeltEvent;
 import org.bukkit.inventory.ItemStack;
 
 @Enchant(name = "Efficiency", key = "efficiency", enchantChance = 0.45, levelRequirement = 20,
-    targetItem = EnchantmentTarget.ALL, targetGroup = TargetGroup.CONTAINER,
-    description = "Increases how long fuel burns for by 20% per level. Additionally, there is a " +
+    targetItem = EnchantmentTarget.ALL, targetGroup = TargetGroup.FURNACES,
+    description = "Increases how long fuel burns for by 40% per level. Additionally, there is a " +
         "20% chance per level that the amount of items smelted at once is doubled.")
 
 public class Efficiency extends BlockEnchant {
@@ -26,9 +27,9 @@ public class Efficiency extends BlockEnchant {
   }
 
   @Override
-  public boolean canTrigger(Container container) {
-    return hasEnchant(container) && !Enchantments.getCooldownManager()
-        .hasCooldown(container, this);
+  public boolean canTrigger(TileState tile) {
+    return hasEnchant(tile) && !Enchantments.getCooldownManager()
+        .hasCooldown(tile, this);
   }
 
   @Override
@@ -44,7 +45,7 @@ public class Efficiency extends BlockEnchant {
 
     Furnace furnace = (Furnace) event.getBlock().getState();
 
-    double multiplier = (getLevel(furnace) * 20) / 100;
+    double multiplier = (getLevel(furnace) * 40) / 100;
     short burnTime = (short) Math.min(Short.MAX_VALUE, furnace.getBurnTime() + (furnace.getBurnTime() * multiplier));
 
     furnace.setBurnTime(burnTime);
