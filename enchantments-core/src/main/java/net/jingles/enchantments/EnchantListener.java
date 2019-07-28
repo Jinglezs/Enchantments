@@ -11,23 +11,23 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.TileState;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentOffer;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
-import org.bukkit.event.inventory.PrepareAnvilEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -64,28 +64,22 @@ public class EnchantListener implements Listener {
 
     if (item.getType() == Material.BOOK) {
 
-      Map<CustomEnchant, Integer> customAddtions = additions.entrySet().stream()
-          .filter(entry -> entry.getKey() instanceof CustomEnchant)
-          .collect(Collectors.toMap(entry -> (CustomEnchant) entry.getKey(), Map.Entry::getValue));
+      item.setType(Material.ENCHANTED_BOOK);
+      EnchantmentStorageMeta meta = (EnchantmentStorageMeta) item.getItemMeta();
 
-      if (!customAddtions.isEmpty()) {
-
-        item.setType(Material.ENCHANTED_BOOK);
-        EnchantmentStorageMeta meta = (EnchantmentStorageMeta) item.getItemMeta();
-
-        customAddtions.forEach((key, value) -> meta.addStoredEnchant(key, value, true));
-        item.setItemMeta(meta);
-        InventoryUtils.addEnchantLore(item, customAddtions);
-
-        customAddtions.keySet().forEach(additions::remove);
-
-      }
+     additions.entrySet().stream()
+          .filter(entry -> CustomEnchant.isCustomEnchant(entry.getKey()))
+          .forEach(entry -> InventoryUtils.addEnchantLore(meta, Collections.singletonMap(entry.getKey(), entry.getValue())));
 
     } else {
 
-      InventoryUtils.addEnchantLore(item, additions.entrySet().stream()
-          .filter(entry -> entry.getKey() instanceof CustomEnchant)
-          .collect(Collectors.toMap(entry -> (CustomEnchant) entry.getKey(), Map.Entry::getValue)));
+      ItemMeta meta = item.getItemMeta();
+
+      InventoryUtils.addEnchantLore(meta, additions.entrySet().stream()
+          .filter(entry -> CustomEnchant.isCustomEnchant(entry.getKey()))
+          .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+
+      item.setItemMeta(meta);
 
     }
 
@@ -121,25 +115,64 @@ public class EnchantListener implements Listener {
 
   }
 
-  // This fixes an issue where repairing an item or adding any enchantment to an
-  // item with custom enchants caused all custom enchants to be erased.
   @EventHandler
-  public void onAvilEnchantment(PrepareAnvilEvent event) {
+  public void onAnvilInventoryClick(InventoryClickEvent event) {
 
-    ItemStack previous = event.getInventory().getItem(0);
-    ItemStack result = event.getResult();
+    if (event.getInventory().getType() != InventoryType.ANVIL) return;
 
-    if (previous == null || result == null ||
-        !previous.hasItemMeta() || !result.hasItemMeta()) return;
+    AnvilInventory inventory = (AnvilInventory) event.getInventory();
+
+    // Only interested if there's an item in the first and middle slot and if there is no result.
+    if (inventory.getItem(0) == null || event.getSlot() != 1 ||
+        inventory.getItem(2) != null) return;
+
+    ItemStack original = inventory.getItem(0);
+    ItemStack addition = inventory.getItem(1);
+    ItemStack result = new ItemStack(original.getType(), 1);
 
     ItemMeta resultMeta = result.getItemMeta();
+    Map<Enchantment, Integer> additions = new HashMap<>();
 
-    previous.getItemMeta().getEnchants().entrySet().forEach(entry -> {
-      if (!resultMeta.getEnchants().containsKey(entry.getKey()))
-        resultMeta.addEnchant(entry.getKey(), entry.getValue(), true);
-    });
+    // Collect the enchantments from the original item
+    if (original.getItemMeta() != null)
+      original.getItemMeta().getEnchants().forEach(additions::put);
+
+
+    // Collects the enchantments from the second item
+    if (addition != null) {
+
+      if (addition.getType() == Material.ENCHANTED_BOOK) {
+
+        EnchantmentStorageMeta additionMeta = (EnchantmentStorageMeta) addition.getItemMeta();
+        additionMeta.getStoredEnchants().forEach(additions::put);
+
+      } else addition.getItemMeta().getEnchants().forEach(additions::put);
+
+    }
+
+    // Add the enchantments to the resulting items
+    if (result.getType() == Material.ENCHANTED_BOOK) {
+
+      additions.forEach((enchant, level) ->
+          ((EnchantmentStorageMeta) resultMeta).addStoredEnchant(enchant, level, true));
+
+    } else {
+
+      additions.forEach((enchant, level) ->
+          resultMeta.addEnchant(enchant, level, true));
+
+    }
+
+    // Add lore for the custom enchants.
+    InventoryUtils.addEnchantLore(resultMeta, additions.entrySet().stream()
+        .filter(entry -> CustomEnchant.isCustomEnchant(entry.getKey()))
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
     result.setItemMeta(resultMeta);
+    inventory.setItem(2, result);
+    inventory.setRepairCost(1);
+    ((Player) event.getWhoClicked()).updateInventory();
+
   }
 
   @EventHandler
@@ -185,10 +218,10 @@ public class EnchantListener implements Listener {
         // Add the enchantments themselves
         ItemMeta meta = item.getItemMeta();
         enchants.forEach((enchant, level) -> meta.addEnchant(enchant, level, true));
+        // Add the enchantment lore
+        InventoryUtils.addEnchantLore(meta, enchants);
         item.setItemMeta(meta);
 
-        // Add the enchantment lore
-        InventoryUtils.addEnchantLore(item, enchants);
       }
 
       // Manually drop each block.
