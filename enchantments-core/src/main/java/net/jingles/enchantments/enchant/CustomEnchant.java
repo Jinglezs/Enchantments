@@ -213,4 +213,9 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
     Enchantments.getCooldownManager().addCooldown(player, this, getCooldown(), getTimeUnit());
   }
 
+  public static boolean isCustomEnchant(Enchantment enchantment) {
+    return Enchantments.getEnchantmentManager().getRegisteredEnchants().stream()
+        .anyMatch(enchant -> enchant.getKey().equals(enchantment.getKey()));
+  }
+
 }
