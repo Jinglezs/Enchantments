@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 
 @Enchant(name = "Heartward Amulet", key = "heartward_amulet", levelRequirement = 30, enchantChance = 0.30,
   maxLevel = 1, targetItem = EnchantmentTarget.ARMOR_TORSO, description = "Upon death, the wearer's items are " +
-  "not dropped, but placed inside a chest at their current location. The wearer will respawn with a paper that " +
+  "not dropped, but placed inside a chest at their current location. The wearer will be sent a message that " +
   "contains the coordinates of their death location. This enchantment is removed from the item upon use.")
 
 public class HeartwardAmulet extends CustomEnchant {
@@ -89,7 +89,6 @@ public class HeartwardAmulet extends CustomEnchant {
 
   private String getWorldType(World.Environment environment) {
     switch (environment) {
-      case NORMAL: return "Overworld";
       case NETHER: return "Nether";
       case THE_END: return "The End";
       default: return "Overworld";
