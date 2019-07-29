@@ -162,7 +162,7 @@ public class Mjolnir extends CustomEnchant {
 
     @Override
     public void stop() {
-      if (player.isOnGround()) seismicSmash(player);
+      if (player.isOnGround()) seismicSmash();
       addCooldown(player);
 
       player.setGliding(false);
@@ -170,19 +170,19 @@ public class Mjolnir extends CustomEnchant {
       super.stop();
     }
 
-  }
+    private void seismicSmash() {
+      player.getWorld().playSound(player.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 2, 1);
 
-  private void seismicSmash(Player player) {
-    player.getWorld().playSound(player.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 2, 1);
+      player.getWorld().getNearbyEntities(player.getLocation(), 10, 10, 10).stream()
+          .filter(entity -> entity instanceof LivingEntity && !entity.equals(player))
+          .map(entity -> (LivingEntity) entity)
+          .forEach(entity -> {
+            entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_GRASS_BREAK, 2, 1);
+            entity.damage(10F, player);
+            entity.setVelocity(entity.getVelocity().setY(1.25));
+          });
+    }
 
-    player.getWorld().getNearbyEntities(player.getLocation(), 10, 10, 10).stream()
-        .filter(entity -> entity instanceof LivingEntity && !entity.equals(player))
-        .map(entity -> (LivingEntity) entity)
-        .forEach(entity -> {
-          entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_GRASS_BREAK, 2, 1);
-          entity.damage(10F);
-          entity.setVelocity(entity.getVelocity().setY(1.25));
-        });
   }
 
 }
