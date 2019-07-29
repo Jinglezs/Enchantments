@@ -31,12 +31,6 @@ public abstract class EntityStatusEffect extends StatusEffect {
     else target.setHealth(newHealth);
   }
 
-  public void damage(double amount) {
-    double newHealth = target.getHealth() - amount;
-    if (newHealth > 0) target.damage(amount);
-    else target.setHealth(0);
-  }
-
   public abstract void effect();
 
 }
