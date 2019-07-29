@@ -77,7 +77,7 @@ public class Gravity extends CustomEnchant {
     //Detonate the arrow about half a second after pulling the entities towards it.
     plugin.getServer().getScheduler().runTaskLater(plugin, () -> targets.forEach(target -> {
       hitLoc.getWorld().spawnParticle(Particle.EXPLOSION_HUGE, hitLoc, 0, 0, 0, 1);
-      target.damage(7.0F);
+      target.damage(7.0F, player);
     }), 12L);
 
     int duration = (5 * level) * 20;
