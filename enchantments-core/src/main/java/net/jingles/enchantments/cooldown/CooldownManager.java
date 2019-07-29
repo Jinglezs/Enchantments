@@ -43,7 +43,7 @@ public class CooldownManager implements Listener {
     if (!event.isCancelled()) {
       long cooldown = System.currentTimeMillis() + TimeUnit.MILLISECONDS
           .convert(event.getRawCooldown(), event.getTimeUnit());
-      holder.getPersistentDataContainer().set(enchant.getKey(), PersistentDataType.LONG, cooldown);
+      holder.getPersistentDataContainer().set(enchant.getCooldownKey(), PersistentDataType.LONG, cooldown);
       if (holder instanceof TileState) ((TileState) holder).update();
     }
 
@@ -79,7 +79,7 @@ public class CooldownManager implements Listener {
   }
 
   private boolean hasCooldownNoMessage(PersistentDataHolder holder, CustomEnchant enchant) {
-    if (!holder.getPersistentDataContainer().has(enchant.getKey(), PersistentDataType.LONG)) return false;
+    if (!holder.getPersistentDataContainer().has(enchant.getCooldownKey(), PersistentDataType.LONG)) return false;
 
     long cooldown = getCooldown(holder, enchant);
 
@@ -92,7 +92,7 @@ public class CooldownManager implements Listener {
   }
 
   public long getCooldown(PersistentDataHolder holder, CustomEnchant enchant) {
-    return holder.getPersistentDataContainer().getOrDefault(enchant.getKey(), PersistentDataType.LONG, 0L);
+    return holder.getPersistentDataContainer().getOrDefault(enchant.getCooldownKey(), PersistentDataType.LONG, 0L);
   }
 
   /**
@@ -102,7 +102,7 @@ public class CooldownManager implements Listener {
    * @param enchant the enchantment in question.
    */
   public void removeCooldown(PersistentDataHolder holder, CustomEnchant enchant) {
-    holder.getPersistentDataContainer().remove(enchant.getKey());
+    holder.getPersistentDataContainer().remove(enchant.getCooldownKey());
     if (holder instanceof TileState) ((TileState) holder).update();
   }
 

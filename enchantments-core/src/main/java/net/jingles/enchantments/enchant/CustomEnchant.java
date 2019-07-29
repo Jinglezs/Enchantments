@@ -34,6 +34,7 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
   private final EnchantmentTarget target;
   private final boolean treasure;
   private final boolean cursed;
+  private final NamespacedKey cooldownKey;
 
   public CustomEnchant(NamespacedKey key) {
     super(key);
@@ -52,6 +53,7 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
     this.target = annotation.targetItem();
     this.treasure = annotation.treasure();
     this.cursed = annotation.cursed();
+    this.cooldownKey = getCooldownKey();
   }
 
   public String getKeyName() {
@@ -195,6 +197,12 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
 
   public int getLevel(ItemStack item) {
     return item.getItemMeta() == null ? 0 : item.getItemMeta().getEnchantLevel(this);
+  }
+
+  public NamespacedKey getCooldownKey() {
+    if (cooldownKey != null) return cooldownKey;
+    else return (!(this instanceof BlockEnchant)) ? getKey() :
+        new NamespacedKey(Enchantments.getProvidingPlugin(Enchantments.class), getKeyName() + "cooldown");
   }
 
   public static Set<Enchantment> getEnchantmentsByItemType(EnchantmentTarget target) {

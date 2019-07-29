@@ -103,6 +103,16 @@ public enum TargetGroup {
   LECTERN(material -> material == Material.LECTERN),
 
   /**
+   * All banner blocks
+   */
+  BANNER(material -> material.name().endsWith("_BANNER")),
+
+  /**
+   * Jukeboxes only
+   */
+  JUKEBOX(material -> material == Material.JUKEBOX),
+
+  /**
    * Represents all items that can be enchanted through this plugin, but cannot be enchanted normally in vanilla.
    */
   NON_VANILLA(material ->TILE_ENTITY.canEnchant(material) || BLOCK.canEnchant(material) || ELYTRA.canEnchant(material) ||
