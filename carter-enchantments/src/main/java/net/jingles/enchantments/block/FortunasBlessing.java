@@ -17,7 +17,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @Enchant(name = "Fortuna's Blessing", key = "fortunas_blessing", enchantChance = 0.45, maxLevel = 1,
-    targetGroup = TargetGroup.TILE_ENTITY, description = "While this banner is placed, there is a 45% " +
+    targetGroup = TargetGroup.BANNER, description = "While this banner is placed, there is a 45% " +
     "chance that mobs killed within the same chunk will double their drops/experience and the probability " +
     "of their equipment being dropped is increased by 50%.")
 
