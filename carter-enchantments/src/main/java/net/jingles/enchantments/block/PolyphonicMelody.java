@@ -47,18 +47,12 @@ public class PolyphonicMelody extends BlockEnchant {
     ItemStack item = event.getItem();
 
     if (event.getAction() != Action.RIGHT_CLICK_BLOCK || block == null ||
-        block.getType() != Material.JUKEBOX) return;
+        item == null || block.getType() != Material.JUKEBOX) return;
 
     Jukebox jukebox = (Jukebox) block.getState();
     if (!canTrigger(jukebox)) return;
 
-    event.setCancelled(true);
-
-    if (jukebox.getRecord().getType() == Material.AIR && item != null && item.getType().isRecord()) {
-
-      jukebox.setRecord(item);
-      jukebox.setPlaying(item.getType());
-      event.getPlayer().getInventory().remove(item);
+    if (!jukebox.isPlaying() || jukebox.getPlaying() != item.getType()) {
 
       if (!Enchantments.getCooldownManager().hasCooldown(jukebox, this)) {
 
@@ -73,14 +67,9 @@ public class PolyphonicMelody extends BlockEnchant {
 
         addCooldown(jukebox);
 
-      } else {
-        jukebox.eject();
-        jukebox.setPlaying(null);
       }
 
     }
-
-    jukebox.update(true);
 
   }
 
