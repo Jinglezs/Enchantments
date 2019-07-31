@@ -6,6 +6,7 @@ import net.jingles.enchantments.statuseffect.container.EffectContainer;
 import net.jingles.enchantments.statuseffect.container.EntityEffectContainer;
 import net.jingles.enchantments.statuseffect.container.WorldEffectContainer;
 import net.jingles.enchantments.statuseffect.effects.FeatherFallingEffect;
+import net.jingles.enchantments.statuseffect.entity.EntityStatusEffect;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;

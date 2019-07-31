@@ -1,7 +1,7 @@
 package net.jingles.enchantments.statuseffect.effects;
 
 import net.jingles.enchantments.enchant.CustomEnchant;
-import net.jingles.enchantments.statuseffect.EntityStatusEffect;
+import net.jingles.enchantments.statuseffect.entity.EntityStatusEffect;
 import org.bukkit.entity.LivingEntity;
 
 public class FeatherFallingEffect extends EntityStatusEffect {

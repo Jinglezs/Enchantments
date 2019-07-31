@@ -1,7 +1,7 @@
 package net.jingles.enchantments.statuseffect.container;
 
 import net.jingles.enchantments.Enchantments;
-import net.jingles.enchantments.statuseffect.EntityStatusEffect;
+import net.jingles.enchantments.statuseffect.entity.EntityStatusEffect;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 

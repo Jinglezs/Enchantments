@@ -1,6 +1,7 @@
-package net.jingles.enchantments.statuseffect;
+package net.jingles.enchantments.statuseffect.entity;
 
 import net.jingles.enchantments.enchant.CustomEnchant;
+import net.jingles.enchantments.statuseffect.StatusEffect;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;
 

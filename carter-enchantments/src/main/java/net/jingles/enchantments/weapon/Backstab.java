@@ -3,7 +3,7 @@ package net.jingles.enchantments.weapon;
 import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
-import net.jingles.enchantments.statuseffect.EntityStatusEffect;
+import net.jingles.enchantments.statuseffect.entity.EntityStatusEffect;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
