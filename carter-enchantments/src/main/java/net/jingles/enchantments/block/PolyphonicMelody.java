@@ -4,6 +4,7 @@ import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.BlockEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.enchant.TargetGroup;
+import net.jingles.enchantments.statuseffect.entity.PotionStatusEffect;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -62,13 +63,31 @@ public class PolyphonicMelody extends BlockEnchant {
             .map(entity -> (LivingEntity) entity)
             .forEach(entity -> {
               PotionEffect effect = new PotionEffect(getType(item.getType()), getDuration(item.getType()), 1);
-              entity.addPotionEffect(effect);
+              Enchantments.getStatusEffectManager().add(new PolyphonicStatusEffect(effect, entity));
             });
 
         addCooldown(jukebox);
 
       }
 
+    } else { // if the current disc being played is stopped
+
+      jukebox.getWorld().getNearbyEntities(jukebox.getLocation(), 65, 65, 65)
+          .forEach(entity -> Enchantments.getStatusEffectManager().getEntityContainer(entity.getUniqueId())
+              .ifPresent(container -> container.removeEffects(this)));
+
+    }
+
+  }
+
+  private class PolyphonicStatusEffect extends PotionStatusEffect {
+
+    public PolyphonicStatusEffect(PotionEffect potionEffect, LivingEntity target) {
+      super(potionEffect, target, PolyphonicMelody.this, 20);
+    }
+
+    @Override
+    public void effect() {
     }
 
   }
