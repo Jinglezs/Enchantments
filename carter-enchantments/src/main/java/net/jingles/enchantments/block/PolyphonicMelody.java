@@ -48,12 +48,12 @@ public class PolyphonicMelody extends BlockEnchant {
     ItemStack item = event.getItem();
 
     if (event.getAction() != Action.RIGHT_CLICK_BLOCK || block == null ||
-        item == null || block.getType() != Material.JUKEBOX) return;
+        block.getType() != Material.JUKEBOX) return;
 
     Jukebox jukebox = (Jukebox) block.getState();
     if (!canTrigger(jukebox)) return;
 
-    if (!jukebox.isPlaying() || jukebox.getPlaying() != item.getType()) {
+    if (item != null && !jukebox.isPlaying() && item.getType().isRecord()) {
 
       if (!Enchantments.getCooldownManager().hasCooldown(jukebox, this)) {
 
@@ -62,19 +62,20 @@ public class PolyphonicMelody extends BlockEnchant {
             .filter(entity -> entity instanceof LivingEntity)
             .map(entity -> (LivingEntity) entity)
             .forEach(entity -> {
-              PotionEffect effect = new PotionEffect(getType(item.getType()), getDuration(item.getType()), 1);
-              Enchantments.getStatusEffectManager().add(new PolyphonicStatusEffect(effect, entity));
+              PotionEffect effect = new PotionEffect(getType(item.getType()), getDuration(item.getType()), 1, false);
+              Enchantments.getStatusEffectManager().add(new PolyphonicStatusEffect(jukebox, effect, entity));
             });
 
         addCooldown(jukebox);
 
       }
 
-    } else { // if the current disc being played is stopped
+    } else if (jukebox.isPlaying()) { // if the current disc being played is stopped
 
-      jukebox.getWorld().getNearbyEntities(jukebox.getLocation(), 65, 65, 65)
-          .forEach(entity -> Enchantments.getStatusEffectManager().getEntityContainer(entity.getUniqueId())
-              .ifPresent(container -> container.removeEffects(this)));
+      Enchantments.getStatusEffectManager().getEffectsBySource(this).stream()
+          .map(effect -> (PolyphonicStatusEffect) effect)
+          .filter(effect -> effect.getJukebox().equals(jukebox))
+          .forEach(PotionStatusEffect::stop);
 
     }
 
@@ -82,8 +83,15 @@ public class PolyphonicMelody extends BlockEnchant {
 
   private class PolyphonicStatusEffect extends PotionStatusEffect {
 
-    public PolyphonicStatusEffect(PotionEffect potionEffect, LivingEntity target) {
+    private final Jukebox jukebox;
+
+    private PolyphonicStatusEffect(Jukebox jukebox, PotionEffect potionEffect, LivingEntity target) {
       super(potionEffect, target, PolyphonicMelody.this, 20);
+      this.jukebox = jukebox;
+    }
+
+    public Jukebox getJukebox() {
+      return this.jukebox;
     }
 
     @Override

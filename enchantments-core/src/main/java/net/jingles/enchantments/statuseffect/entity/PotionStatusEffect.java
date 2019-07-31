@@ -19,7 +19,6 @@ public abstract class PotionStatusEffect extends EntityStatusEffect {
 
   @Override
   public void start() {
-    super.start();
     getTarget().addPotionEffect(potionEffect);
   }
 
@@ -28,8 +27,8 @@ public abstract class PotionStatusEffect extends EntityStatusEffect {
 
   @Override
   public void stop() {
-    super.stop();
     getTarget().removePotionEffect(potionEffect.getType());
+    super.stop();
   }
 
 }

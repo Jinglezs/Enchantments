@@ -61,7 +61,7 @@ public class StatusEffectManager extends BukkitRunnable implements EffectContain
   }
 
   public Optional<EntityEffectContainer> getEntityContainer(UUID id) {
-    return containers.stream()
+    return getContainers().stream()
         .filter(container -> container instanceof EntityEffectContainer)
         .map(container -> (EntityEffectContainer) container)
         .filter(container -> container.getOwner().equals(id))
