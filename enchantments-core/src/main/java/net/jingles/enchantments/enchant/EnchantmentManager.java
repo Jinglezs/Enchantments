@@ -3,6 +3,7 @@ package net.jingles.enchantments.enchant;
 import net.jingles.enchantments.Enchantments;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
+import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
@@ -34,6 +35,7 @@ public final class EnchantmentManager {
     loadClasses(plugin.getDataFolder());
   }
 
+  @NotNull
   public Set<CustomEnchant> getRegisteredEnchants() {
     return this.registered;
   }
@@ -102,6 +104,7 @@ public final class EnchantmentManager {
    * Gets all registered CustomEnchants that extend BlockEnchant
    * @return registered BlockEnchants
    */
+  @NotNull
   public Set<BlockEnchant> getRegisteredBlockEnchants() {
     return getRegisteredEnchants().stream()
         .filter(enchant -> enchant instanceof BlockEnchant)

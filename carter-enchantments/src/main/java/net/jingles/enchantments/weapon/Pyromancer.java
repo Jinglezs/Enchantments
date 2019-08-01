@@ -38,7 +38,7 @@ public class Pyromancer extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(LivingEntity entity) {
+  public boolean canTrigger(@NotNull LivingEntity entity) {
     ItemStack sword = getItem(entity);
     return sword != null && hasEnchantment(sword) &&
         !Enchantments.getCooldownManager().hasCooldown(entity, this);

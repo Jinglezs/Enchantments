@@ -45,7 +45,7 @@ public class Mjolnir extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(LivingEntity entity) {
+  public boolean canTrigger(@NotNull LivingEntity entity) {
     ItemStack axe = getItem(entity);
 
     if (axe == null || !hasEnchantment(axe) ||

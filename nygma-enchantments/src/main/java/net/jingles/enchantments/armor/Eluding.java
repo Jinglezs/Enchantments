@@ -34,7 +34,7 @@ public class Eluding extends CustomEnchant {
   public boolean conflictsWith(@NotNull Enchantment other) { return false; }
 
   @Override
-  public boolean canTrigger(LivingEntity entity) {
+  public boolean canTrigger(@NotNull LivingEntity entity) {
     ItemStack boots = getItem(entity);
     return boots != null && hasEnchantment(boots) &&
         !Enchantments.getCooldownManager().hasCooldown(entity, this);

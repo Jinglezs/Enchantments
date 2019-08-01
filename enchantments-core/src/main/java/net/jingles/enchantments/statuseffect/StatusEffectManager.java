@@ -15,6 +15,7 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -25,7 +26,7 @@ public class StatusEffectManager extends BukkitRunnable implements EffectContain
   private final Set<EffectContainer> containers = new HashSet<>();
   private final WorldEffectContainer worldContainer;
 
-  public StatusEffectManager(Enchantments plugin) {
+  public StatusEffectManager(@NotNull Enchantments plugin) {
     this.worldContainer = new WorldEffectContainer();
     plugin.getServer().getPluginManager().registerEvents(this, plugin);
     runTaskTimer(plugin, 0, 1);
@@ -52,14 +53,17 @@ public class StatusEffectManager extends BukkitRunnable implements EffectContain
   }
 
   @Override
+  @NotNull
   public Set<StatusEffect> getStatusEffects() {
     return this.statusEffects;
   }
 
+  @NotNull
   public Set<EffectContainer> getContainers() {
     return this.containers;
   }
 
+  @NotNull
   public Optional<EntityEffectContainer> getEntityContainer(UUID id) {
     return getContainers().stream()
         .filter(container -> container instanceof EntityEffectContainer)
@@ -74,7 +78,8 @@ public class StatusEffectManager extends BukkitRunnable implements EffectContain
    * @param id the entity's unique id
    * @return the entity's container
    */
-  public EntityEffectContainer getOrNewEntityContainer(UUID id) {
+  @NotNull
+  public EntityEffectContainer getOrNewEntityContainer(@NotNull UUID id) {
     Optional<EntityEffectContainer> container = getEntityContainer(id);
 
     if (!container.isPresent()) {
@@ -92,6 +97,7 @@ public class StatusEffectManager extends BukkitRunnable implements EffectContain
    *
    * @return the world container
    */
+  @NotNull
   public WorldEffectContainer getWorldContainer() {
     return this.worldContainer;
   }
@@ -115,7 +121,8 @@ public class StatusEffectManager extends BukkitRunnable implements EffectContain
    * @param duration duration of the effect in ticks
    * @return new Feather Falling Effect.
    */
-  public FeatherFallingEffect negateFallDamage(LivingEntity entity, CustomEnchant source, int duration) {
+  @NotNull
+  public FeatherFallingEffect negateFallDamage(@NotNull LivingEntity entity, @NotNull CustomEnchant source, int duration) {
     FeatherFallingEffect effect = new FeatherFallingEffect(entity, source, duration);
     this.add(effect);
     return effect;

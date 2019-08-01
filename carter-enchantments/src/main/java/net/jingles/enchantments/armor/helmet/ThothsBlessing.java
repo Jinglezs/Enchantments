@@ -27,7 +27,7 @@ public class ThothsBlessing extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(LivingEntity entity) {
+  public boolean canTrigger(@NotNull LivingEntity entity) {
     ItemStack helm = getItem(entity);
     return helm != null && hasEnchantment(helm);
   }

@@ -8,6 +8,8 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.Map;
@@ -19,19 +21,20 @@ public abstract class BlockEnchant extends CustomEnchant {
     super(key);
   }
 
-  public abstract boolean canTrigger(TileState tile);
+  public abstract boolean canTrigger(@NotNull TileState tile);
 
   @Override
-  public boolean canTrigger(LivingEntity entity) {
+  public boolean canTrigger(@NotNull LivingEntity entity) {
     return false;
   }
 
-  public int getLevel(TileState tile) {
+  public int getLevel(@NotNull TileState tile) {
       return !hasEnchant(tile) ? 0 :
         tile.getPersistentDataContainer().get(getKey(), PersistentDataType.INTEGER);
   }
 
-  public static Map<BlockEnchant, Integer> getBlockEnchants(ItemStack item) {
+  @NotNull
+  public static Map<BlockEnchant, Integer> getBlockEnchants(@NotNull ItemStack item) {
     if (item.getItemMeta() == null || item.getItemMeta().getEnchants().isEmpty())
       return Collections.emptyMap();
 
@@ -45,6 +48,7 @@ public abstract class BlockEnchant extends CustomEnchant {
    * @param container the data container to search through
    * @return a map where the enchantment is the key and the enchantment level is the value.
    */
+  @NotNull
   public static Map<BlockEnchant, Integer> getBlockEnchants(PersistentDataContainer container) {
     return Enchantments.getEnchantmentManager().getRegisteredBlockEnchants().stream()
         .filter(enchant -> container.has(enchant.getKey(), PersistentDataType.INTEGER))
@@ -52,22 +56,23 @@ public abstract class BlockEnchant extends CustomEnchant {
             enchant -> container.get(enchant.getKey(), PersistentDataType.INTEGER)));
   }
 
-  public static boolean isBlockEnchant(Enchantment enchantment) {
+  public static boolean isBlockEnchant(@NotNull Enchantment enchantment) {
     return Enchantments.getEnchantmentManager().getRegisteredBlockEnchants().stream()
         .anyMatch(enchant -> enchant.getKey().equals(enchantment.getKey()));
   }
 
-  public static BlockEnchant getBlockEnchant(NamespacedKey key) {
+  @Nullable
+  public static BlockEnchant getBlockEnchant(@NotNull NamespacedKey key) {
     return Enchantments.getEnchantmentManager().getRegisteredBlockEnchants().stream()
         .filter(enchant -> enchant.getKey().equals(key))
         .findFirst().orElse(null);
   }
 
-  public boolean hasEnchant(TileState tile) {
+  public boolean hasEnchant(@NotNull TileState tile) {
     return tile.getPersistentDataContainer().has(getKey(), PersistentDataType.INTEGER);
   }
 
-  public void addCooldown(TileState tile) {
+  public void addCooldown(@NotNull TileState tile) {
     Enchantments.getCooldownManager().addCooldown(tile, this, getCooldown(), getTimeUnit());
   }
 

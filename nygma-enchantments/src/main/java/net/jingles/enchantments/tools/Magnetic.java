@@ -41,7 +41,7 @@ public class Magnetic extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(LivingEntity entity) {
+  public boolean canTrigger(@NotNull LivingEntity entity) {
     ItemStack tool = getItem(entity);
     return tool != null && hasEnchantment(tool);
   }

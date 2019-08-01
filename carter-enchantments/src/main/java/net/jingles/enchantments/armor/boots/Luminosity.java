@@ -33,7 +33,7 @@ public class Luminosity extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(LivingEntity entity) {
+  public boolean canTrigger(@NotNull LivingEntity entity) {
     ItemStack boots = getItem(entity);
 
     if (boots == null || !hasEnchantment(boots)) return false;

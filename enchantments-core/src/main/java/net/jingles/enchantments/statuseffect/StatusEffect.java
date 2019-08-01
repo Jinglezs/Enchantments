@@ -1,6 +1,7 @@
 package net.jingles.enchantments.statuseffect;
 
 import net.jingles.enchantments.enchant.CustomEnchant;
+import org.jetbrains.annotations.NotNull;
 
 public abstract class StatusEffect implements Comparable<StatusEffect> {
 
@@ -11,7 +12,7 @@ public abstract class StatusEffect implements Comparable<StatusEffect> {
   private int ticks = 0; // The current amount of ticks the effect has been alive for
   private boolean cancelled = false; // Whether or not the effect should be stopped.
 
-  public StatusEffect(CustomEnchant source, int maxTicks, int interval) {
+  public StatusEffect(@NotNull CustomEnchant source, int maxTicks, int interval) {
     this.source = source;
     this.maxTicks = maxTicks;
     this.interval = Math.max(1, interval);
@@ -31,6 +32,7 @@ public abstract class StatusEffect implements Comparable<StatusEffect> {
    *
    * @return the owning CustomEnchant
    */
+  @NotNull
   public CustomEnchant getSource() {
     return this.source;
   }
@@ -97,6 +99,7 @@ public abstract class StatusEffect implements Comparable<StatusEffect> {
    * effect() method.
    * @return the reason for failure, or SUCCESS if none.
    */
+  @NotNull
   public TickFailure canTick() {
     return isCancelled() ? TickFailure.CANCELLED :
         (ticks > maxTicks) ? TickFailure.EXPIRED :

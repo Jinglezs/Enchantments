@@ -41,7 +41,7 @@ public class Reinforcement extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(LivingEntity entity) {
+  public boolean canTrigger(@NotNull LivingEntity entity) {
 
     ItemStack shield = getItem(entity);
     if (!hasEnchantment(shield)) return false;

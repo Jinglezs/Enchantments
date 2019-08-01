@@ -38,7 +38,7 @@ public class Grapple extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(LivingEntity entity) {
+  public boolean canTrigger(@NotNull LivingEntity entity) {
     ItemStack bow = getItem(entity);
     return bow != null && hasEnchantment(bow);
   }

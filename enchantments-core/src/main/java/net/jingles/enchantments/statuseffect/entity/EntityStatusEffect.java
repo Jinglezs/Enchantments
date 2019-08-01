@@ -4,6 +4,7 @@ import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.statuseffect.StatusEffect;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
@@ -11,15 +12,17 @@ public abstract class EntityStatusEffect extends StatusEffect {
 
   private final LivingEntity target;
 
-  public EntityStatusEffect(LivingEntity target, CustomEnchant source, int maxTicks, int interval) {
+  public EntityStatusEffect(@NotNull LivingEntity target, @NotNull CustomEnchant source, int maxTicks, int interval) {
     super(source, maxTicks, interval);
     this.target = target;
   }
 
+  @NotNull
   public LivingEntity getTarget() {
     return this.target;
   }
 
+  @NotNull
   public UUID getTargetId() {
     return target.getUniqueId();
   }

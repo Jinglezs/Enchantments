@@ -37,6 +37,7 @@ public class EnchantmentCooldownEvent extends Event implements Cancellable {
    * be applied to.
    * @return the cooldown target.
    */
+  @NotNull
   public PersistentDataHolder getHolder() {
     return this.holder;
   }
@@ -46,6 +47,7 @@ public class EnchantmentCooldownEvent extends Event implements Cancellable {
    * be applied to.
    * @return the applicable enchantment
    */
+  @NotNull
   public CustomEnchant getEnchant() {
     return this.enchant;
   }
@@ -71,7 +73,7 @@ public class EnchantmentCooldownEvent extends Event implements Cancellable {
    * the raw cooldown represents.
    * @param unit the time unit
    */
-  public void setTimeUnit(TimeUnit unit) {
+  public void setTimeUnit(@NotNull TimeUnit unit) {
     this.unit = unit;
   }
 
@@ -82,6 +84,7 @@ public class EnchantmentCooldownEvent extends Event implements Cancellable {
    * will be 5 HOURS converted to MILLISECONDS.
    * @return the time unit of the raw cooldown.
    */
+  @NotNull
   public TimeUnit getTimeUnit() {
     return this.unit;
   }

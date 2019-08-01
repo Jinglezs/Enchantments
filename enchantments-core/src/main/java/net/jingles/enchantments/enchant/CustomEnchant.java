@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Set;
@@ -52,10 +53,12 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
     this.cooldownKey = getCooldownKey();
   }
 
+  @NotNull
   public String getKeyName() {
     return this.keyName;
   }
 
+  @NotNull
   public String getDescription() {
     return this.description;
   }
@@ -72,6 +75,7 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
     return this.cooldown;
   }
 
+  @NotNull
   public TimeUnit getTimeUnit() {
     return this.timeUnit;
   }
@@ -114,19 +118,21 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
         getTargetGroup().canEnchant(itemStack.getType());
   }
 
-  public boolean hasEnchantment(ItemStack item) {
+  public boolean hasEnchantment(@Nullable ItemStack item) {
     return item != null && item.getItemMeta() != null && item.getItemMeta().hasEnchant(this);
   }
 
+  @NotNull
   public TargetGroup getTargetGroup() {
     return this.targetGroup;
   }
 
   public abstract boolean conflictsWith(@NotNull Enchantment other);
 
-  public abstract boolean canTrigger(LivingEntity entity);
+  public abstract boolean canTrigger(@NotNull LivingEntity entity);
 
-  public ItemStack getItem(LivingEntity entity) {
+  @Nullable
+  public ItemStack getItem(@NotNull LivingEntity entity) {
 
     EntityEquipment equipment = entity.getEquipment();
     if (equipment == null) return null;
@@ -205,33 +211,36 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
     }
   }
 
-  public int getLevel(ItemStack item) {
+  public int getLevel(@NotNull ItemStack item) {
     return item.getItemMeta() == null ? 0 : item.getItemMeta().getEnchantLevel(this);
   }
 
+  @NotNull
   public NamespacedKey getCooldownKey() {
     if (cooldownKey != null) return cooldownKey;
     else return (!(this instanceof BlockEnchant)) ? getKey() :
         new NamespacedKey(Enchantments.getProvidingPlugin(Enchantments.class), getKeyName() + "cooldown");
   }
 
-  public static Set<Enchantment> getEnchantmentsByItemType(EnchantmentTarget target) {
+  @NotNull
+  public static Set<Enchantment> getEnchantmentsByItemType(@NotNull EnchantmentTarget target) {
     return Enchantments.getEnchantmentManager().getRegisteredEnchants().stream()
         .filter(enchantment -> enchantment.getItemTarget() == target)
         .collect(Collectors.toSet());
   }
 
-  public static Set<CustomEnchant> getApplicableEnchants(ItemStack item) {
+  @NotNull
+  public static Set<CustomEnchant> getApplicableEnchants(@NotNull ItemStack item) {
     return Enchantments.getEnchantmentManager().getRegisteredEnchants().stream()
         .filter(enchantment -> enchantment.canEnchantItem(item))
         .collect(Collectors.toSet());
   }
 
-  public void addCooldown(LivingEntity entity) {
+  public void addCooldown(@NotNull LivingEntity entity) {
     Enchantments.getCooldownManager().addCooldown(entity, this, getCooldown(), getTimeUnit());
   }
 
-  public static boolean isCustomEnchant(Enchantment enchantment) {
+  public static boolean isCustomEnchant(@NotNull Enchantment enchantment) {
     return Enchantments.getEnchantmentManager().getRegisteredEnchants().stream()
         .anyMatch(enchant -> enchant.getKey().equals(enchantment.getKey()));
   }

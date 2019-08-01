@@ -29,7 +29,7 @@ public class FortunasBlessing extends BlockEnchant {
   }
 
   @Override
-  public boolean canTrigger(TileState tile) {
+  public boolean canTrigger(@NotNull TileState tile) {
     return hasEnchant(tile);
   }
 

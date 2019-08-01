@@ -28,7 +28,7 @@ public class Efficiency extends BlockEnchant {
   }
 
   @Override
-  public boolean canTrigger(TileState tile) {
+  public boolean canTrigger(@NotNull TileState tile) {
     return hasEnchant(tile) && !Enchantments.getCooldownManager()
         .hasCooldown(tile, this);
   }

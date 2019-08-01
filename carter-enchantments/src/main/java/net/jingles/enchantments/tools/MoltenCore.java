@@ -50,7 +50,7 @@ public class MoltenCore extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(LivingEntity entity) {
+  public boolean canTrigger(@NotNull LivingEntity entity) {
     ItemStack held = getItem(entity);
     return held != null && hasEnchantment(held);
   }

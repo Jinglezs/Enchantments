@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.List;
@@ -38,7 +39,7 @@ public class Projectile implements Comparable<Projectile> {
   private BiConsumer<Projectile, Block> onBlockHit = (projectile, block) -> {};
   private BiConsumer<Projectile, Entity> onEntityHit = (projectile, block) -> {};
 
-  public Projectile(Player owner) {
+  public Projectile(@NotNull Player owner) {
     this.blockFilters = new HashSet<>();
     this.entityFilters = new HashSet<>();
     this.owner = owner;
@@ -117,7 +118,8 @@ public class Projectile implements Comparable<Projectile> {
    * @param particle the particle
    * @return the projectile instance.
    */
-  public Projectile setParticle(Particle particle) {
+  @NotNull
+  public Projectile setParticle(@NotNull Particle particle) {
     this.particle = particle;
     return this;
   }
@@ -129,7 +131,8 @@ public class Projectile implements Comparable<Projectile> {
    * @param direction the directional vector
    * @return the projectile instance
    */
-  public Projectile setDirection(Vector direction) {
+  @NotNull
+  public Projectile setDirection(@NotNull Vector direction) {
     this.direction = direction;
     return this;
   }
@@ -140,7 +143,8 @@ public class Projectile implements Comparable<Projectile> {
    * @param runnable actions to be executed every tick.
    * @return the projectile instance.
    */
-  public Projectile onTick(Runnable runnable) {
+  @NotNull
+  public Projectile onTick(@NotNull Runnable runnable) {
     this.onTick = runnable;
     return this;
   }
@@ -151,7 +155,8 @@ public class Projectile implements Comparable<Projectile> {
    * @param location the starting location.
    * @return the projectile instance.
    */
-  public Projectile setStartLocation(Location location) {
+  @NotNull
+  public Projectile setStartLocation(@NotNull Location location) {
     this.location = location;
     return this;
   }
@@ -163,7 +168,8 @@ public class Projectile implements Comparable<Projectile> {
    * @param filter the block predicate
    * @return the projectile instance
    */
-  public Projectile withBlockFilter(Predicate<Block> filter) {
+  @NotNull
+  public Projectile withBlockFilter(@NotNull Predicate<Block> filter) {
     this.blockFilters.add(filter);
     return this;
   }
@@ -175,7 +181,8 @@ public class Projectile implements Comparable<Projectile> {
    * @param filter the entity predicate
    * @return the projectile instance.
    */
-  public Projectile withEntityFilter(Predicate<Entity> filter) {
+  @NotNull
+  public Projectile withEntityFilter(@NotNull Predicate<Entity> filter) {
     this.entityFilters.add(filter);
     return this;
   }
@@ -187,7 +194,8 @@ public class Projectile implements Comparable<Projectile> {
    * @param data the dust options
    * @return the projectile instance.
    */
-  public Projectile withParticleData(Object data) {
+  @NotNull
+  public Projectile withParticleData(@NotNull Object data) {
     this.options = data;
     return this;
   }
@@ -198,6 +206,7 @@ public class Projectile implements Comparable<Projectile> {
    * @param noClip block collision or not?
    * @return the projectile instance.
    */
+  @NotNull
   public Projectile setNoClip(boolean noClip) {
     this.noClip = noClip;
     return this;
@@ -209,7 +218,8 @@ public class Projectile implements Comparable<Projectile> {
    * @param consumer takes the entity and projectile instances and does something with them.
    * @return the projectile instance.
    */
-  public Projectile onEntityHit(BiConsumer<Projectile, Entity> consumer) {
+  @NotNull
+  public Projectile onEntityHit(@NotNull BiConsumer<Projectile, Entity> consumer) {
     this.onEntityHit = consumer;
     return this;
   }
@@ -220,7 +230,8 @@ public class Projectile implements Comparable<Projectile> {
    * @param consumer takes the block and projectile instances and does something with them.
    * @return the projectile instance.
    */
-  public Projectile onBlockHit(BiConsumer<Projectile, Block> consumer) {
+  @NotNull
+  public Projectile onBlockHit(@NotNull BiConsumer<Projectile, Block> consumer) {
     this.onBlockHit = consumer;
     return this;
   }
@@ -231,6 +242,7 @@ public class Projectile implements Comparable<Projectile> {
    * @param maxDistance the maximum distance
    * @return the projectile instance
    */
+  @NotNull
   public Projectile setMaxDistance(double maxDistance) {
     //Square the distance so it can be compared with Location.getDistanceSquared()
     this.maxDistance = maxDistance * maxDistance;
@@ -245,6 +257,7 @@ public class Projectile implements Comparable<Projectile> {
    * @param z distance from location on the z-axis
    * @return the projectile instance.
    */
+  @NotNull
   public Projectile withHitbox(double x, double y, double z) {
     this.hitbox = BoundingBox.of(location, x, y, z);
     return this;
@@ -261,22 +274,27 @@ public class Projectile implements Comparable<Projectile> {
         loc.getY() + bb.getHeight(), loc.getZ() + bb.getWidthZ());
   }
 
+  @NotNull
   public Player getOwner() {
     return this.owner;
   }
 
+  @Nullable
   public Vector getDirection() {
     return this.direction;
   }
 
+  @Nullable
   public Location getLocation() {
     return this.location;
   }
 
+  @Nullable
   public Particle getParticle() {
     return this.particle;
   }
 
+  @Nullable
   public BoundingBox getHitbox() {
     return this.hitbox;
   }

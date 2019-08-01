@@ -35,7 +35,7 @@ public class FireDancer extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(LivingEntity entity) {
+  public boolean canTrigger(@NotNull LivingEntity entity) {
     ItemStack enchanted = getItem(entity);
     return enchanted != null && hasEnchantment(enchanted);
   }

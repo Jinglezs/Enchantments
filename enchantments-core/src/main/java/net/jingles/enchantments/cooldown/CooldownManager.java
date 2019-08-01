@@ -13,6 +13,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,7 +36,7 @@ public class CooldownManager implements Listener {
    * @param time    the length of the cooldown **PRIOR** to conversions.
    * @param unit    the time unit of the cooldown, such as SECONDS or MINUTES
    */
-  public void addCooldown(PersistentDataHolder holder, CustomEnchant enchant, long time, TimeUnit unit) {
+  public void addCooldown(@NotNull PersistentDataHolder holder, @NotNull CustomEnchant enchant, long time, @NotNull TimeUnit unit) {
 
     EnchantmentCooldownEvent event = new EnchantmentCooldownEvent(holder, enchant, time, unit);
     plugin.getServer().getPluginManager().callEvent(event);
@@ -56,7 +57,7 @@ public class CooldownManager implements Listener {
    * @param enchant the enchantment in question
    * @return whether or not an active cooldown is present.
    */
-  public boolean hasCooldown(PersistentDataHolder holder, CustomEnchant enchant) {
+  public boolean hasCooldown(@NotNull PersistentDataHolder holder, @NotNull CustomEnchant enchant) {
     if (!hasCooldownNoMessage(holder, enchant)) return false;
 
     if (holder instanceof Player) {
@@ -91,7 +92,7 @@ public class CooldownManager implements Listener {
     return true;
   }
 
-  public long getCooldown(PersistentDataHolder holder, CustomEnchant enchant) {
+  public long getCooldown(@NotNull PersistentDataHolder holder, @NotNull CustomEnchant enchant) {
     return holder.getPersistentDataContainer().getOrDefault(enchant.getCooldownKey(), PersistentDataType.LONG, 0L);
   }
 
@@ -101,12 +102,13 @@ public class CooldownManager implements Listener {
    * @param holder  the holder
    * @param enchant the enchantment in question.
    */
-  public void removeCooldown(PersistentDataHolder holder, CustomEnchant enchant) {
+  public void removeCooldown(@NotNull PersistentDataHolder holder, @NotNull CustomEnchant enchant) {
     holder.getPersistentDataContainer().remove(enchant.getCooldownKey());
     if (holder instanceof TileState) ((TileState) holder).update();
   }
 
-  public Map<CustomEnchant, Long> getCooldowns(Player player) {
+  @NotNull
+  public Map<CustomEnchant, Long> getCooldowns(@NotNull Player player) {
 
     Map<CustomEnchant, Long> cooldowns = new HashMap<>();
 

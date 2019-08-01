@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -14,30 +15,32 @@ public class ProjectileManager extends BukkitRunnable {
 
   private final Set<Projectile> projectiles = new ConcurrentSkipListSet<>();
 
-  public ProjectileManager(Enchantments plugin) {
+  public ProjectileManager(@NotNull Enchantments plugin) {
     runTaskTimer(plugin, 0, 1);
   }
 
-  public void register(Projectile projectile) {
+  public void register(@NotNull Projectile projectile) {
     projectiles.add(projectile);
   }
 
-  public void unregister(Projectile projectile) {
+  public void unregister(@NotNull Projectile projectile) {
     projectiles.remove(projectile);
   }
 
-  public Set<Projectile> getNearbyProjectiles(Location center, double radius) {
+  @NotNull
+  public Set<Projectile> getNearbyProjectiles(@NotNull Location center, double radius) {
     return getNearbyProjectiles(center, radius, radius, radius);
   }
 
-  public Set<Projectile> getNearbyProjectiles(Location center, double x, double y, double z) {
+  @NotNull
+  public Set<Projectile> getNearbyProjectiles(@NotNull Location center, double x, double y, double z) {
     BoundingBox boundingBox = BoundingBox.of(center, x, y, z);
     return projectiles.stream()
         .filter(projectile -> boundingBox.overlaps(projectile.getHitbox()))
         .collect(Collectors.toSet());
   }
 
-  public void bounceProjectileFromSource(Projectile projectile, Location source) {
+  public void bounceProjectileFromSource(@NotNull Projectile projectile, @NotNull Location source) {
     Vector direction = source.toVector().subtract(projectile.getLocation().toVector()).normalize();
     double multiplier = 1 + (Math.random() * 5);
 

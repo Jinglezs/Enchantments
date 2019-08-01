@@ -34,7 +34,7 @@ public class Forcefield extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(LivingEntity entity) {
+  public boolean canTrigger(@NotNull LivingEntity entity) {
     return hasEnchantment(getItem(entity)) && !Enchantments.getCooldownManager()
         .hasCooldown(entity, this);
   }

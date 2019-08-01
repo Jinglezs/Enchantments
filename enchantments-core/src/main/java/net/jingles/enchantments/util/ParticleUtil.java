@@ -3,10 +3,12 @@ package net.jingles.enchantments.util;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ParticleUtil {
 
-  public static void sphere(Location location, double radius, Particle particle, Object data) {
+  public static void sphere(@NotNull Location location, double radius, @NotNull Particle particle, @Nullable Object data) {
     int d = 3;
     for (double inc = (Math.random()*Math.PI)/5; inc < Math.PI; inc += Math.PI/d){
       for (double azi = (Math.random()*Math.PI)/d; azi < 2*Math.PI; azi += Math.PI/d){
@@ -31,7 +33,8 @@ public class ParticleUtil {
     return new Vector(x, y, z);
   }
 
-  public static Vector bounceFromSource(Vector original, Location source) {
+  @NotNull
+  public static Vector bounceFromSource(@NotNull Vector original, @NotNull Location source) {
     Vector direction = source.toVector().subtract(original).normalize();
     double multiplier = 1 + (Math.random() * 5);
 

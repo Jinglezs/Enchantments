@@ -8,6 +8,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -15,7 +16,7 @@ import java.util.stream.Stream;
 
 public class InventoryUtils {
 
-  public static void removeItem(Inventory inventory, Material material, int amount) {
+  public static void removeItem(@NotNull Inventory inventory, @NotNull Material material, int amount) {
     Stream.of(inventory.getContents())
         .filter(Objects::nonNull)
         .filter(item -> item.getType() == material)
@@ -27,7 +28,7 @@ public class InventoryUtils {
   }
 
 
-  public static void removeItem(Inventory inventory, Tag<Material> tag, int amount) {
+  public static void removeItem(@NotNull Inventory inventory, @NotNull Tag<Material> tag, int amount) {
     Stream.of(inventory.getContents())
         .filter(Objects::nonNull)
         .filter(item -> tag.isTagged(item.getType()))
@@ -39,11 +40,11 @@ public class InventoryUtils {
 
   }
 
-  public static void addEnchantLore(ItemStack item, Map<? extends Enchantment, Integer> enchants) {
+  public static void addEnchantLore(@NotNull ItemStack item, @NotNull Map<? extends Enchantment, Integer> enchants) {
     addEnchantLore(item.getItemMeta(), enchants);
   }
 
-  public static void addEnchantLore(ItemMeta meta, Map<? extends Enchantment, Integer> enchants) {
+  public static void addEnchantLore(@NotNull ItemMeta meta, @NotNull Map<? extends Enchantment, Integer> enchants) {
     List<String> lore = meta.hasLore() ? meta.getLore() : new ArrayList<>();
 
     enchants.forEach((enchant, level) -> lore.add((enchant.isCursed() ? ChatColor.RED : ChatColor.GRAY)
@@ -52,7 +53,7 @@ public class InventoryUtils {
     meta.setLore(lore);
   }
 
-  public static void removeEnchantLore(ItemStack item) {
+  public static void removeEnchantLore(@NotNull ItemStack item) {
     if (item.getItemMeta() == null || item.getEnchantments().isEmpty()) return;
     else if (item.getItemMeta().getLore() == null) return;
 
@@ -69,7 +70,7 @@ public class InventoryUtils {
     item.setItemMeta(meta);
   }
 
-  public static void removeEnchantLore(ItemStack item, CustomEnchant enchant) {
+  public static void removeEnchantLore(@NotNull ItemStack item, @NotNull CustomEnchant enchant) {
     if (item.getItemMeta() == null || item.getEnchantments().isEmpty()) return;
     else if (item.getItemMeta().getLore() == null) return;
 

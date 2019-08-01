@@ -45,7 +45,7 @@ public class Decapitation extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(LivingEntity entity) {
+  public boolean canTrigger(@NotNull LivingEntity entity) {
     ItemStack weapon = getItem(entity);
     return weapon != null && hasEnchantment(weapon);
   }

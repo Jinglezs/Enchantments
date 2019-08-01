@@ -37,7 +37,7 @@ public class Slippery extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(LivingEntity entity) {
+  public boolean canTrigger(@NotNull LivingEntity entity) {
     ItemStack item = getItem(entity);
     return item != null && hasEnchantment(item);
   }

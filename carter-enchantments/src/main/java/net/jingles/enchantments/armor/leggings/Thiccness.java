@@ -36,7 +36,7 @@ public class Thiccness extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(LivingEntity entity) {
+  public boolean canTrigger(@NotNull LivingEntity entity) {
 
     ItemStack leggings = getItem(entity);
     if (leggings == null || !hasEnchantment(leggings) ||
