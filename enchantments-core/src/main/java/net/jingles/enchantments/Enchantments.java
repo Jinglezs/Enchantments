@@ -30,6 +30,7 @@ public class Enchantments extends JavaPlugin {
     enableRegistrations();
     registerCommands();
     getServer().getPluginManager().registerEvents(new EnchantListener(), this);
+    getServer().getWorlds().forEach(world -> getEnchantmentManager().loadBlockEnchants(world));
   }
 
   //Ignore what Spigot has to say and forcefully enable enchantment registration

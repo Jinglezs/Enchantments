@@ -236,13 +236,7 @@ public class EnchantListener implements Listener {
 
   @EventHandler
   public void onChunkLoad(ChunkLoadEvent event) {
-
-    Stream.of(event.getChunk().getTileEntities())
-        .filter(state -> state instanceof TileState)
-        .map(state -> (TileState) state)
-        .forEach(tile -> BlockEnchant.getBlockEnchants(tile.getPersistentDataContainer())
-            .keySet().forEach(enchant -> enchant.onChunkLoad(tile)));
-
+    Enchantments.getEnchantmentManager().loadBlockEnchants(event.getChunk());
   }
 
   @EventHandler

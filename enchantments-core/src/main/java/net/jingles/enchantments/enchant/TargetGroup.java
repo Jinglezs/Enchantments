@@ -118,6 +118,11 @@ public enum TargetGroup {
   CAMPFIRE(material -> material == Material.CAMPFIRE),
 
   /**
+   * Bells yay
+   */
+  BELL(material -> material == Material.BELL),
+
+  /**
    * Represents all items that can be enchanted through this plugin, but cannot be enchanted normally in vanilla.
    */
   NON_VANILLA(material ->TILE_ENTITY.canEnchant(material) || BLOCK.canEnchant(material) || ELYTRA.canEnchant(material) ||

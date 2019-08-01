@@ -1,7 +1,10 @@
 package net.jingles.enchantments.enchant;
 
 import net.jingles.enchantments.Enchantments;
+import org.bukkit.Chunk;
 import org.bukkit.NamespacedKey;
+import org.bukkit.World;
+import org.bukkit.block.TileState;
 import org.bukkit.enchantments.Enchantment;
 import org.jetbrains.annotations.NotNull;
 import org.reflections.Reflections;
@@ -20,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class EnchantmentManager {
 
@@ -110,6 +114,19 @@ public final class EnchantmentManager {
         .filter(enchant -> enchant instanceof BlockEnchant)
         .map(enchant -> (BlockEnchant) enchant)
         .collect(Collectors.toSet());
+  }
+
+  public void loadBlockEnchants(World world) {
+    for (Chunk chunk : world.getLoadedChunks())
+      loadBlockEnchants(chunk);
+  }
+
+  public void loadBlockEnchants(Chunk chunk) {
+    Stream.of(chunk.getTileEntities())
+        .filter(state -> state instanceof TileState)
+        .map(state -> (TileState) state)
+        .forEach(tile -> BlockEnchant.getBlockEnchants(tile.getPersistentDataContainer())
+            .keySet().forEach(enchant -> enchant.onChunkLoad(tile)));
   }
 
 }
