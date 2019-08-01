@@ -7,7 +7,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.inventory.ItemStack;
 
@@ -35,13 +34,12 @@ public class ThothsBlessing extends CustomEnchant {
   @EventHandler
   public void onEnchantmentAddtion(EnchantmentCooldownEvent event) {
 
-    if (!(event.getHolder() instanceof Player)) return;
+    if (!(event.getHolder() instanceof LivingEntity)) return;
 
-    Player player = (Player) event.getHolder();
+    LivingEntity holder = (LivingEntity) event.getHolder();
 
-    if (canTrigger(player)) {
-      ItemStack helmet = getItem(player);
-      double reduction = (10 * getLevel(helmet)) / 100;
+    if (canTrigger(holder)) {
+      double reduction = (10 * getLevel(getItem(holder))) / 100;
       event.setRawCooldown((long) (event.getRawCooldown() - (event.getRawCooldown() * reduction)));
     }
 

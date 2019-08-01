@@ -39,8 +39,7 @@ public class HeartwardAmulet extends CustomEnchant {
 
   @Override
   public boolean canTrigger(LivingEntity entity) {
-    ItemStack chestplate = getItem(entity);
-    return chestplate != null && hasEnchantment(chestplate);
+    return hasEnchantment(getItem(entity));
   }
 
   @EventHandler

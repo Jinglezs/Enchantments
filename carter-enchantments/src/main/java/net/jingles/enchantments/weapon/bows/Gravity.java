@@ -51,13 +51,13 @@ public class Gravity extends CustomEnchant {
     if (!(event.getEntity() instanceof Arrow) ||
         !(event.getEntity().getShooter() instanceof LivingEntity)) return;
 
-    LivingEntity player = (LivingEntity) event.getEntity().getShooter();
-    if (!canTrigger(player)) return;
+    LivingEntity shooter = (LivingEntity) event.getEntity().getShooter();
+    if (!canTrigger(shooter)) return;
 
     Location hitLoc = event.getHitEntity() != null ? event.getHitEntity().getLocation() :
         event.getHitBlock().getLocation();
 
-    int level = getItem(player).getItemMeta().getEnchantLevel(this);
+    int level = getLevel(getItem(shooter));
     int radius = 5 + (3 * level);
 
     //Gets nearby entities within the radius that are living, not players, and are not tamed by the enchant owner.
@@ -77,14 +77,14 @@ public class Gravity extends CustomEnchant {
     //Detonate the arrow about half a second after pulling the entities towards it.
     plugin.getServer().getScheduler().runTaskLater(plugin, () -> targets.forEach(target -> {
       hitLoc.getWorld().spawnParticle(Particle.EXPLOSION_HUGE, hitLoc, 0, 0, 0, 1);
-      target.damage(7.0F, player);
+      target.damage(7.0F, shooter);
     }), 12L);
 
     int duration = (5 * level) * 20;
     PotionEffect slow = new PotionEffect(PotionEffectType.SLOW, duration, 1, false, true);
     targets.forEach(target -> target.addPotionEffect(slow));
 
-    Enchantments.getCooldownManager().addCooldown(player, this, getCooldown(), getTimeUnit());
+    Enchantments.getCooldownManager().addCooldown(shooter, this, getCooldown(), getTimeUnit());
   }
 
 }

@@ -7,10 +7,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.inventory.ItemStack;
 
 @Enchant(name = "Puppet Master", key = "puppet_master", levelRequirement = 30, maxLevel = 3, enchantChance = 0.25,
         targetItem = EnchantmentTarget.ARMOR_HEAD, description = "When the wearer attacks a mob, " +
@@ -29,23 +27,22 @@ public class PuppetMaster extends CustomEnchant {
 
   @Override
   public boolean canTrigger(LivingEntity entity) {
-    ItemStack helm = getItem(entity);
-    return helm != null && hasEnchantment(helm);
+    return hasEnchantment(getItem(entity));
   }
 
   @EventHandler
   public void onEntityAttack(EntityDamageByEntityEvent event) {
-    if (!(event.getDamager() instanceof Player) || !(event.getEntity() instanceof LivingEntity)) return;
+    if (!(event.getDamager() instanceof LivingEntity) || !(event.getEntity() instanceof LivingEntity)) return;
 
-    Player player = (Player) event.getDamager();
-    if (!canTrigger(player)) return;
+    LivingEntity damager = (LivingEntity) event.getDamager();
+    if (!canTrigger(damager)) return;
 
-    int level = getLevel(getItem(player));
+    int level = getLevel(getItem(damager));
     double probability = 0.25 + ((level * 15) / 100D);
 
     if (Math.random() >= probability) return;
 
-    player.getNearbyEntities(25, 25, 25).stream()
+    damager.getNearbyEntities(25, 25, 25).stream()
             .filter(entity -> entity instanceof Mob)
             .map(entity -> (Mob) entity)
             .forEach(entity -> entity.setTarget((LivingEntity) event.getEntity()));

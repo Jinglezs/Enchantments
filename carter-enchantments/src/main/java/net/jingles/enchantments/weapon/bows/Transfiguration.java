@@ -59,14 +59,14 @@ public class Transfiguration extends CustomEnchant {
     if (event.getHitEntity() == null || !(event.getHitEntity() instanceof LivingEntity) ||
         !(event.getEntity().getShooter() instanceof LivingEntity)) return;
 
-    LivingEntity player = (LivingEntity) event.getEntity().getShooter();
-    if (!canTrigger(player)) return;
+    LivingEntity shooter = (LivingEntity) event.getEntity().getShooter();
+    if (!canTrigger(shooter)) return;
 
-    LivingEntity entity = (LivingEntity) event.getHitEntity();
-    if (entity.isDead() || entity.getClass().isAssignableFrom(Boss.class)) return;
+    LivingEntity hit = (LivingEntity) event.getHitEntity();
+    if (hit.isDead() || hit.getClass().isAssignableFrom(Boss.class)) return;
 
-    Enchantments.getStatusEffectManager().add(new TransfigurationEffect(entity));
-    addCooldown(entity);
+    Enchantments.getStatusEffectManager().add(new TransfigurationEffect(hit));
+    addCooldown(hit);
   }
 
   @EventHandler

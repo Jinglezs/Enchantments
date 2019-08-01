@@ -6,7 +6,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
@@ -43,17 +42,17 @@ public class FireDancer extends CustomEnchant {
 
   @EventHandler
   private void onCombust(EntityDamageEvent event) {
-    if (!(event.getEntity() instanceof Player)) return;
+    if (!(event.getEntity() instanceof LivingEntity)) return;
 
     if (event.getCause() == EntityDamageEvent.DamageCause.LAVA || event.getCause() == EntityDamageEvent.DamageCause.FIRE
         || event.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK) {
 
-      Player player = (Player) event.getEntity();
-      if (!canTrigger(player)) return;
+      LivingEntity entity = (LivingEntity) event.getEntity();
+      if (!canTrigger(entity)) return;
 
       event.setCancelled(true);
-      player.setFireTicks(0);
-      player.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 5, 3, false, true));
+      entity.setFireTicks(0);
+      entity.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 20 * 5, 3, false, true));
     }
 
   }

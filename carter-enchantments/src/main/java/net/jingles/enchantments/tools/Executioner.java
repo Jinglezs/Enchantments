@@ -3,15 +3,12 @@ package net.jingles.enchantments.tools;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.enchant.TargetGroup;
-import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.inventory.ItemStack;
 
 @Enchant(name = "Executioner", key = "executioner", targetItem = EnchantmentTarget.TOOL, enchantChance = 0.45,
     targetGroup = TargetGroup.AXES, description = "Increases weapon damage by 10% (+5% per level) " +
@@ -30,24 +27,18 @@ public class Executioner extends CustomEnchant {
 
   @Override
   public boolean canTrigger(LivingEntity entity) {
-    ItemStack axe = getItem(entity);
-    return isAxe(axe.getType()) && hasEnchantment(axe);
-  }
-
-  private boolean isAxe(Material item) {
-    return item == Material.WOODEN_AXE || item == Material.STONE_AXE || item == Material.IRON_AXE ||
-            item == Material.GOLDEN_AXE || item == Material.DIAMOND_AXE;
+    return hasEnchantment(getItem(entity));
   }
 
   @EventHandler
   public void onEntityDamage(EntityDamageByEntityEvent event) {
-    if (!(event.getDamager() instanceof Player)) return;
 
-    Player player = (Player) event.getDamager();
-    if (!canTrigger(player)) return;
+    if (!(event.getDamager() instanceof LivingEntity)) return;
 
-    int level = getLevel(getItem(player));
+    LivingEntity entity = (LivingEntity) event.getDamager();
+    if (!canTrigger(entity)) return;
 
+    int level = getLevel(getItem(entity));
     double increase = 0.10 + ((level * 5) / 100D);
     event.setDamage(event.getDamage() + (event.getDamage() * increase));
 
