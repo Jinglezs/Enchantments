@@ -22,19 +22,14 @@ import java.util.stream.Stream;
 
 public abstract class CustomEnchant extends Enchantment implements Listener {
 
-  private final String name;
-  private final String keyName;
-  private final String description;
+  private final String name, keyName, description;
   private final long cooldown;
   private final TimeUnit timeUnit;
   private final TargetGroup targetGroup;
-  private final int levelRequirement;
   private final double enchantChance;
-  private final int maxLevel;
-  private final int startLevel;
+  private final int levelRequirement, maxLevel, startLevel;
   private final EnchantmentTarget target;
-  private final boolean treasure;
-  private final boolean cursed;
+  private final boolean treasure, cursed;
   private final NamespacedKey cooldownKey;
 
   public CustomEnchant(NamespacedKey key) {
