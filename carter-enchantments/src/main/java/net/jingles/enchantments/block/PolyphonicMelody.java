@@ -85,6 +85,7 @@ public class PolyphonicMelody extends BlockEnchant {
   private class PolyphonicStatusEffect extends PotionStatusEffect {
 
     private final Jukebox jukebox;
+    private final int MAX_DISTANCE = 65 * 65;
 
     private PolyphonicStatusEffect(Jukebox jukebox, PotionEffect potionEffect, LivingEntity target) {
       super(potionEffect, target, PolyphonicMelody.this, 20);
@@ -97,6 +98,10 @@ public class PolyphonicMelody extends BlockEnchant {
 
     @Override
     public void effect() {
+
+      if (getTarget().getLocation().distanceSquared(jukebox.getLocation()) > MAX_DISTANCE)
+        this.stop();
+
     }
 
   }

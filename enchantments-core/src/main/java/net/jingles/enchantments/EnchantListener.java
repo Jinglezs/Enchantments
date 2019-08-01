@@ -84,7 +84,8 @@ public class EnchantListener implements Listener {
     ItemStack item = event.getInventory().getItem(0);
 
     // We're only interested if the item cannot be enchanted normally and is not already enchanted.
-    if (item == null || !item.getEnchantments().isEmpty() || !TargetGroup.NON_VANILLA.canEnchant(item.getType())) return;
+    if (item == null || !item.getEnchantments().isEmpty() || !TargetGroup.NON_VANILLA.canEnchant(item.getType()))
+      return;
 
     // Event must be un-cancelled because the item cannot be enchanted by default.
     event.setCancelled(false);
@@ -178,8 +179,11 @@ public class EnchantListener implements Listener {
 
     PersistentDataContainer container = ((TileState) state).getPersistentDataContainer();
     // Save the enchantment level to the container with the corresponding key.
-    BlockEnchant.getBlockEnchants(item).forEach((enchant, level) ->
-        container.set(enchant.getKey(), PersistentDataType.INTEGER, level));
+    // Call the onChunkLoad method because the block is being loaded in
+    BlockEnchant.getBlockEnchants(item).forEach((enchant, level) -> {
+      container.set(enchant.getKey(), PersistentDataType.INTEGER, level);
+      enchant.onChunkLoad((TileState) state);
+    });
 
     // Update the BlockState so all of these things take effect >_>
     state.update(true);
@@ -237,7 +241,7 @@ public class EnchantListener implements Listener {
         .filter(state -> state instanceof TileState)
         .map(state -> (TileState) state)
         .forEach(tile -> BlockEnchant.getBlockEnchants(tile.getPersistentDataContainer())
-          .keySet().forEach(enchant -> enchant.onChunkLoad(tile)));
+            .keySet().forEach(enchant -> enchant.onChunkLoad(tile)));
 
   }
 
@@ -247,7 +251,7 @@ public class EnchantListener implements Listener {
         .filter(state -> state instanceof TileState)
         .map(state -> (TileState) state)
         .forEach(tile -> BlockEnchant.getBlockEnchants(tile.getPersistentDataContainer())
-          .keySet().forEach(enchant -> enchant.onChunkUnload(tile)));
+            .keySet().forEach(enchant -> enchant.onChunkUnload(tile)));
   }
 
 }
