@@ -10,8 +10,8 @@ import org.bukkit.Particle;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.inventory.ItemStack;
@@ -40,24 +40,24 @@ public class Gravity extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
-    ItemStack bow = getItem(player.getInventory());
+  public boolean canTrigger(LivingEntity entity) {
+    ItemStack bow = getItem(entity);
     return bow != null && hasEnchantment(bow) && !Enchantments.getCooldownManager()
-        .hasCooldown(player, this);
+        .hasCooldown(entity, this);
   }
 
   @EventHandler
   public void onArrowHit(ProjectileHitEvent event) {
     if (!(event.getEntity() instanceof Arrow) ||
-        !(event.getEntity().getShooter() instanceof Player)) return;
+        !(event.getEntity().getShooter() instanceof LivingEntity)) return;
 
-    Player player = (Player) event.getEntity().getShooter();
+    LivingEntity player = (LivingEntity) event.getEntity().getShooter();
     if (!canTrigger(player)) return;
 
     Location hitLoc = event.getHitEntity() != null ? event.getHitEntity().getLocation() :
         event.getHitBlock().getLocation();
 
-    int level = getItem(player.getInventory()).getItemMeta().getEnchantLevel(this);
+    int level = getItem(player).getItemMeta().getEnchantLevel(this);
     int radius = 5 + (3 * level);
 
     //Gets nearby entities within the radius that are living, not players, and are not tamed by the enchant owner.

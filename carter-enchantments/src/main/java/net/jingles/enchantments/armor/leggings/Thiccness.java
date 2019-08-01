@@ -11,6 +11,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
@@ -34,15 +35,15 @@ public class Thiccness extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
+  public boolean canTrigger(LivingEntity entity) {
 
-    ItemStack leggings = getItem(player.getInventory());
+    ItemStack leggings = getItem(entity);
     if (leggings == null || !hasEnchantment(leggings) ||
-        Enchantments.getCooldownManager().hasCooldown(player, this))
+        Enchantments.getCooldownManager().hasCooldown(entity, this))
       return false;
 
     Optional<EntityEffectContainer> container = Enchantments.getStatusEffectManager()
-        .getEntityContainer(player.getUniqueId());
+        .getEntityContainer(entity.getUniqueId());
 
     return !container.isPresent() || !container.get().hasEffect(ThiccnessChargeEffect.class);
   }

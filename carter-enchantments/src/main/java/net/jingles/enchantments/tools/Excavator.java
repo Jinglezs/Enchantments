@@ -8,7 +8,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
@@ -36,8 +36,8 @@ public class Excavator extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
-    return hasEnchantment(player.getInventory().getItemInMainHand());
+  public boolean canTrigger(LivingEntity entity) {
+    return hasEnchantment(getItem(entity));
   }
 
   @EventHandler

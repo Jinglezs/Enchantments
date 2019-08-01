@@ -9,6 +9,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -32,10 +33,10 @@ public class Eluding extends CustomEnchant {
   public boolean conflictsWith(Enchantment other) { return false; }
 
   @Override
-  public boolean canTrigger(Player player) {
-    ItemStack boots = getItem(player.getInventory());
+  public boolean canTrigger(LivingEntity entity) {
+    ItemStack boots = getItem(entity);
     return boots != null && hasEnchantment(boots) &&
-        !Enchantments.getCooldownManager().hasCooldown(player, this);
+        !Enchantments.getCooldownManager().hasCooldown(entity, this);
   }
 
   @EventHandler
@@ -46,7 +47,7 @@ public class Eluding extends CustomEnchant {
     Player player = (Player) event.getEntity();
     if (!canTrigger(player)) return;
 
-    int level = getItem(player.getInventory()).getItemMeta().getEnchantLevel(this);
+    int level = getLevel(getItem(player));
     double probability = 0.25 + ((level * 5) / 100D);
     // Max level can be 5, equals to a .5 chance every time hit - if other conditions met
 

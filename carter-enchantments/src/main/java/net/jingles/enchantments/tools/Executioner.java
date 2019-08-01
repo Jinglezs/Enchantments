@@ -7,11 +7,11 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 
 @Enchant(name = "Executioner", key = "executioner", targetItem = EnchantmentTarget.TOOL, enchantChance = 0.45,
     targetGroup = TargetGroup.AXES, description = "Increases weapon damage by 10% (+5% per level) " +
@@ -29,8 +29,8 @@ public class Executioner extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
-    ItemStack axe = getItem(player.getInventory());
+  public boolean canTrigger(LivingEntity entity) {
+    ItemStack axe = getItem(entity);
     return isAxe(axe.getType()) && hasEnchantment(axe);
   }
 
@@ -43,10 +43,10 @@ public class Executioner extends CustomEnchant {
   public void onEntityDamage(EntityDamageByEntityEvent event) {
     if (!(event.getDamager() instanceof Player)) return;
 
-    PlayerInventory inventory = ((Player) event.getDamager()).getInventory();
-    if (!canTrigger((Player) event.getDamager())) return;
+    Player player = (Player) event.getDamager();
+    if (!canTrigger(player)) return;
 
-    int level = getItem(inventory).getItemMeta().getEnchantLevel(this);
+    int level = getLevel(getItem(player));
 
     double increase = 0.10 + ((level * 5) / 100D);
     event.setDamage(event.getDamage() + (event.getDamage() * increase));

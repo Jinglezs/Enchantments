@@ -9,6 +9,7 @@ import org.bukkit.Particle;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
@@ -38,8 +39,8 @@ public class Forcefield extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
-    ItemStack enchanted = getItem(player.getInventory());
+  public boolean canTrigger(LivingEntity entity) {
+    ItemStack enchanted = getItem(entity);
     if (enchanted == null || !hasEnchantment(enchanted)) return false;
     return (Math.random() * 100) <= (enchanted.getItemMeta().getEnchantLevel(this) * 10);
   }

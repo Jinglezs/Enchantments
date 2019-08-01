@@ -8,6 +8,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -29,10 +30,10 @@ public class Disarming extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
-    ItemStack sword = getItem(player.getInventory());
+  public boolean canTrigger(LivingEntity entity) {
+    ItemStack sword = getItem(entity);
     return sword != null && hasEnchantment(sword) &&
-        !Enchantments.getCooldownManager().hasCooldown(player, this);
+        !Enchantments.getCooldownManager().hasCooldown(entity, this);
   }
 
   @EventHandler
@@ -43,7 +44,7 @@ public class Disarming extends CustomEnchant {
     Player attacked = (Player) event.getEntity();
     if (!canTrigger(attacker)) return;
 
-    int level = getLevel(getItem(attacker.getInventory()));
+    int level = getLevel(getItem(attacker));
     if (Math.random() > (0.10 + ((level * 10) / 100D))) return;
 
     ItemStack held = attacked.getInventory().getItemInMainHand();

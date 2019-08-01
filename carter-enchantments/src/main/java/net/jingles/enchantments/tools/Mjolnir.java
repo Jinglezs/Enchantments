@@ -44,14 +44,14 @@ public class Mjolnir extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
-    ItemStack axe = getItem(player.getInventory());
+  public boolean canTrigger(LivingEntity entity) {
+    ItemStack axe = getItem(entity);
 
     if (axe == null || !hasEnchantment(axe) ||
-        Enchantments.getCooldownManager().hasCooldown(player, this)) return false;
+        Enchantments.getCooldownManager().hasCooldown(entity, this)) return false;
 
     Optional<EntityEffectContainer> container = Enchantments.getStatusEffectManager()
-        .getEntityContainer(player.getUniqueId());
+        .getEntityContainer(entity.getUniqueId());
 
     return !container.isPresent() || (!container.get().hasEffect(MjolnirChargeEffect.class)
         && !container.get().hasEffect(MjolnirFlightEffect.class));

@@ -10,6 +10,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -43,8 +44,8 @@ public class Decapitation extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
-    ItemStack weapon = getItem(player.getInventory());
+  public boolean canTrigger(LivingEntity entity) {
+    ItemStack weapon = getItem(entity);
     return weapon != null && hasEnchantment(weapon);
   }
 
@@ -58,7 +59,7 @@ public class Decapitation extends CustomEnchant {
 
     if (!canTrigger(player) || !DROPPABLE.containsKey(event.getEntityType())) return;
 
-    int level = getItem(player.getInventory()).getItemMeta().getEnchantLevel(this);
+    int level = getLevel(getItem(player));
     double probability = (10 * level) / 100D;
     if (Math.random() >= probability) return;
 

@@ -6,6 +6,7 @@ import net.jingles.enchantments.enchant.Enchant;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.inventory.ItemStack;
@@ -26,8 +27,8 @@ public class ThothsBlessing extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
-    ItemStack helm = getItem(player.getInventory());
+  public boolean canTrigger(LivingEntity entity) {
+    ItemStack helm = getItem(entity);
     return helm != null && hasEnchantment(helm);
   }
 
@@ -39,8 +40,8 @@ public class ThothsBlessing extends CustomEnchant {
     Player player = (Player) event.getHolder();
 
     if (canTrigger(player)) {
-      ItemStack helmet = getItem(player.getInventory());
-      double reduction = (10 * helmet.getItemMeta().getEnchantLevel(this)) / 100;
+      ItemStack helmet = getItem(player);
+      double reduction = (10 * getLevel(helmet)) / 100;
       event.setRawCooldown((long) (event.getRawCooldown() - (event.getRawCooldown() * reduction)));
     }
 

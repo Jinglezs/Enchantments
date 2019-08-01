@@ -36,10 +36,14 @@ public class Backstab extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
-    ItemStack sword = getItem(player.getInventory());
-    return player.isSneaking() && sword != null && hasEnchantment(sword) &&
-        !Enchantments.getCooldownManager().hasCooldown(player, this);
+  public boolean canTrigger(LivingEntity entity) {
+
+    if (!(entity instanceof Player)) return false;
+
+    ItemStack sword = getItem(entity);
+
+    return ((Player) entity).isSneaking() && sword != null && hasEnchantment(sword) &&
+        !Enchantments.getCooldownManager().hasCooldown(entity, this);
   }
 
   @EventHandler

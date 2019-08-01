@@ -13,6 +13,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -39,18 +40,18 @@ public class Reinforcement extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
+  public boolean canTrigger(LivingEntity entity) {
 
-    ItemStack shield = getItem(player.getInventory());
+    ItemStack shield = getItem(entity);
     if (!hasEnchantment(shield)) return false;
 
     Optional<EntityEffectContainer> container = Enchantments.getStatusEffectManager()
-        .getEntityContainer(player.getUniqueId());
+        .getEntityContainer(entity.getUniqueId());
 
     if (!container.isPresent()) return true;
 
     return !container.get().hasEffect(ReinforcementEffect.class) &&
-        !Enchantments.getCooldownManager().hasCooldown(player, this);
+        !Enchantments.getCooldownManager().hasCooldown(entity, this);
   }
 
   @EventHandler
@@ -62,7 +63,7 @@ public class Reinforcement extends CustomEnchant {
         !canTrigger(player)) return;
 
     // The duration increases by 7 seconds per level.
-    int level = getLevel(getItem(player.getInventory()));
+    int level = getLevel(getItem(player));
     int duration = level * (7 * 20);
     int damage = level * 3;
     Enchantments.getStatusEffectManager().add(new ReinforcementEffect(player, duration, damage));

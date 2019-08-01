@@ -8,7 +8,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.inventory.ItemStack;
@@ -29,8 +29,8 @@ public class AthenasBlessing extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
-    ItemStack helm = getItem(player.getInventory());
+  public boolean canTrigger(LivingEntity entity) {
+    ItemStack helm = getItem(entity);
     return helm != null && hasEnchantment(helm);
   }
 
@@ -39,7 +39,7 @@ public class AthenasBlessing extends CustomEnchant {
     if (!canTrigger(event.getPlayer())) return;
 
     double original = event.getAmount();
-    int level = getItem(event.getPlayer().getInventory()).getItemMeta().getEnchantLevel(this);
+    int level = getItem(event.getPlayer()).getItemMeta().getEnchantLevel(this);
     double increase = 0.10 + ((level * 10) / 100D);
     int newExperience = (int) (original + (original * increase));
     event.setAmount(newExperience);

@@ -10,6 +10,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerItemHeldEvent;
@@ -35,25 +36,25 @@ public class Slippery extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
-    ItemStack item = getItem(player.getInventory());
+  public boolean canTrigger(LivingEntity entity) {
+    ItemStack item = getItem(entity);
     return item != null && hasEnchantment(item);
   }
 
   @EventHandler
   public void onMainHandSwitch(PlayerItemHeldEvent event) {
     Player player = event.getPlayer();
-    if (canTrigger(player)) tryDrop(player, getItem(player.getInventory()));
+    if (canTrigger(player)) tryDrop(player, getItem(player));
   }
 
   @EventHandler
   public void onSwitchToOffhand(PlayerSwapHandItemsEvent event) {
     Player player = event.getPlayer();
-    if (canTrigger(player)) tryDrop(player, getItem(player.getInventory()));
+    if (canTrigger(player)) tryDrop(player, getItem(player));
   }
 
   private void tryDrop(Player player, ItemStack item) {
-    int level = item.getItemMeta().getEnchantLevel(this);
+    int level = getLevel(getItem(player));
     double probability = 0.10 + ((level * 5) / 100D);
     if (Math.random() >= probability) return;
 

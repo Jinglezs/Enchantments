@@ -10,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -31,15 +32,15 @@ public class Luminosity extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
-    ItemStack boots = getItem(player.getInventory());
+  public boolean canTrigger(LivingEntity entity) {
+    ItemStack boots = getItem(entity);
 
     if (boots == null || !hasEnchantment(boots)) return false;
 
     EntityEffectContainer container = Enchantments.getStatusEffectManager()
-        .getOrNewEntityContainer(player.getUniqueId());
+        .getOrNewEntityContainer(entity.getUniqueId());
 
-    return player.isOnGround() && !container.hasEffect(LuminosityEffect.class);
+    return entity.isOnGround() && !container.hasEffect(LuminosityEffect.class);
   }
 
   @EventHandler

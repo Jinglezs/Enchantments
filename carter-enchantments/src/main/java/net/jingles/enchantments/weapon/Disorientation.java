@@ -36,9 +36,9 @@ public class Disorientation extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
-    return hasEnchantment(getItem(player.getInventory())) && !Enchantments.getCooldownManager()
-        .hasCooldown(player, this);
+  public boolean canTrigger(LivingEntity entity) {
+    return hasEnchantment(getItem(entity)) && !Enchantments.getCooldownManager()
+        .hasCooldown(entity, this);
   }
 
   @EventHandler
@@ -49,7 +49,7 @@ public class Disorientation extends CustomEnchant {
     Player attacker = (Player) event.getDamager();
     if (!canTrigger(attacker)) return;
 
-    int duration = getLevel(getItem(attacker.getInventory())) * 20;
+    int duration = getLevel(getItem(attacker)) * 20;
     PotionEffect effect = new PotionEffect(PotionEffectType.CONFUSION, duration, 3, false, true);
     Enchantments.getStatusEffectManager().add(new DisorientationEffect(effect, (LivingEntity) event.getEntity()));
 

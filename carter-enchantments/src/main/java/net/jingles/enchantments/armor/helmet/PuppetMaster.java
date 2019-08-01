@@ -28,8 +28,8 @@ public class PuppetMaster extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
-    ItemStack helm = getItem(player.getInventory());
+  public boolean canTrigger(LivingEntity entity) {
+    ItemStack helm = getItem(entity);
     return helm != null && hasEnchantment(helm);
   }
 
@@ -40,7 +40,7 @@ public class PuppetMaster extends CustomEnchant {
     Player player = (Player) event.getDamager();
     if (!canTrigger(player)) return;
 
-    int level = getItem(player.getInventory()).getItemMeta().getEnchantLevel(this);
+    int level = getLevel(getItem(player));
     double probability = 0.25 + ((level * 15) / 100D);
 
     if (Math.random() >= probability) return;

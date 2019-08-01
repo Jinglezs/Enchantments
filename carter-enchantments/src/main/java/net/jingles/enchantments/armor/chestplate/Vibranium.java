@@ -13,6 +13,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.inventory.EntityEquipment;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -39,12 +40,15 @@ public class Vibranium extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
+  public boolean canTrigger(LivingEntity entity) {
 
-    if (Enchantments.getCooldownManager().hasCooldown(player, this)) return false;
+    if (Enchantments.getCooldownManager().hasCooldown(entity, this)) return false;
+
+    EntityEquipment equipment = entity.getEquipment();
+    if (equipment == null) return false;
 
     // Only returns true if every armor piece is present and has the enchantment.
-    return Stream.of(player.getInventory().getArmorContents())
+    return Stream.of(equipment.getArmorContents())
         .noneMatch(item -> item == null || !hasEnchantment(item));
   }
 

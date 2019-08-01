@@ -13,7 +13,10 @@ import org.bukkit.Particle;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
-import org.bukkit.entity.*;
+import org.bukkit.entity.Boss;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Monster;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
@@ -44,26 +47,26 @@ public class Transfiguration extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
-    ItemStack bow = getItem(player.getInventory());
+  public boolean canTrigger(LivingEntity entity) {
+    ItemStack bow = getItem(entity);
     return bow != null && hasEnchantment(bow) && !Enchantments.getCooldownManager()
-        .hasCooldown(player, this);
+        .hasCooldown(entity, this);
   }
 
   @EventHandler
   public void onArrowHit(ProjectileHitEvent event) {
 
     if (event.getHitEntity() == null || !(event.getHitEntity() instanceof LivingEntity) ||
-        !(event.getEntity().getShooter() instanceof Player)) return;
+        !(event.getEntity().getShooter() instanceof LivingEntity)) return;
 
-    Player player = (Player) event.getEntity().getShooter();
+    LivingEntity player = (LivingEntity) event.getEntity().getShooter();
     if (!canTrigger(player)) return;
 
     LivingEntity entity = (LivingEntity) event.getHitEntity();
     if (entity.isDead() || entity.getClass().isAssignableFrom(Boss.class)) return;
 
     Enchantments.getStatusEffectManager().add(new TransfigurationEffect(entity));
-    addCooldown(player);
+    addCooldown(entity);
   }
 
   @EventHandler

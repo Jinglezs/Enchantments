@@ -37,10 +37,10 @@ public class Pyromancer extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
-    ItemStack sword = getItem(player.getInventory());
+  public boolean canTrigger(LivingEntity entity) {
+    ItemStack sword = getItem(entity);
     return sword != null && hasEnchantment(sword) &&
-        !Enchantments.getCooldownManager().hasCooldown(player, this);
+        !Enchantments.getCooldownManager().hasCooldown(entity, this);
   }
 
   @EventHandler
@@ -56,7 +56,7 @@ public class Pyromancer extends CustomEnchant {
     final LivingEntity target = result != null ? (LivingEntity) result.getHitEntity() : null;
     if (target == null) return;
 
-    int level = getItem(player.getInventory()).getItemMeta().getEnchantLevel(this);
+    int level = getLevel(getItem(player));
     float damage = 5 + (level * 2);
     int fireTicks = (5 + (level * 2)) * 20;
 

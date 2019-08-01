@@ -7,6 +7,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -45,8 +46,8 @@ public class EggHunter extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
-    ItemStack sword = getItem(player.getInventory());
+  public boolean canTrigger(LivingEntity entity) {
+    ItemStack sword = getItem(entity);
     return sword != null && hasEnchantment(sword);
   }
 
@@ -58,7 +59,7 @@ public class EggHunter extends CustomEnchant {
 
     if (!SPAWN_EGGS.containsKey(event.getEntityType()) || !canTrigger(player)) return;
 
-    int level = getItem(player.getInventory()).getItemMeta().getEnchantLevel(this);
+    int level = getLevel(getItem(player));
     double probability = (10 * level) / 100D;
 
     if (Math.random() <= probability)

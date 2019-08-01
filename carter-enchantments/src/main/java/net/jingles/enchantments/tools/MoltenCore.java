@@ -8,7 +8,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
@@ -49,8 +49,8 @@ public class MoltenCore extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
-    ItemStack held = getItem(player.getInventory());
+  public boolean canTrigger(LivingEntity entity) {
+    ItemStack held = getItem(entity);
     return held != null && hasEnchantment(held);
   }
 
@@ -62,7 +62,7 @@ public class MoltenCore extends CustomEnchant {
 
     Block block = event.getBlock();
     Material replacement = SMELTABLE.get(block.getType());
-    ItemStack tool = getItem(event.getPlayer().getInventory());
+    ItemStack tool = getItem(event.getPlayer());
     Collection<ItemStack> drops = block.getDrops(tool);
 
     int amount = drops.stream().filter(stack -> stack.getType() == block.getType())

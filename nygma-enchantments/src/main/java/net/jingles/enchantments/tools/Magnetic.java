@@ -11,6 +11,7 @@ import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -39,8 +40,8 @@ public class Magnetic extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
-    ItemStack tool = getItem(player.getInventory());
+  public boolean canTrigger(LivingEntity entity) {
+    ItemStack tool = getItem(entity);
     return tool != null && hasEnchantment(tool);
   }
 
@@ -53,7 +54,7 @@ public class Magnetic extends CustomEnchant {
 
     Player player = event.getPlayer();
     Block block = event.getBlock();
-    ItemStack tool = getItem(player.getInventory());
+    ItemStack tool = getItem(player);
     Collection<ItemStack> drops = block.getDrops(tool);
 
     event.setCancelled(true);

@@ -5,6 +5,7 @@ import net.jingles.enchantments.enchant.Enchant;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -35,8 +36,8 @@ public class FireDancer extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
-    ItemStack enchanted = getItem(player.getInventory());
+  public boolean canTrigger(LivingEntity entity) {
+    ItemStack enchanted = getItem(entity);
     return enchanted != null && hasEnchantment(enchanted);
   }
 

@@ -11,6 +11,7 @@ import org.bukkit.Tag;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Arrow;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
@@ -36,8 +37,8 @@ public class Grapple extends CustomEnchant {
   }
 
   @Override
-  public boolean canTrigger(Player player) {
-    ItemStack bow = getItem(player.getInventory());
+  public boolean canTrigger(LivingEntity entity) {
+    ItemStack bow = getItem(entity);
     return bow != null && hasEnchantment(bow);
   }
 
