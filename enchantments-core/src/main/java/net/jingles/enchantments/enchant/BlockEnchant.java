@@ -1,6 +1,7 @@
 package net.jingles.enchantments.enchant;
 
 import net.jingles.enchantments.Enchantments;
+import net.jingles.enchantments.statuseffect.StatusEffect;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.TileState;
 import org.bukkit.enchantments.Enchantment;
@@ -22,6 +23,30 @@ public abstract class BlockEnchant extends CustomEnchant {
   }
 
   public abstract boolean canTrigger(@NotNull TileState tile);
+
+  /**
+   * This method can be overrode to determine how the enchanted block
+   * behaves when it is loaded with a chunk. This allows for continuous
+   * effects to be stopped and restarted when the chunk unloads and loads again.
+   *
+   * @param tile the tile entity with the enchantment
+   */
+  public void onChunkLoad(TileState tile) {
+  }
+
+  /**
+   * Allows the developer to determine how unloading the enchanted
+   * block's chunk affects its behavior.
+   *
+   * The default behavior is to stop all location status effects
+   * at the tile entity's location.
+   *
+   * @param tile the tile entity with the enchantment
+   */
+  public void onChunkUnload(TileState tile) {
+    Enchantments.getStatusEffectManager().getWorldContainer().getEffectsAtLocation(tile.getLocation())
+        .forEach(StatusEffect::stop);
+  }
 
   @Override
   public boolean canTrigger(@NotNull LivingEntity entity) {

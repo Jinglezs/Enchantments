@@ -20,6 +20,8 @@ import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.world.ChunkLoadEvent;
+import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
@@ -30,6 +32,7 @@ import org.bukkit.persistence.PersistentDataType;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class EnchantListener implements Listener {
 
@@ -221,6 +224,30 @@ public class EnchantListener implements Listener {
 
     });
 
+  }
+
+  // The chunk events make calls to BlockEnchant#onChunkLoad() and
+  // BlockEnchant#onChunkUnload for more control over how chunk
+  // loading affects block enchantments.
+
+  @EventHandler
+  public void onChunkLoad(ChunkLoadEvent event) {
+
+    Stream.of(event.getChunk().getTileEntities())
+        .filter(state -> state instanceof TileState)
+        .map(state -> (TileState) state)
+        .forEach(tile -> BlockEnchant.getBlockEnchants(tile.getPersistentDataContainer())
+          .keySet().forEach(enchant -> enchant.onChunkLoad(tile)));
+
+  }
+
+  @EventHandler
+  public void onChunkUnload(ChunkUnloadEvent event) {
+    Stream.of(event.getChunk().getTileEntities())
+        .filter(state -> state instanceof TileState)
+        .map(state -> (TileState) state)
+        .forEach(tile -> BlockEnchant.getBlockEnchants(tile.getPersistentDataContainer())
+          .keySet().forEach(enchant -> enchant.onChunkUnload(tile)));
   }
 
 }
