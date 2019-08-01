@@ -5,10 +5,11 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.EntityEquipment;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
@@ -128,44 +129,52 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
 
   public abstract boolean conflictsWith(Enchantment other);
 
-  public abstract boolean canTrigger(Player player);
+  public abstract boolean canTrigger(LivingEntity entity);
 
-  public ItemStack getItem(PlayerInventory player) {
+  public ItemStack getItem(LivingEntity entity) {
+
+    EntityEquipment equipment = entity.getEquipment();
+    if (equipment == null) return null;
+
     //Why the fuck does a llama have my enchantment?
     switch (getItemTarget()) {
       case ALL: //Prioritizes hands, but also checks rest of contents
 
-        ItemStack mainHand = player.getItemInMainHand();
+        ItemStack mainHand = equipment.getItemInMainHand();
         if (hasEnchantment(mainHand)) return mainHand;
 
-        ItemStack offHand = player.getItemInOffHand();
+        ItemStack offHand = equipment.getItemInOffHand();
         if (hasEnchantment(offHand)) return offHand;
 
-        ItemStack found = Stream.of(player.getContents())
-            .filter(Objects::nonNull)
-            .filter(item -> getTargetGroup().canEnchant(item.getType()))
-            .filter(this::hasEnchantment)
-            .findFirst().orElse(null);
+        if (entity instanceof InventoryHolder) {
 
-        // Unless it's wearable, we want to make sure that the player is holding the enchanted item.
-        if (found != null && !EnchantmentTarget.WEARABLE.includes(found) &&
-            (mainHand.equals(found) || offHand.equals(found))) return found;
+          ItemStack found = Stream.of(((InventoryHolder) entity).getInventory().getContents())
+              .filter(Objects::nonNull)
+              .filter(item -> getTargetGroup().canEnchant(item.getType()))
+              .filter(this::hasEnchantment)
+              .findFirst().orElse(null);
+
+          // Unless it's wearable, we want to make sure that the player is holding the enchanted item.
+          if (found != null && !EnchantmentTarget.WEARABLE.includes(found) &&
+              (mainHand.equals(found) || offHand.equals(found))) return found;
+
+        }
 
         return null;
 
       case ARMOR:
-        return Stream.of(player.getArmorContents())
+        return Stream.of(equipment.getArmorContents())
             .filter(this::hasEnchantment)
             .findFirst().orElse(null);
 
       case ARMOR_HEAD:
-        return player.getHelmet();
+        return equipment.getHelmet();
       case ARMOR_TORSO:
-        return player.getChestplate();
+        return equipment.getChestplate();
       case ARMOR_LEGS:
-        return player.getLeggings();
+        return equipment.getLeggings();
       case ARMOR_FEET:
-        return player.getBoots();
+        return equipment.getBoots();
 
       case TOOL:
       case BOW:
@@ -173,22 +182,28 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
       case TRIDENT:
       case CROSSBOW:
       case FISHING_ROD:
-        return player.getItemInMainHand().getType() == Material.AIR ?
-            player.getItemInOffHand() : player.getItemInMainHand();
+        return equipment.getItemInMainHand().getType() == Material.AIR ?
+            equipment.getItemInOffHand() : equipment.getItemInMainHand();
 
       case WEARABLE:
-        return (player.getChestplate() != null && player.getChestplate().getType() == Material.ELYTRA) ?
-            player.getChestplate() : player.getHelmet();
+        return (equipment.getChestplate() != null && equipment.getChestplate().getType() == Material.ELYTRA) ?
+            equipment.getChestplate() : equipment.getHelmet();
 
       case BREAKABLE: //return item.getMaxDurability() > 0 && item.getMaxStackSize() == 1
-        return Stream.of(player.getContents())
-            .filter(item -> item.getMaxStackSize() == 1)
-            .filter(item -> {
-              ItemMeta meta = item.getItemMeta();
-              return meta instanceof Damageable && ((Damageable) meta).hasDamage();
-            })
-            .filter(this::hasEnchantment)
-            .findFirst().orElse(null);
+
+        if (entity instanceof InventoryHolder) {
+
+          return Stream.of(((InventoryHolder) entity).getInventory().getContents())
+              .filter(item -> item.getMaxStackSize() == 1)
+              .filter(item -> {
+                ItemMeta meta = item.getItemMeta();
+                return meta instanceof Damageable && ((Damageable) meta).hasDamage();
+              })
+              .filter(this::hasEnchantment)
+              .findFirst().orElse(null);
+
+        } else return null;
+
 
       default:
         return null;
@@ -217,8 +232,8 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
         .collect(Collectors.toSet());
   }
 
-  public void addCooldown(Player player) {
-    Enchantments.getCooldownManager().addCooldown(player, this, getCooldown(), getTimeUnit());
+  public void addCooldown(LivingEntity entity) {
+    Enchantments.getCooldownManager().addCooldown(entity, this, getCooldown(), getTimeUnit());
   }
 
   public static boolean isCustomEnchant(Enchantment enchantment) {

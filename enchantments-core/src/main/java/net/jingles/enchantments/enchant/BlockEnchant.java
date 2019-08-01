@@ -4,7 +4,7 @@ import net.jingles.enchantments.Enchantments;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.TileState;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -22,7 +22,7 @@ public abstract class BlockEnchant extends CustomEnchant {
   public abstract boolean canTrigger(TileState tile);
 
   @Override
-  public boolean canTrigger(Player player) {
+  public boolean canTrigger(LivingEntity entity) {
     return false;
   }
 
