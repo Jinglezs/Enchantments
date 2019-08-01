@@ -54,8 +54,8 @@ public class Homecoming extends BlockEnchant {
       int duration = level * (10 * 20);
 
       this.radius = level * 20;
-      this.regen = new PotionEffect(PotionEffectType.REGENERATION, duration, 2, false, false);
-      this.saturation = new PotionEffect(PotionEffectType.SATURATION, duration, 2, false, false);
+      this.regen = new PotionEffect(PotionEffectType.REGENERATION, duration, level, false, false);
+      this.saturation = new PotionEffect(PotionEffectType.SATURATION, duration, level, false, false);
     }
 
     @Override
