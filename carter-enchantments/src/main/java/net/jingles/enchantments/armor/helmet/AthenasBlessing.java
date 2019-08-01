@@ -12,6 +12,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerExpChangeEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 @Enchant(name = "Athena's Blessing", key = "athenas_blessing", levelRequirement = 30,
   targetItem = EnchantmentTarget.ARMOR_HEAD, maxLevel = 10, description = "Increases all " +
@@ -24,7 +25,7 @@ public class AthenasBlessing extends CustomEnchant {
   }
 
   @Override
-  public boolean conflictsWith(Enchantment other) {
+  public boolean conflictsWith(@NotNull Enchantment other) {
     return false;
   }
 

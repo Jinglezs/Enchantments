@@ -9,6 +9,7 @@ import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.jetbrains.annotations.NotNull;
 
 @Enchant(name = "Executioner", key = "executioner", targetItem = EnchantmentTarget.TOOL, enchantChance = 0.45,
     targetGroup = TargetGroup.AXES, description = "Increases weapon damage by 10% (+5% per level) " +
@@ -21,7 +22,7 @@ public class Executioner extends CustomEnchant {
   }
 
   @Override
-  public boolean conflictsWith(Enchantment other) {
+  public boolean conflictsWith(@NotNull Enchantment other) {
     return false;
   }
 

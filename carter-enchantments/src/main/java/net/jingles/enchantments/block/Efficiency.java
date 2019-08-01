@@ -14,6 +14,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.FurnaceBurnEvent;
 import org.bukkit.event.inventory.FurnaceSmeltEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 @Enchant(name = "Efficiency", key = "efficiency", enchantChance = 0.45, levelRequirement = 20,
     targetItem = EnchantmentTarget.ALL, targetGroup = TargetGroup.FURNACES,
@@ -33,7 +34,7 @@ public class Efficiency extends BlockEnchant {
   }
 
   @Override
-  public boolean conflictsWith(Enchantment other) {
+  public boolean conflictsWith(@NotNull Enchantment other) {
     return false;
   }
 

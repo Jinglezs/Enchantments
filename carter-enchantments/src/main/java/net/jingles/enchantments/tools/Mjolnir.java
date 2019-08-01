@@ -22,6 +22,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
@@ -39,7 +40,7 @@ public class Mjolnir extends CustomEnchant {
   }
 
   @Override
-  public boolean conflictsWith(Enchantment other) {
+  public boolean conflictsWith(@NotNull Enchantment other) {
     return false;
   }
 

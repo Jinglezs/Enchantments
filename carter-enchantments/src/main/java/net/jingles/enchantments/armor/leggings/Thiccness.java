@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
@@ -30,7 +31,7 @@ public class Thiccness extends CustomEnchant {
   }
 
   @Override
-  public boolean conflictsWith(Enchantment other) {
+  public boolean conflictsWith(@NotNull Enchantment other) {
     return false;
   }
 

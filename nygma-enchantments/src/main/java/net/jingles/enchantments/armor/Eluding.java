@@ -17,6 +17,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.jetbrains.annotations.NotNull;
 
 @Enchant(name = "Eluding", key = "eluding", targetItem = EnchantmentTarget.ARMOR_FEET, cooldown = 2,
     levelRequirement = 20, enchantChance = 0.30, description = "When the player is attacked while under half health, " +
@@ -30,7 +31,7 @@ public class Eluding extends CustomEnchant {
   }
 
   @Override
-  public boolean conflictsWith(Enchantment other) { return false; }
+  public boolean conflictsWith(@NotNull Enchantment other) { return false; }
 
   @Override
   public boolean canTrigger(LivingEntity entity) {

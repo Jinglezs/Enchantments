@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 @Enchant(name = "Luminosity", key = "luminosity", cooldown = 5, enchantChance = 0.5,
   targetItem = EnchantmentTarget.ARMOR_FEET, description = "Replaces the block under the " +
@@ -27,7 +28,7 @@ public class Luminosity extends CustomEnchant {
   }
 
   @Override
-  public boolean conflictsWith(Enchantment other) {
+  public boolean conflictsWith(@NotNull Enchantment other) {
     return false;
   }
 

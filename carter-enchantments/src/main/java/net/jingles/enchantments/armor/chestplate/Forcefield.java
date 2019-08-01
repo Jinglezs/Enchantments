@@ -16,6 +16,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.jetbrains.annotations.NotNull;
 
 @Enchant(name = "Forcefield", key = "forcefield", maxLevel = 3, targetItem = EnchantmentTarget.ARMOR_TORSO,
     levelRequirement = 13, description = "When a projectile nears the owner, a forcefield will surround them " +
@@ -28,7 +29,7 @@ public class Forcefield extends CustomEnchant {
   }
 
   @Override
-  public boolean conflictsWith(Enchantment other) {
+  public boolean conflictsWith(@NotNull Enchantment other) {
     return false;
   }
 

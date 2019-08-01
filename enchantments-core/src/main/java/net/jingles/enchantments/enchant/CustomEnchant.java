@@ -122,7 +122,7 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
     return this.targetGroup;
   }
 
-  public abstract boolean conflictsWith(Enchantment other);
+  public abstract boolean conflictsWith(@NotNull Enchantment other);
 
   public abstract boolean canTrigger(LivingEntity entity);
 

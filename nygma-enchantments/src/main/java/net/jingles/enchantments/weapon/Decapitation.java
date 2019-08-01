@@ -16,6 +16,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +40,7 @@ public class Decapitation extends CustomEnchant {
   }
 
   @Override
-  public boolean conflictsWith(Enchantment enchant) {
+  public boolean conflictsWith(@NotNull Enchantment enchant) {
     return false;
   }
 

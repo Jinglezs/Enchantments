@@ -16,6 +16,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
@@ -31,7 +32,7 @@ public class Slippery extends CustomEnchant {
   }
 
   @Override
-  public boolean conflictsWith(Enchantment enchant) {
+  public boolean conflictsWith(@NotNull Enchantment enchant) {
     return false;
   }
 

@@ -18,6 +18,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Map;
@@ -34,7 +35,7 @@ public class Magnetic extends CustomEnchant {
   }
 
   @Override
-  public boolean conflictsWith(Enchantment enchant) {
+  public boolean conflictsWith(@NotNull Enchantment enchant) {
     // Incompatible with Molten Core enchant due to the immutability of block drops.
     return enchant.getKey().getKey().equals("molten_core");
   }

@@ -20,6 +20,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
 
 @Enchant(name = "Grapple", key = "grapple", targetItem = EnchantmentTarget.BOW, maxLevel = 1, cooldown = 2,
     enchantChance = 0.50, description = "Allows the user to launch an arrow by left clicking. When it hits a " +
@@ -32,7 +33,7 @@ public class Grapple extends CustomEnchant {
   }
 
   @Override
-  public boolean conflictsWith(Enchantment other) {
+  public boolean conflictsWith(@NotNull Enchantment other) {
     return false;
   }
 

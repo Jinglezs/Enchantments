@@ -19,6 +19,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.RayTraceResult;
+import org.jetbrains.annotations.NotNull;
 
 @Enchant(name = "Pyromancer", key = "pyromancer", targetItem = EnchantmentTarget.WEAPON, cooldown = 10, enchantChance = 0.25,
     description = "When the wielder right clicks while holding an enchanted blade and looking at an entity, " +
@@ -32,7 +33,7 @@ public class Pyromancer extends CustomEnchant {
   }
 
   @Override
-  public boolean conflictsWith(Enchantment other) {
+  public boolean conflictsWith(@NotNull Enchantment other) {
     return false;
   }
 

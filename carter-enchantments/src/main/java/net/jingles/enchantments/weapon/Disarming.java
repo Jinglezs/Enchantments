@@ -13,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 @Enchant(name = "Disarming", key = "disarming", cooldown = 15, targetItem = EnchantmentTarget.WEAPON, maxLevel = 3,
   description = "Upon hitting another player, there is a 10% (+10% per level) chance for their weapon to " +
@@ -25,7 +26,7 @@ public class Disarming extends CustomEnchant {
   }
 
   @Override
-  public boolean conflictsWith(Enchantment other) {
+  public boolean conflictsWith(@NotNull Enchantment other) {
     return false;
   }
 

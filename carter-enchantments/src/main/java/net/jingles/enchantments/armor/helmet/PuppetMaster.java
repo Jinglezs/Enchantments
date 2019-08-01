@@ -9,6 +9,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Mob;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.jetbrains.annotations.NotNull;
 
 @Enchant(name = "Puppet Master", key = "puppet_master", levelRequirement = 30, maxLevel = 3, enchantChance = 0.25,
         targetItem = EnchantmentTarget.ARMOR_HEAD, description = "When the wearer attacks a mob, " +
@@ -21,7 +22,7 @@ public class PuppetMaster extends CustomEnchant {
   }
 
   @Override
-  public boolean conflictsWith(Enchantment other) {
+  public boolean conflictsWith(@NotNull Enchantment other) {
     return false;
   }
 
