@@ -46,7 +46,7 @@ public class MoltenCore extends CustomEnchant {
   @Override
   public boolean conflictsWith(@NotNull Enchantment other) {
     // Incompatible with Magnetic enchant due to the immutability of block drops.
-    return other.equals(Enchantment.SILK_TOUCH) || other.getKey().getKey().equals("magnetic");
+    return other.getKey().getKey().equals("magnetic");
   }
 
   @Override
