@@ -79,7 +79,7 @@ public class CooldownManager implements Listener {
     return true;
   }
 
-  private boolean hasCooldownNoMessage(PersistentDataHolder holder, CustomEnchant enchant) {
+  public boolean hasCooldownNoMessage(PersistentDataHolder holder, CustomEnchant enchant) {
     if (!holder.getPersistentDataContainer().has(enchant.getCooldownKey(), PersistentDataType.LONG)) return false;
 
     long cooldown = getCooldown(holder, enchant);

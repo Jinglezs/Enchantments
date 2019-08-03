@@ -211,8 +211,8 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
     }
   }
 
-  public int getLevel(@NotNull ItemStack item) {
-    return item.getItemMeta() == null ? 0 : item.getItemMeta().getEnchantLevel(this);
+  public int getLevel(@Nullable ItemStack item) {
+    return (item == null || item.getItemMeta() == null) ? 0 : item.getItemMeta().getEnchantLevel(this);
   }
 
   @NotNull

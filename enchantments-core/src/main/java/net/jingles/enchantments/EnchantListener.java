@@ -47,7 +47,6 @@ public class EnchantListener implements Listener {
         .filter(customEnchant -> event.getEnchanter().getLevel() >= customEnchant.getLevelRequirement())
         .collect(Collectors.toList());
 
-    Collections.shuffle(enchants);
     Map<Enchantment, Integer> additions = event.getEnchantsToAdd();
 
     // In the PrepareItemEnchantEvent, fake offers were added to the table so that enchantment was possible.
@@ -55,6 +54,9 @@ public class EnchantListener implements Listener {
     if (TargetGroup.NON_VANILLA.canEnchant(item.getType())) {
       additions.clear();
     }
+
+    // Add the enchantment to the additions list if the RNG gods agree.
+    // The level is randomly generated for more RN-Jesus fun.
 
     enchants.forEach(enchant -> {
 
@@ -65,6 +67,18 @@ public class EnchantListener implements Listener {
 
     });
 
+    // Get a list of all conflicting enchantments in the additions set
+    List<Enchantment> removals = additions.keySet().stream()
+        .filter(enchant -> additions.keySet().stream().anyMatch(e -> e.conflictsWith(enchant)))
+        .collect(Collectors.toList());
+
+    // Shuffle the removal list and save only one of the conflicting enchantments
+    Collections.shuffle(removals);
+    removals.remove(0);
+    // Remove all of the others from the additions map
+    removals.forEach(additions::remove);
+
+    // Add the enchantment lore to the item
 
     ItemMeta meta = item.getItemMeta();
 
@@ -73,6 +87,10 @@ public class EnchantListener implements Listener {
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
     item.setItemMeta(meta);
+
+    // There is no need to add the enchantments manually. Upon completion of
+    // this event, all of the enchantments in the additions map will be
+    // added to the item automagically.
 
   }
 
