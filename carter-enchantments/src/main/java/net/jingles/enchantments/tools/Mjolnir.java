@@ -12,8 +12,10 @@ import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
+import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.LightningStrike;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -22,6 +24,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -139,7 +142,7 @@ public class Mjolnir extends CustomEnchant {
 
     @Override
     public void start() {
-      Enchantments.getStatusEffectManager().negateFallDamage(player, Mjolnir.this, getMaxTicks());
+      Enchantments.getStatusEffectManager().negateFallDamage(player, Mjolnir.this, getMaxTicks() + 20);
       player.getWorld().playSound(player.getLocation(), Sound.ITEM_ELYTRA_FLYING, 1, 1);
       player.setGliding(true);
     }
@@ -172,6 +175,7 @@ public class Mjolnir extends CustomEnchant {
     }
 
     private void seismicSmash() {
+
       player.getWorld().playSound(player.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 2, 1);
 
       player.getWorld().getNearbyEntities(player.getLocation(), 10, 10, 10).stream()
@@ -182,6 +186,21 @@ public class Mjolnir extends CustomEnchant {
             entity.damage(10F, player);
             entity.setVelocity(entity.getVelocity().setY(1.25));
           });
+
+      BlockData data = player.getLocation().subtract(0, 1, 0).getBlock().getBlockData();
+
+      for (int i = 0; i < 10; i++) {
+        FallingBlock block = player.getWorld().spawnFallingBlock(player.getLocation().add(0, 1, 0), data);
+        block.setDropItem(false);
+        block.setHurtEntities(false);
+
+        float x = (float) -1 + (float) (Math.random() * 2);
+        float y = (float) 0.5;
+        float z = (float) -0.3 + (float) (Math.random() * 2);
+
+        block.setVelocity(new Vector(x, y, z));
+      }
+
     }
 
   }
