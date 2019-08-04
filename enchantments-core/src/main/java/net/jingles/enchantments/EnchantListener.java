@@ -72,11 +72,13 @@ public class EnchantListener implements Listener {
         .filter(enchant -> additions.keySet().stream().anyMatch(e -> e.conflictsWith(enchant)))
         .collect(Collectors.toList());
 
-    // Shuffle the removal list and save only one of the conflicting enchantments
-    Collections.shuffle(removals);
-    removals.remove(0);
-    // Remove all of the others from the additions map
-    removals.forEach(additions::remove);
+    if (!removals.isEmpty()) {
+      // Shuffle the removal list and save only one of the conflicting enchantments
+      Collections.shuffle(removals);
+      removals.remove(0);
+      // Remove all of the others from the additions map
+      removals.forEach(additions::remove);
+    }
 
     // Add the enchantment lore to the item
 
