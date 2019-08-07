@@ -9,6 +9,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
@@ -38,7 +39,7 @@ public class Excavator extends CustomEnchant {
 
   @Override
   public boolean canTrigger(@NotNull LivingEntity entity) {
-    return hasEnchantment(getItem(entity));
+    return ((Player) entity).isSneaking() && hasEnchantment(getItem(entity));
   }
 
   @EventHandler

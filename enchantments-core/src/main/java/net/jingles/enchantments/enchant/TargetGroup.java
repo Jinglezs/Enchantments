@@ -48,6 +48,11 @@ public enum TargetGroup {
   FLINT_AND_STEEL(material -> material == Material.FLINT_AND_STEEL),
 
   /**
+   * Leads/leashes
+   */
+  LEAD(material -> material == Material.LEAD),
+
+  /**
    * Targets only armor
    */
   ALL_ARMOR(EnchantmentTarget.ARMOR::includes),

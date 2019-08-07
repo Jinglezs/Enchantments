@@ -129,4 +129,8 @@ public final class EnchantmentManager {
             .keySet().forEach(enchant -> enchant.onChunkLoad(tile)));
   }
 
+  public NamespacedKey createKey(String key) {
+    return new NamespacedKey(plugin, key);
+  }
+
 }
