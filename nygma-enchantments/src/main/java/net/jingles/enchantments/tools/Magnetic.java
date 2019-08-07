@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.Map;
 
-@Enchant(name = "Magnetic", key = "magnetic", levelRequirement = 30, maxLevel = 1, enchantChance = 0.40,
+@Enchant(name = "Magnetic", key = "magnetic", levelRequirement = 30, maxLevel = 1, enchantChance = 0.25,
     targetItem = EnchantmentTarget.TOOL, targetGroup = TargetGroup.DIGGING, description = "All item drops " +
     "resulting from mining a block are automatically added to the owner's inventory if possible. If the player " +
     "has a Resource Backpack, items will be added to it before they are added to the inventory.")

@@ -21,7 +21,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.RayTraceResult;
 import org.jetbrains.annotations.NotNull;
 
-@Enchant(name = "Pyromancer", key = "pyromancer", targetItem = EnchantmentTarget.WEAPON, cooldown = 10, enchantChance = 0.25,
+@Enchant(name = "Pyromancer", key = "pyromancer", targetItem = EnchantmentTarget.WEAPON, cooldown = 10, enchantChance = 0.15,
     description = "When the wielder right clicks while holding an enchanted blade and looking at an entity, " +
         "homing flame projectiles are launched at the target. Upon finding their target, the entity is dealt " +
         "5 (+2 per level) damage and ignited for 5 (+2 per level) seconds.")

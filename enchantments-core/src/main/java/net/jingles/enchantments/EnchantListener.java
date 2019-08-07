@@ -45,8 +45,6 @@ public class EnchantListener implements Listener {
     ItemStack item = event.getItem();
 
     List<CustomEnchant> enchants = CustomEnchant.getApplicableEnchants(event.getItem()).stream()
-        .filter(customEnchant -> item.getEnchantments().keySet()
-            .stream().noneMatch(enchant -> enchant.conflictsWith(customEnchant)))
         .filter(customEnchant -> event.getEnchanter().getLevel() >= customEnchant.getLevelRequirement())
         .collect(Collectors.toList());
 

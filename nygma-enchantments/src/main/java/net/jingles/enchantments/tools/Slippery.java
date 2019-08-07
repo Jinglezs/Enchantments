@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-@Enchant(name = "Slippery", key = "slippery", levelRequirement = 10, enchantChance = 0.20, maxLevel = 3,
+@Enchant(name = "Slippery", key = "slippery", levelRequirement = 10, enchantChance = 0.05, maxLevel = 3,
     targetItem = EnchantmentTarget.ALL, targetGroup = TargetGroup.NON_WEARABLE, cursed = true,
     description = "When the player switches to this item, there is a 10% (+5% per level) chance " +
         "for the item to slip out of their hands and drop to the ground.")

@@ -25,10 +25,10 @@ import java.util.Collections;
 import static org.bukkit.entity.EntityType.*;
 
 @Enchant(name = "Summoner", key = "summoner", levelRequirement = 30, targetItem = EnchantmentTarget.ALL, maxLevel = 1,
-    targetGroup = TargetGroup.NONE, description = "This enchantment can be applied to any item. Right clicking an " +
-    "iron block with the enchanted item will consume the item and replace the block with a mob spawner. The type of mob " +
-    "that is spawned is based on what the item material is. For example, a feather would result in a chicken spawner. " +
-    "Right clicking a spawner created by this enchantment while sneaking will refund the enchantment.")
+    enchantChance = 0.15, targetGroup = TargetGroup.NONE, description = "This enchantment can be applied to any item. " +
+    "Right clicking an iron block with the enchanted item will consume the item and replace the block with a mob spawner. " +
+    "The type of mob that is spawned is based on what the item material is. For example, a feather would result in a " +
+    "chicken spawner. Right clicking a spawner created by this enchantment while sneaking will refund the enchantment.")
 
 public class Summoner extends BlockEnchant {
 
