@@ -29,7 +29,10 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -66,19 +69,6 @@ public class EnchantListener implements Listener {
       }
 
     });
-
-    // Get a list of all conflicting enchantments in the additions set
-    List<Enchantment> removals = additions.keySet().stream()
-        .filter(enchant -> additions.keySet().stream().anyMatch(e -> e.conflictsWith(enchant)))
-        .collect(Collectors.toList());
-
-    if (!removals.isEmpty()) {
-      // Shuffle the removal list and save only one of the conflicting enchantments
-      Collections.shuffle(removals);
-      removals.remove(0);
-      // Remove all of the others from the additions map
-      removals.forEach(additions::remove);
-    }
 
     // Add the enchantment lore to the item
 

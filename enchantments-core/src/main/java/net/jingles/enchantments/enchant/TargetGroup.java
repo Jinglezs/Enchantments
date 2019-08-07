@@ -125,7 +125,7 @@ public enum TargetGroup {
   /**
    * Represents all items that can be enchanted through this plugin, but cannot be enchanted normally in vanilla.
    */
-  NON_VANILLA(material ->TILE_ENTITY.canEnchant(material) || BLOCK.canEnchant(material) || ELYTRA.canEnchant(material) ||
+  NON_VANILLA(material -> TILE_ENTITY.canEnchant(material) || BLOCK.canEnchant(material) || ELYTRA.canEnchant(material) ||
       SHIELD.canEnchant(material) || SHEARS.canEnchant(material) || FLINT_AND_STEEL.canEnchant(material)),
 
   /**
