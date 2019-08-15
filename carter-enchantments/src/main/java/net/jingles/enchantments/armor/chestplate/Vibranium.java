@@ -6,6 +6,8 @@ import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.statuseffect.LocationStatusEffect;
 import net.jingles.enchantments.util.ParticleUtil;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
@@ -16,6 +18,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.EntityEquipment;
 import org.jetbrains.annotations.NotNull;
 
+import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -71,6 +74,11 @@ public class Vibranium extends CustomEnchant {
 
     Particle.DustOptions options = new Particle.DustOptions(Color.PURPLE, 0.5f);
     ParticleUtil.sphere(player.getLocation(), 2, Particle.REDSTONE, options);
+
+    String percentage = NumberFormat.getPercentInstance().format(kineticEnergy.get(id));
+    TextComponent message = new TextComponent(ChatColor.DARK_PURPLE + "Kinetic Energy Level: ");
+    message.addExtra(percentage);
+    player.spigot().sendMessage(ChatMessageType.ACTION_BAR, message);
 
     // Should be equivalent at max capacity due to the clamp method.
     if (heldEnergy == level * 25) {
