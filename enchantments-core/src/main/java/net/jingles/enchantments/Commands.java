@@ -96,11 +96,29 @@ public class Commands extends BaseCommand {
   @CommandCompletion("@enchantments")
   @Description("Shows the executor information about the provided enchantment")
   public void onEnchantmentInfo(CommandSender sender, CustomEnchant enchant) {
-    sender.sendMessage(TITLE + enchant.getDescription());
+
+    StringBuilder info = new StringBuilder();
+
+    // General info
+    info.append(String.format(LABELLED, "\nEnchant Chance", String.valueOf(enchant.getEnchantChance())))
+    .append(String.format(LABELLED, "Max Level", enchant.getMaxLevel()))
+    // Cooldown info
+    .append(String.format(LABELLED, "\nCooldown", String.valueOf(enchant.getCooldown())))
+    .append(String.format(LABELLED, "Time Unit", enchant.getTimeUnit().name()))
+    // Target info
+    .append(String.format(LABELLED, "Target Item", enchant.getItemTarget().name()))
+    .append(String.format(LABELLED, "Target Group", enchant.getTargetGroup().name()))
+    // Description
+    .append(String.format(LABELLED, "\nDescription", enchant.getDescription()))
+    .append("\n");
+
+    sender.sendMessage(String.format(HEADER, enchant.getName()) + info.toString());
   }
 
-  private static final String COOLDOWN_HEADER = ChatColor.DARK_GRAY + "+-------+ " + ChatColor.AQUA +
-      "Enchantment Cooldowns " + ChatColor.DARK_GRAY + "+-------+\n" + ChatColor.RESET;
+  private static final String LABELLED = ChatColor.GREEN + "%s" + ChatColor.DARK_GRAY + ": " + ChatColor.RESET + "%s\n";
+
+  private static final String HEADER = ChatColor.DARK_GRAY + "+-------+ " + ChatColor.AQUA +
+      "%s " + ChatColor.DARK_GRAY + "+-------+\n" + ChatColor.RESET;
 
   //Replacements: Name, cooldown, time unit
   private static final String INFO = ChatColor.GOLD + " - " + ChatColor.AQUA + "%s " + ChatColor.GOLD + ": "
@@ -116,13 +134,14 @@ public class Commands extends BaseCommand {
         })
         .collect(Collectors.joining("\n"));
 
-    player.sendMessage(COOLDOWN_HEADER + (!cooldownMessage.isEmpty() ? cooldownMessage : " - You do not have any active enchantment cooldowns"));
+    player.sendMessage(String.format(HEADER, "Enchantment Cooldowns") +
+        (!cooldownMessage.isEmpty() ? cooldownMessage : " - You do not have any active enchantment cooldowns"));
   }
 
   private static final String EFFECTS_HEADER = ChatColor.DARK_GRAY + "+-------+ " + ChatColor.AQUA +
       "Current Status Effects " + ChatColor.DARK_GRAY + "+-------+\n" + ChatColor.RESET;
 
-  @CommandAlias("effects")
+  @CommandAlias("statusEffects")
   @Description("Shows the executor all status effects being applied to them")
   public void onEffectInfo(Player sender) {
 
