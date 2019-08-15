@@ -23,8 +23,21 @@ import java.util.stream.Collectors;
 @CommandAlias("enchantments")
 public class Commands extends BaseCommand {
 
+  // --- Frequently used formatting ---
+
   private static final String TITLE = ChatColor.DARK_GRAY + "[" + ChatColor.AQUA + "Enchantments" +
       ChatColor.DARK_GRAY + "] " + ChatColor.RESET;
+
+  private static final String LABELLED = ChatColor.GREEN + "%s" + ChatColor.DARK_GRAY + ": " + ChatColor.RESET + "%s\n";
+
+  private static final String HEADER = ChatColor.DARK_GRAY + "+-------+ " + ChatColor.AQUA +
+      "%s " + ChatColor.DARK_GRAY + "+-------+\n" + ChatColor.RESET;
+
+  //Replacements: Name, cooldown, time unit
+  private static final String INFO = ChatColor.GOLD + " - " + ChatColor.AQUA + "%s " + ChatColor.GOLD + ": "
+      + ChatColor.RED + "%d %s";
+
+  // -----------------------------------
 
   @Dependency
   private CooldownManager cooldownManager;
@@ -114,15 +127,6 @@ public class Commands extends BaseCommand {
 
     sender.sendMessage(String.format(HEADER, enchant.getName()) + info.toString());
   }
-
-  private static final String LABELLED = ChatColor.GREEN + "%s" + ChatColor.DARK_GRAY + ": " + ChatColor.RESET + "%s\n";
-
-  private static final String HEADER = ChatColor.DARK_GRAY + "+-------+ " + ChatColor.AQUA +
-      "%s " + ChatColor.DARK_GRAY + "+-------+\n" + ChatColor.RESET;
-
-  //Replacements: Name, cooldown, time unit
-  private static final String INFO = ChatColor.GOLD + " - " + ChatColor.AQUA + "%s " + ChatColor.GOLD + ": "
-      + ChatColor.RED + "%d %s";
 
   @CommandAlias("cooldowns")
   public void onCooldownInfo(Player player) {
