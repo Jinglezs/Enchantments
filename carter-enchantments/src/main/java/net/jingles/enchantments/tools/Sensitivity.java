@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-@Enchant(name = "Sensitivity", key = "sensitivity", maxLevel = 7, targetGroup = TargetGroup.PICKAXES,
+@Enchant(name = "Sensitivity", key = "sensitivity", maxLevel = 7, targetGroup = TargetGroup.PICKAXES, cooldown = 25,
     description = "While mining underground, the enchanted pickaxe is sensitive to the position of nearby ores. " +
         "The sensed ore will glow in reaction to the pickaxe's presence for 30 seconds. The rarity of ores that " +
         "can be sensed by this enchantment is dependent on the enchantment level, ranging from 1 (coal ore) to " +
@@ -109,6 +109,7 @@ public class Sensitivity extends CustomEnchant {
     @Override
     public void start() {
 
+      Sensitivity.this.addCooldown(getTarget());
       shulker.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, getMaxTicks(), 3, false, false));
       shulker.setGlowing(true);
       shulker.setInvulnerable(true);
