@@ -80,7 +80,7 @@ public class Magnetic extends CustomEnchant {
 
         leftover.values().forEach(item -> player.getWorld().dropItemNaturally(block.getLocation(), item));
 
-      } else player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1, 1);
+      } else player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 0.25F, 1);
 
     }
 
