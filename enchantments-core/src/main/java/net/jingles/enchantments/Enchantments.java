@@ -27,8 +27,11 @@ public class Enchantments extends JavaPlugin {
 
   @Override
   public void onEnable() {
+
     enableRegistrations();
     registerCommands();
+    getEnchantmentManager().loadClasses(getDataFolder());
+
     getServer().getPluginManager().registerEvents(new EnchantListener(), this);
     getServer().getWorlds().forEach(world -> getEnchantmentManager().loadBlockEnchants(world));
   }

@@ -36,7 +36,6 @@ public final class EnchantmentManager {
   public EnchantmentManager(Enchantments plugin) {
     this.plugin = plugin;
     if (!plugin.getDataFolder().exists()) plugin.getDataFolder().mkdirs();
-    loadClasses(plugin.getDataFolder());
   }
 
   @NotNull
@@ -44,7 +43,7 @@ public final class EnchantmentManager {
     return this.registered;
   }
 
-  private void loadClasses(File start) {
+  public void loadClasses(File start) {
     
     try { //Collects the URLs of all non-yaml files in the data folder
       List<URL> classFiles = Files.walk(start.toPath(), Integer.MAX_VALUE)

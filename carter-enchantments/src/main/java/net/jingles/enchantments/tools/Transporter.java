@@ -4,6 +4,7 @@ import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.enchant.TargetGroup;
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Entity;
@@ -54,7 +55,8 @@ public class Transporter extends CustomEnchant {
 
     Player player = event.getPlayer();
     ItemStack item = event.getItem();
-    PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
+    ItemMeta meta = item.getItemMeta() != null ? item.getItemMeta() : Bukkit.getItemFactory().getItemMeta(item.getType());
+    PersistentDataContainer container = meta.getPersistentDataContainer();
 
     if (container.has(entityType, PersistentDataType.STRING) && event.getClickedBlock() != null) {
 
