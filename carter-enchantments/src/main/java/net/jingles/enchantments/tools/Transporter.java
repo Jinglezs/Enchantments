@@ -49,14 +49,14 @@ public class Transporter extends CustomEnchant {
   @EventHandler
   public void onEntityInteract(PlayerInteractEvent event) {
 
-    if (!canTrigger(event.getPlayer())) return;
-
-    event.setCancelled(true);
+    if (event.getItem() == null || !canTrigger(event.getPlayer())) return;
 
     Player player = event.getPlayer();
     ItemStack item = event.getItem();
     ItemMeta meta = item.getItemMeta() != null ? item.getItemMeta() : Bukkit.getItemFactory().getItemMeta(item.getType());
     PersistentDataContainer container = meta.getPersistentDataContainer();
+
+    event.setCancelled(true);
 
     if (container.has(entityType, PersistentDataType.STRING) && event.getClickedBlock() != null) {
 
