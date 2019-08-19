@@ -76,6 +76,7 @@ public class Undying extends CustomEnchant {
 
     @Override
     public void start() {
+      super.start();
       getTarget().addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, getMaxTicks(), 1, false, false));
       addCooldown(getTarget());
     }
