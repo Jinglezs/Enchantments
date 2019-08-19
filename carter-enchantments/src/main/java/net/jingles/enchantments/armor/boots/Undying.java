@@ -4,6 +4,7 @@ import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.statuseffect.entity.PotionStatusEffect;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
@@ -60,19 +61,22 @@ public class Undying extends CustomEnchant {
 
   private class UndyingEffect extends PotionStatusEffect {
 
+    private final Particle.DustOptions options;
     private final PotionEffect regen;
+
     private final int radius;
     private float angle = 0F;
 
     private UndyingEffect(@NotNull PotionEffect potionEffect, @NotNull LivingEntity target, int radius, int level) {
-      super(potionEffect, target, Undying.this, 2);
+      super(potionEffect, target, Undying.this, 1);
       this.radius = radius;
+      this.options = new Particle.DustOptions(Color.RED, 2.3F);
       this.regen = new PotionEffect(PotionEffectType.REGENERATION, 60, level, false, false);
     }
 
     @Override
     public void start() {
-      getTarget().addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, getMaxTicks(), 2, false, false));
+      getTarget().addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, getMaxTicks(), 1, false, false));
       addCooldown(getTarget());
     }
 
@@ -80,12 +84,12 @@ public class Undying extends CustomEnchant {
     public void effect() {
 
       double x = radius * Math.sin(angle);
-      double y = 2 * Math.sin(angle / 3);
+      double y = 1.25 * Math.sin(angle * 100);
       double z = radius * Math.cos(angle);
-      angle += 0.5;
+      angle += 0.1;
 
       Location displayLoc = getTarget().getLocation().add(x, y, z);
-      getTarget().getWorld().spawnParticle(Particle.HEART, displayLoc, 1);
+      getTarget().getWorld().spawnParticle(Particle.REDSTONE, displayLoc, 1, options);
 
       getTarget().getNearbyEntities(radius, radius, radius).stream()
           .filter(entity -> entity instanceof LivingEntity)
