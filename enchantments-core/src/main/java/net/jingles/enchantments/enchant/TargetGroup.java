@@ -128,6 +128,11 @@ public enum TargetGroup {
   BELL(material -> material == Material.BELL),
 
   /**
+   * Compasses wew
+   */
+  COMPASS(material-> material == Material.COMPASS),
+
+  /**
    * Represents all items that can be enchanted through this plugin, but cannot be enchanted normally in vanilla.
    */
   NON_VANILLA(material -> TILE_ENTITY.canEnchant(material) || BLOCK.canEnchant(material) || ELYTRA.canEnchant(material) ||
