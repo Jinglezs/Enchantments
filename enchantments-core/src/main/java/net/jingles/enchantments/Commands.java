@@ -35,7 +35,7 @@ public class Commands extends BaseCommand {
 
   //Replacements: Name, cooldown, time unit
   private static final String INFO = ChatColor.GOLD + " - " + ChatColor.AQUA + "%s " + ChatColor.GOLD + ": "
-      + ChatColor.RED + "%d %s";
+      + ChatColor.RED + "%s %s";
 
   // -----------------------------------
 
@@ -133,8 +133,8 @@ public class Commands extends BaseCommand {
 
     String cooldownMessage = cooldownManager.getCooldowns(player).entrySet().stream()
         .map(entry -> {
-          long remaining = entry.getKey().getTimeUnit().convert(entry.getValue() - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
-          return String.format(INFO, entry.getKey().getName(), (int) remaining, entry.getKey().getTimeUnit().name().toLowerCase());
+          long remaining = TimeUnit.MILLISECONDS.toSeconds(entry.getValue() - System.currentTimeMillis());
+          return String.format(INFO, entry.getKey().getName(), remaining, TimeUnit.SECONDS.name().toLowerCase());
         })
         .collect(Collectors.joining("\n"));
 
