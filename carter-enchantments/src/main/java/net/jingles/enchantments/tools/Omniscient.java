@@ -35,18 +35,19 @@ public class Omniscient extends CustomEnchant {
   private static final String NOTICE = "You are now searching for: " + ChatColor.AQUA + "%s";
   private final Map<Integer, StructureType> structures = new HashMap<>();
   private final NamespacedKey structureKey;
+  private final NamespacedKey targetKey;
 
   public Omniscient(NamespacedKey key) {
     super(key);
     structures.put(1, STRONGHOLD);
     structures.put(2, OCEAN_MONUMENT);
     structures.put(3, SHIPWRECK);
-    structures.put(4, WOODLAND_MANSION);
-    structures.put(5, VILLAGE);
-    structures.put(6, DESERT_PYRAMID);
-    structures.put(7, JUNGLE_PYRAMID);
+    structures.put(4, VILLAGE);
+    structures.put(5, DESERT_PYRAMID);
+    structures.put(6, JUNGLE_PYRAMID);
 
     structureKey = Enchantments.getEnchantmentManager().createKey("structure_type");
+    targetKey = Enchantments.getEnchantmentManager().createKey("has_target");
   }
 
   @Override
@@ -82,6 +83,7 @@ public class Omniscient extends CustomEnchant {
       // Cycles to the next StructureType and saves it to the item
       StructureType type = getNextStructure(current);
       container.set(structureKey, PersistentDataType.STRING, type.getName());
+      container.remove(targetKey);
       item.setItemMeta(meta);
 
       TextComponent notice = new TextComponent(String.format(NOTICE, type.getName().replace("_", " ")));
@@ -90,18 +92,22 @@ public class Omniscient extends CustomEnchant {
       // Actually locates the closest structure and sets the compass' target.
     } else if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
 
-      if (Enchantments.getCooldownManager().hasCooldown(player, this)) return;
+      if (Enchantments.getCooldownManager().hasCooldown(player, this) ||
+        container.has(targetKey, PersistentDataType.BYTE)) return;
 
-      Location location = player.getWorld().locateNearestStructure(player.getLocation(), current, 100, false);
+      Location location = player.getWorld().locateNearestStructure(player.getLocation(), current, 50, false);
 
       if (location == null) {
 
-        TextComponent component = new TextComponent(ChatColor.RED + "A structure could not be found within 100 chunks!");
+        TextComponent component = new TextComponent(ChatColor.RED + "A structure could not be found within 50 chunks!");
         player.spigot().sendMessage(component);
 
       } else {
 
         player.setCompassTarget(location);
+        container.set(targetKey, PersistentDataType.BYTE, (byte) 1);
+        item.setItemMeta(meta);
+
         TextComponent component = new TextComponent(ChatColor.GREEN + "Your compass' target has been updated!");
         player.spigot().sendMessage(component);
 
