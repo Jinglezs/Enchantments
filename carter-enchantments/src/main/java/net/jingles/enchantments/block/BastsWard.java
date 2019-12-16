@@ -94,7 +94,7 @@ public class BastsWard extends BlockEnchant {
     public void effect() {
 
       if (target == null || target.isDead() || ocelots.stream()
-        .anyMatch(o -> o.getLocation().distanceSquared(target.getLocation()) > 100)) {
+        .noneMatch(o -> o.getLocation().distanceSquared(target.getLocation()) < 25 * 25)) {
         this.cancel();
       }
 

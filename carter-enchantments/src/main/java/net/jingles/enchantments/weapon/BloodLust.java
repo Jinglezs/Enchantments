@@ -47,7 +47,7 @@ public class BloodLust extends CustomEnchant {
       return;
 
     int level = getLevel(getItem(player));
-    int duration = level * 10;
+    int duration = (level * 10) * 20;
 
     PotionEffect effect = new PotionEffect(PotionEffectType.SPEED, duration, level);
     PotionEffect effect1 = new PotionEffect(PotionEffectType.INCREASE_DAMAGE, duration, level);
