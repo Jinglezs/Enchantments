@@ -1,7 +1,6 @@
 package net.jingles.enchantments.block;
 
 import java.util.ArrayList;
-import java.util.concurrent.ThreadLocalRandom;
 
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -18,8 +17,7 @@ import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.statuseffect.LocationStatusEffect;
 import net.jingles.enchantments.enchant.TargetGroup;
 
-@Enchant(name = "Demeter's Blessing", key = "demeters_blessing", enchantChance = 0.35, maxLevel = 3, targetGroup = TargetGroup.BANNER,
-  description = "For every crop or sapling within a 5 block (per level) radius, the crop's age will increase by one every 20 seconds.")
+@Enchant(name = "Demeter's Blessing", key = "demeters_blessing", enchantChance = 0.35, maxLevel = 3, targetGroup = TargetGroup.BANNER, description = "For every crop or sapling within a 5 block (per level) radius, the crop's age will increase by one every 20 seconds.")
 public class DemetersBlessing extends BlockEnchant {
 
   public DemetersBlessing(NamespacedKey key) {
@@ -47,35 +45,33 @@ public class DemetersBlessing extends BlockEnchant {
     private final int radius;
 
     public DemetersBlessingEffect(TileState tile) {
-      super(DemetersBlessing.this, Integer.MAX_VALUE, 20 * 20, tile.getLocation());
+      super(DemetersBlessing.this, Integer.MAX_VALUE, 400, tile.getLocation());
 
       int level = getLevel(tile);
       this.radius = level * 5;
-     
+
     }
 
     @Override
-        public void effect() {
-            
-          ThreadLocalRandom random = ThreadLocalRandom.current();
+    public void effect() {
 
-          for (Block block : getCropsInRadius(getLocation(), radius)) {
+      for (Block block : getCropsInRadius(getLocation(), radius)) {
 
-            BlockData data = block.getBlockData();
-            
-            if (data instanceof Sapling) {
-              Sapling sapling = (Sapling) data;
-              sapling.setStage(Math.min(sapling.getStage() + 1, sapling.getMaximumStage()));
-            } else {
-              Ageable ageable = (Ageable) data;
-              ageable.setAge(Math.min(ageable.getAge() + 1, ageable.getMaximumAge()));
-            }
+        BlockData data = block.getBlockData();
 
-            block.setBlockData(data);
-
-          }
-
+        if (data instanceof Sapling) {
+          Sapling sapling = (Sapling) data;
+          sapling.setStage(Math.min(sapling.getStage() + 1, sapling.getMaximumStage()));
+        } else {
+          Ageable ageable = (Ageable) data;
+          ageable.setAge(Math.min(ageable.getAge() + 1, ageable.getMaximumAge()));
         }
+
+        block.setBlockData(data);
+
+      }
+
+    }
 
     private ArrayList<Block> getCropsInRadius(Location center, int radius) {
 
@@ -85,7 +81,8 @@ public class DemetersBlessing extends BlockEnchant {
         for (int y = center.getBlockY() - radius; y <= center.getBlockY() + radius; y++) {
           for (int z = center.getBlockZ() - radius; z <= center.getBlockZ() + radius; z++) {
             Block block = center.getWorld().getBlockAt(x, y, z);
-            if (block.getBlockData() instanceof Ageable || block.getBlockData() instanceof Sapling) crops.add(block);
+            if (block.getBlockData() instanceof Ageable || block.getBlockData() instanceof Sapling)
+              crops.add(block);
           }
         }
       }

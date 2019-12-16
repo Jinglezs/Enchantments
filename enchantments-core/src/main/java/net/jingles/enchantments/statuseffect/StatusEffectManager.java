@@ -2,6 +2,7 @@ package net.jingles.enchantments.statuseffect;
 
 import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;
+import net.jingles.enchantments.statuseffect.StatusEffect.TickFailure;
 import net.jingles.enchantments.statuseffect.container.EffectContainer;
 import net.jingles.enchantments.statuseffect.container.EntityEffectContainer;
 import net.jingles.enchantments.statuseffect.container.WorldEffectContainer;
@@ -40,12 +41,14 @@ public class StatusEffectManager extends BukkitRunnable implements EffectContain
     while (iterator.hasNext()) {
 
       StatusEffect effect = iterator.next();
-      if (!effect.canTick().isFatal()) {
-        effect.effect();
-        effect.setNextExecution();
-      } else {
+      TickFailure canTick = effect.canTick();
+
+      if (canTick.isFatal()) {
         effect.stop();
         iterator.remove();
+      } else if (canTick == TickFailure.SUCCESS) {
+        effect.effect();
+        effect.setNextExecution();
       }
 
     }

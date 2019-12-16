@@ -13,8 +13,8 @@ public class FeatherFallingEffect extends EntityStatusEffect {
 
   @Override
   public void effect() {
-    if (getTarget().isOnGround()) this.stop();
     getTarget().setFallDistance(0F);
+    if (getTarget().isOnGround()) this.stop();
   }
 
 }
