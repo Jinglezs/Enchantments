@@ -19,7 +19,7 @@ import net.jingles.enchantments.statuseffect.LocationStatusEffect;
 import net.jingles.enchantments.enchant.TargetGroup;
 
 @Enchant(name = "Demeter's Blessing", key = "demeters_blessing", enchantChance = 0.35, maxLevel = 3, targetGroup = TargetGroup.BANNER,
-  description = "For every crop or sapling within a 5 block (per level) radius, the crop's age will increase by one every 20 seconds.");
+  description = "For every crop or sapling within a 5 block (per level) radius, the crop's age will increase by one every 20 seconds.")
 public class DemetersBlessing extends BlockEnchant {
 
   public DemetersBlessing(NamespacedKey key) {
