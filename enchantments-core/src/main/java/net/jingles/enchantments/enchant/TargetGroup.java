@@ -133,6 +133,11 @@ public enum TargetGroup {
   COMPASS(material-> material == Material.COMPASS),
 
   /**
+   * Mob skull blocks
+   */
+  SKULLS(material -> material.name().endsWith("_SKULL")),
+
+  /**
    * Represents all items that can be enchanted through this plugin, but cannot be enchanted normally in vanilla.
    */
   NON_VANILLA(material -> TILE_ENTITY.canEnchant(material) || BLOCK.canEnchant(material) || ELYTRA.canEnchant(material) ||

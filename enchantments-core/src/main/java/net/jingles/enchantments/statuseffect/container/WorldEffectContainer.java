@@ -22,6 +22,11 @@ public class WorldEffectContainer implements EffectContainer<LocationStatusEffec
     return getEffectsAtLocation(location).stream().anyMatch(statusEffect ->  statusEffect.getClass() == effect);
   }
 
+  public boolean hasEffectNearLocation(Location location, double radius, Class<? extends LocationStatusEffect> effect) {
+    return getEffectsWithinRadius(location, radius, radius, radius).stream()
+      .anyMatch(e -> e.getClass() == effect);
+  }
+
   @NotNull
   public <T extends LocationStatusEffect> Optional<T> getEffect(@NotNull Location location, @NotNull Class<T> clazz) {
     return getEffectsAtLocation(location).stream()
