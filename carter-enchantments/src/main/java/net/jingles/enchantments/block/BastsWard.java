@@ -16,8 +16,14 @@ import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 
 import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.BlockEnchant;
+import net.jingles.enchantments.enchant.Enchant;
+import net.jingles.enchantments.enchant.TargetGroup;
 import net.jingles.enchantments.statuseffect.LocationStatusEffect;
 
+//TODO: Add mob head target group.
+@Enchant(name = "Bast's Ward", key = "basts_ward", maxLevel = 1, targetGroup = TargetGroup.TILE_ENTITY,
+  description = "When a creeper targets a player near an enchanted creeper head, a swarm of ocelots " +
+    "are summoned to scare it away.")
 public class BastsWard extends BlockEnchant {
 
   public BastsWard(NamespacedKey key) {
@@ -60,7 +66,7 @@ public class BastsWard extends BlockEnchant {
     private Ocelot ocelot;
 
     public BastsWardEffect(LivingEntity target, Location location) {
-      super(BastsWard.this, Integer.MAX_VALUE, 1, location);
+      super(BastsWard.this, 30 * 20, 1, location);
       this.target = target;
     }
 
