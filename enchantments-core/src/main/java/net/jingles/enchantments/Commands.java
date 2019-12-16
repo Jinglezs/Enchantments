@@ -2,9 +2,11 @@ package net.jingles.enchantments;
 
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.CommandHelp;
+import co.aikar.commands.InvalidCommandArgument;
 import co.aikar.commands.annotation.*;
 import net.jingles.enchantments.cooldown.CooldownManager;
 import net.jingles.enchantments.enchant.CustomEnchant;
+import net.jingles.enchantments.enchant.TargetGroup;
 import net.jingles.enchantments.statuseffect.StatusEffectManager;
 import net.jingles.enchantments.statuseffect.container.EntityEffectContainer;
 import net.jingles.enchantments.statuseffect.container.WorldEffectContainer;
@@ -96,12 +98,46 @@ public class Commands extends BaseCommand {
 
   @Subcommand("list")
   @Description("Shows the executor a complete list of registered custom enchantment names.")
-  public void onEnchantmentList(CommandSender sender) {
-    String enchants = Enchantments.getEnchantmentManager().getRegisteredEnchants().stream()
+  public void onEnchantmentList(CommandSender sender, String type) {
+
+    type = type.trim().toLowerCase();
+    String enchants;
+
+    if (type.equals("all")) {
+
+      enchants = Enchantments.getEnchantmentManager().getRegisteredEnchants().stream()
         .map(CustomEnchant::getName)
         .collect(Collectors.joining(ChatColor.WHITE + ", " + ChatColor.GOLD));
 
-    sender.sendMessage(TITLE + "Registered custom enchantments: " + ChatColor.GOLD + enchants);
+    } else if (type.equals("hand")) {
+
+      ItemStack item = sender instanceof Player ? ((Player) sender).getInventory().getItemInMainHand() : null;
+
+      if (item == null) throw new InvalidCommandArgument("You must be holding an item in your main hand.");
+      
+      enchants = Enchantments.getEnchantmentManager().getRegisteredEnchants().stream() 
+        .filter(enchant -> enchant.canEnchantItem(item))
+        .map(CustomEnchant::getName)
+        .collect(Collectors.joining(ChatColor.WHITE + ", " + ChatColor.GOLD));
+
+    } else {
+
+      TargetGroup target;
+
+      try {
+        target = TargetGroup.valueOf(type.toUpperCase());
+      } catch (IllegalArgumentException e) {
+        throw new InvalidCommandArgument("That is not a valid target group.");
+      }
+
+      enchants = Enchantments.getEnchantmentManager().getRegisteredBlockEnchants().stream()
+        .filter(enchant -> enchant.getTargetGroup() == target)
+        .map(CustomEnchant::getName)
+        .collect(Collectors.joining(ChatColor.WHITE + ", " + ChatColor.GOLD));
+
+    }
+
+    sender.sendMessage(TITLE + "Applicable custom enchantments: " + ChatColor.GOLD + enchants);
   }
 
   @Subcommand("info")

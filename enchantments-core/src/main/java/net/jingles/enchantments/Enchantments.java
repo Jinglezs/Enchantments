@@ -6,6 +6,7 @@ import co.aikar.commands.InvalidCommandArgument;
 import net.jingles.enchantments.cooldown.CooldownManager;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.EnchantmentManager;
+import net.jingles.enchantments.enchant.TargetGroup;
 import net.jingles.enchantments.projectile.ProjectileManager;
 import net.jingles.enchantments.statuseffect.StatusEffectManager;
 import org.bukkit.Material;
@@ -73,9 +74,24 @@ public class Enchantments extends JavaPlugin {
     //----- ARGUMENT COMPLETIONS -----
 
     //Command completion for CustomEnchant names
-    manager.getCommandCompletions().registerAsyncCompletion("enchantments", handler ->
+    manager.getCommandCompletions().registerAsyncCompletion("enchantments", handler -> 
             enchantmentManager.getRegisteredEnchants().stream().map(CustomEnchant::getName)
                 .collect(Collectors.toList()));
+
+    manager.getCommandCompletions().registerAsyncCompletion("targetGroups", handler -> {
+
+      List<String> groups = Stream.of(TargetGroup.values)
+        .map(TargetGroup::name)
+        .collect(Collectors.toList());
+
+      groups.add("hand");
+      groups.add("all");  
+
+      return groups;
+
+    })            
+
+
 
     //----- CONDITIONS -----
 
