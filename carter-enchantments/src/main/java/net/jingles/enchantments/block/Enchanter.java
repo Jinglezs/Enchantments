@@ -5,11 +5,15 @@ import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.enchant.TargetGroup;
 import net.jingles.enchantments.util.InventoryUtils;
+
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
 import org.bukkit.block.TileState;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerTakeLecternBookEvent;
 import org.bukkit.inventory.ItemStack;
@@ -63,16 +67,32 @@ public class Enchanter extends BlockEnchant {
         .ifPresent(enchant -> {
 
           int level = ThreadLocalRandom.current().nextInt(enchant.getStartLevel(), enchant.getMaxLevel() + 1);
+          int requiredExp = 3;
 
           book.setType(Material.ENCHANTED_BOOK);
           EnchantmentStorageMeta meta = (EnchantmentStorageMeta) book.getItemMeta();
           meta.addStoredEnchant(enchant, level, true);
 
           if (CustomEnchant.isCustomEnchant(enchant)) {
+            requiredExp = ((CustomEnchant) enchant).getLevelRequirement();
             InventoryUtils.addEnchantLore(meta, Collections.singletonMap(enchant, level));
           }
 
+          Player player = event.getPlayer();
+          int xp = player.getLevel();
+
+          if (xp < 10 || xp < requiredExp) {
+            player.sendMessage(ChatColor.RED + "You can't afford this enchantment.");
+            return;
+          }
+
+          // Add the enchantment to the book
           book.setItemMeta(meta);
+
+          // Deduct the cost from the player's xp.
+          int cost = Math.min(xp, ThreadLocalRandom.current().nextInt(10, requiredExp));
+          player.setLevel(xp - cost);
+          player.getWorld().playSound(player.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1, 1);
 
         });
 
