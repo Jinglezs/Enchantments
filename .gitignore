@@ -4,4 +4,4 @@ target/
 .classpath
 .project
 .settings
-settings.json
+.vscode/

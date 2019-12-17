@@ -135,6 +135,8 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
   @Nullable
   public ItemStack getItem(@NotNull LivingEntity entity) {
 
+    if (entity == null) return null;
+
     EntityEquipment equipment = entity.getEquipment();
     if (equipment == null) return null;
 

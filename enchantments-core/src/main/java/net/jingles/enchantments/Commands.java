@@ -97,6 +97,7 @@ public class Commands extends BaseCommand {
   }
 
   @Subcommand("list")
+  @CommandCompletion("@targetGroups")
   @Description("Shows the executor a complete list of registered custom enchantment names.")
   public void onEnchantmentList(CommandSender sender, String type) {
 
