@@ -80,7 +80,9 @@ public class Lockable extends BlockEnchant {
 
   @EventHandler
   public void onPasswordEnter(AsyncPlayerChatEvent event) {
-    //TODO: Check if player has LockableListenEffect and pass their input to it.
+    Enchantments.getStatusEffectManager().getEntityContainer(event.getPlayer().getUniqueId())
+      .flatMap(container -> container.getEffectBySource(this, LockableListenEffect.class))
+      .ifPresent(effect -> effect.acceptInput(event.getMessage()));
   }
 
   private class LockableListenEffect extends EntityStatusEffect {
@@ -144,6 +146,10 @@ public class Lockable extends BlockEnchant {
 
       this.cancel();
 
+    }
+
+    public void acceptInput(String input) {
+      this.input = input;
     }
 
   }

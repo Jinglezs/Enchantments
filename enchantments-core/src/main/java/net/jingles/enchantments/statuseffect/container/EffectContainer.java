@@ -3,6 +3,7 @@ package net.jingles.enchantments.statuseffect.container;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.statuseffect.StatusEffect;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,6 +37,13 @@ public interface EffectContainer<T extends StatusEffect> {
     return getStatusEffects().stream()
         .filter(effect -> effect.getSource().equals(source))
         .collect(Collectors.toSet());
+  }
+
+  default <U extends StatusEffect> Optional<U> getEffectBySource(CustomEnchant source, Class<U> effect) {
+    return getEffectsBySource(source).stream()
+      .filter(e -> e.getClass() == effect)
+      .map(e -> (U) e)
+      .findFirst();
   }
 
   /**
