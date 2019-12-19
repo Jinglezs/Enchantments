@@ -10,7 +10,9 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
+import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Tameable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.potion.PotionEffect;
@@ -19,9 +21,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.TimeUnit;
 
-@Enchant(name = "Undying", key = "Undying", maxLevel = 3, cooldown = 1, targetItem = EnchantmentTarget.ARMOR_FEET,
-    timeUnit = TimeUnit.MINUTES, description = "Undying grants the owner a second chance by providing temporary " +
-    "absorption and regeneration to themselves and nearby entities for 15 seconds.")
+@Enchant(name = "Undying", key = "Undying", maxLevel = 3, cooldown = 1, targetItem = EnchantmentTarget.ARMOR_FEET, timeUnit = TimeUnit.MINUTES, description = "Undying grants the owner a second chance by providing temporary "
+    + "absorption and regeneration to themselves and nearby entities for 15 seconds.")
 
 public class Undying extends CustomEnchant {
 
@@ -36,19 +37,19 @@ public class Undying extends CustomEnchant {
 
   @Override
   public boolean canTrigger(@NotNull LivingEntity entity) {
-    return hasEnchantment(getItem(entity)) &&
-        !Enchantments.getCooldownManager().hasCooldown(entity, this);
+    return hasEnchantment(getItem(entity)) && !Enchantments.getCooldownManager().hasCooldown(entity, this);
   }
 
   @EventHandler
   public void onFatalDamage(EntityDamageByEntityEvent event) {
 
-    if (!(event.getEntity() instanceof LivingEntity) ||
-        !canTrigger((LivingEntity) event.getEntity())) return;
+    if (!(event.getEntity() instanceof LivingEntity) || !canTrigger((LivingEntity) event.getEntity()))
+      return;
 
     LivingEntity entity = (LivingEntity) event.getEntity();
 
-    if (entity.getHealth() - event.getDamage() >= 0) return;
+    if (entity.getHealth() - event.getDamage() >= 0)
+      return;
 
     event.setCancelled(true);
     entity.setHealth(1.5);
@@ -62,7 +63,7 @@ public class Undying extends CustomEnchant {
   private class UndyingEffect extends PotionStatusEffect {
 
     private final Particle.DustOptions options;
-    private final PotionEffect regen;
+    private final PotionEffect absorption;
 
     private final int radius;
     private float angle = 0F;
@@ -71,13 +72,13 @@ public class Undying extends CustomEnchant {
       super(potionEffect, target, Undying.this, 1);
       this.radius = radius;
       this.options = new Particle.DustOptions(Color.RED, 2.3F);
-      this.regen = new PotionEffect(PotionEffectType.REGENERATION, 60, level, false, false);
+      this.absorption = new PotionEffect(PotionEffectType.ABSORPTION, getMaxTicks(), 1, false, false);
     }
 
     @Override
     public void start() {
       super.start();
-      getTarget().addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, getMaxTicks(), 1, false, false));
+      getTarget().addPotionEffect(absorption);
       addCooldown(getTarget());
     }
 
@@ -93,9 +94,15 @@ public class Undying extends CustomEnchant {
       getTarget().getWorld().spawnParticle(Particle.REDSTONE, displayLoc, 1, options);
 
       getTarget().getNearbyEntities(radius, radius, radius).stream()
-          .filter(entity -> entity instanceof LivingEntity)
-          .map(entity -> (LivingEntity) entity)
-          .forEach(entity -> entity.addPotionEffect(regen));
+        .filter(entity -> entity instanceof Tameable && entity instanceof LivingEntity)
+        .map(entity -> (Tameable) entity)
+        .filter(Tameable::isTamed)
+        .filter(tamed -> tamed.getOwner().getUniqueId().equals(getTarget().getUniqueId()))
+        .forEach(entity -> {
+          LivingEntity living = (LivingEntity) entity;
+          living.addPotionEffect(getPotionEffect());
+          living.addPotionEffect(absorption);
+        });
 
     }
 

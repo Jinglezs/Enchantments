@@ -1,6 +1,7 @@
 package net.jingles.enchantments.block;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.bukkit.ChatColor;
@@ -16,10 +17,15 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.BlockEnchant;
+import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.statuseffect.LocationStatusEffect;
 import net.jingles.enchantments.statuseffect.StatusEffectManager;
 import net.jingles.enchantments.statuseffect.entity.EntityStatusEffect;
+import net.jingles.enchantments.enchant.TargetGroup;
 
+@Enchant(name = "Lockable", key = "lockable", maxLevel = 1, targetGroup = TargetGroup.CONTAINER,
+  description = "When a container with Lockable is first opened, the owner will set a password. To access " +
+    "the container, you must open it while holding an item whose name is equivalent to the key.")
 public class Lockable extends BlockEnchant {
 
   public Lockable(NamespacedKey key) {
@@ -34,12 +40,6 @@ public class Lockable extends BlockEnchant {
   @Override
   public boolean conflictsWith(Enchantment other) {
     return false;
-  }
-
-  @Override
-  public void onChunkLoad(TileState tile) {
-    // Enable lockable containers to remember who has entered the password.
-    Enchantments.getStatusEffectManager().add(new LockableRememberEffect(tile.getLocation()));
   }
 
   @EventHandler
@@ -58,24 +58,26 @@ public class Lockable extends BlockEnchant {
     Player player = event.getPlayer();
     StatusEffectManager manager = Enchantments.getStatusEffectManager();
 
-    // Request a new password
-    if (!container.isLocked()) {
+    if (manager.getEntityContainer(player.getUniqueId())
+      .map(con -> con.hasEffect(LockableListenEffect.class))
+      .orElse(false)) return;
+
       event.setCancelled(true);
+
+    // Set new password if container doesn't have a lock
+    if (!container.isLocked()) {
+
       manager.add(new LockableListenEffect(player, Action.NEW_PASSWORD, container));
       return;
-    }
 
-    LockableRememberEffect remember = manager.getWorldContainer()
-      .getEffect(container.getLocation(), LockableRememberEffect.class).orElse(null);
+    // Update the container's lock  
+    } else if (player.isSneaking()) {
 
-    // Do nothing if the player has already entered the password
-    if (remember != null && remember.rememberedPlayers.contains(player.getUniqueId())) return;  
+      manager.add(new LockableListenEffect(player, Action.CHANGE_PASSWORD, container));
 
-    event.setCancelled(true);
-
-    Action action = player.isSneaking() ? Action.CHANGE_PASSWORD : Action.ENTER_PASSWORD;
-    manager.add(new LockableListenEffect(player, action, container));
-
+    // Allow Spigot to do the rest for us.  
+    } else event.setCancelled(false);
+    
   }
 
   @EventHandler
@@ -113,19 +115,7 @@ public class Lockable extends BlockEnchant {
 
         container.setLock(input);
         container.update();
-
         player.sendMessage(ChatColor.GREEN + "Your new password is \"" + input + "\"");
-        player.openInventory(container.getInventory());
-
-      } else if (action == Action.ENTER_PASSWORD) {
-
-        if (input.equals(container.getLock())) {
-
-          player.sendMessage(ChatColor.GREEN + "Password accepted. This chest will remember " +
-            "you until the next restart");
-          player.openInventory(container.getInventory());  
-
-        } else player.sendMessage(ChatColor.RED + "Incorrect password");
 
       } else if (action == Action.CHANGE_PASSWORD) {
 
@@ -138,7 +128,7 @@ public class Lockable extends BlockEnchant {
           container.update();
 
           player.sendMessage(ChatColor.GREEN + "Your new password is \"" + changed + "\"");
-          player.openInventory(container.getInventory());
+          rememberPlayer(player, container.getLocation());
           
         } else player.sendMessage(ChatColor.RED + "Incorrect password");
 
@@ -152,12 +142,17 @@ public class Lockable extends BlockEnchant {
       this.input = input;
     }
 
+    private void rememberPlayer(Player player, Location location) {
+      Enchantments.getStatusEffectManager().getWorldContainer()
+        .getEffect(location, LockableRememberEffect.class)
+        .ifPresent(effect -> effect.rememberedPlayers.add(player.getUniqueId()));
+    }
+
   }
 
   private enum Action {
 
     NEW_PASSWORD(ChatColor.RED + "This Lockable container is currently unprotected. Please enter a new password in chat."),
-    ENTER_PASSWORD(ChatColor.RED + "This container is locked. Please enter the exact password in chat."),
     CHANGE_PASSWORD(ChatColor.GREEN + "Enter the current password followed by the new password separated by a space.");
 
     private String message;
