@@ -22,18 +22,17 @@ import java.util.stream.Stream;
 
 public class Projectile implements Comparable<Projectile> {
 
-  private final Set<Predicate<Block>> blockFilters;
-  private final Set<Predicate<Entity>> entityFilters;
-  private final Player owner;
+  protected final Set<Predicate<Block>> blockFilters;
+  protected final Set<Predicate<Entity>> entityFilters;
+  protected final Player owner;
 
   private Particle particle;
   private Object options;
   private Vector direction;
   private Location location;
   private BoundingBox hitbox;
-  private double maxDistance;
+  private double maxDistance, distanceTraveled = 0D;
   private boolean noClip = false;
-  private double distanceTraveled = 0D;
 
   private Runnable onTick = () -> {};
   private BiConsumer<Projectile, Block> onBlockHit = (projectile, block) -> {};
@@ -44,7 +43,6 @@ public class Projectile implements Comparable<Projectile> {
     this.entityFilters = new HashSet<>();
     this.owner = owner;
     blockFilters.add(block -> !block.getType().name().endsWith("AIR"));
-    Enchantments.getProjectileManager().register(this);
   }
 
   public void run() {
