@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Particle;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Item;
@@ -97,9 +98,12 @@ public class ThrowingAxe extends CustomEnchant {
         return;
       }
 
-      if (charge < 2) {
+      if (charge < 1.85) {
         charge += 0.15;
       }
+
+      float pitch = Math.min(1.55F, (float) charge);
+      player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.5F, pitch);
 
       NumberFormat format = NumberFormat.getPercentInstance(); 
       TextComponent component = new TextComponent("Axe Throw Power: " + format.format(charge));
@@ -119,6 +123,7 @@ public class ThrowingAxe extends CustomEnchant {
         Location loc = getTarget().getEyeLocation();
         Item item = loc.getWorld().dropItem(loc, axe);
         item.setPickupDelay(Integer.MAX_VALUE);
+        item.setGlowing(true);
 
         Enchantments.getStatusEffectManager().add(new ThrowingAxeThrowEffect((Player) getTarget(), item, charge));
 
@@ -179,6 +184,7 @@ public class ThrowingAxe extends CustomEnchant {
       axe.setVelocity(recalculated);
 
       Location center = axe.getBoundingBox().getCenter().toLocation(getTarget().getWorld());
+      axe.getWorld().spawnParticle(Particle.SWEEP_ATTACK, center, 1);
 
       // Check for collisions.
       axe.getWorld().getNearbyEntities(center, 0.85, 0.85, 0.85).stream()
