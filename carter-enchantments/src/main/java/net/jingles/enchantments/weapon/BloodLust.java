@@ -1,6 +1,7 @@
 package net.jingles.enchantments.weapon;
 
 import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.LivingEntity;
@@ -61,6 +62,11 @@ public class BloodLust extends CustomEnchant {
 
     public BloodLustEffect(PotionEffect potionEffect, LivingEntity target) {
       super(potionEffect, target, BloodLust.this, 1);
+    }
+
+    @Override
+    public void start() {
+      getTarget().getWorld().playSound(getTarget().getLocation(), Sound.ENTITY_FOX_AGGRO, 1F, 1F);
     }
 
     @Override

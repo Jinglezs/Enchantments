@@ -5,14 +5,13 @@ import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.enchant.TargetGroup;
 import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.jetbrains.annotations.NotNull;
 
-@Enchant(name = "Executioner", key = "executioner", targetItem = EnchantmentTarget.TOOL, enchantChance = 0.45,
-    targetGroup = TargetGroup.AXES, description = "Increases weapon damage by 10% (+5% per level) " +
+@Enchant(name = "Executioner", key = "executioner", targetGroup = TargetGroup.AXES, enchantChance = 0.45,
+     description = "Increases weapon damage by 10% (+5% per level) " +
     "and has a 10% (+10% per level) to ignite the target for 1 (+2 per level) seconds.")
 
 public class Executioner extends CustomEnchant {

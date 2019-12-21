@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.block.TileState;
 import org.bukkit.block.data.Ageable;
@@ -68,6 +69,7 @@ public class DemetersBlessing extends BlockEnchant {
         }
 
         block.setBlockData(data);
+        block.getWorld().spawnParticle(Particle.COMPOSTER, block.getLocation(), 1);
 
       }
 

@@ -11,6 +11,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.LivingEntity;
@@ -128,6 +129,7 @@ public class Reinforcement extends CustomEnchant {
       if (closest.isPresent()) {
 
         Monster entity = closest.get();
+        entity.getWorld().playSound(getTarget().getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1F, 1F);
 
         // Fire a projectile from the circle.
         new HomingProjectile((Player) getTarget(), closest.get())

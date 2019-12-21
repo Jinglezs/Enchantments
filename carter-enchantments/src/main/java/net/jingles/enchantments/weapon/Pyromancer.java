@@ -8,6 +8,7 @@ import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
@@ -56,6 +57,8 @@ public class Pyromancer extends CustomEnchant {
 
     final LivingEntity target = result != null ? (LivingEntity) result.getHitEntity() : null;
     if (target == null) return;
+
+    target.getWorld().playSound(target.getLocation(), Sound.ITEM_FIRECHARGE_USE, 1F, 1F);
 
     int level = getLevel(getItem(player));
     float damage = 5 + (level * 2);

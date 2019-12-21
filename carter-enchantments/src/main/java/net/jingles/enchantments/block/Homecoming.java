@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 @Enchant(name = "Homecoming", key = "homecoming", enchantChance = 0.47, targetGroup = TargetGroup.CAMPFIRE,
   description = "The enchanted campfire has a radius of 20 blocks per level. Every 5 seconds, all players " +
-      "within the fire's range will receive Regeneration 2 and Saturation 2 potion effects as a " +
+      "within the fire's range will receive Regeneration 1 and Saturation 1 potion effects as a " +
       "homecoming gift.")
 
 public class Homecoming extends BlockEnchant {
@@ -54,8 +54,8 @@ public class Homecoming extends BlockEnchant {
       int duration = level * (10 * 20);
 
       this.radius = level * 20;
-      this.regen = new PotionEffect(PotionEffectType.REGENERATION, duration, level, false, false);
-      this.saturation = new PotionEffect(PotionEffectType.SATURATION, duration, level, false, false);
+      this.regen = new PotionEffect(PotionEffectType.REGENERATION, duration, 1, false, false);
+      this.saturation = new PotionEffect(PotionEffectType.SATURATION, duration, 1, false, false);
     }
 
     @Override

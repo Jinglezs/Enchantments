@@ -32,7 +32,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 
 @Enchant(name = "Throwing Axe", key = "throwing_axe", targetGroup = TargetGroup.AXES, maxLevel = 1,
   cooldown = 13, timeUnit = TimeUnit.SECONDS, description = "Shift right clicking allows the user to " +
-    "begin charging an axe throw. Right clicking again will throw the axe with the accumulated force. The " +
+    "begin charging an axe throw. Shift right clicking again will throw the axe with the accumulated force. The " +
     "axe travels in a parabolic motion and deals damage equivalent to the axe's normal damage multiplied " +
     "by the force of the throw. Enchantments such as sharpness do not affect the final damage.")
 public class ThrowingAxe extends CustomEnchant {
@@ -45,7 +45,7 @@ public class ThrowingAxe extends CustomEnchant {
 
   @Override
   public boolean conflictsWith(Enchantment other) {
-    return false;
+    return other.getClass() == Mjolnir.class;
   }
 
   @Override

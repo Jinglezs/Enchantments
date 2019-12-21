@@ -129,6 +129,7 @@ public class Summoner extends BlockEnchant {
       case EMERALD: return VILLAGER;
       case COMPASS: return WANDERING_TRADER;
       case ORANGE_DYE: return FOX;
+      case HONEY_BOTTLE: return BEE;
 
       // Aquatic mobs
       case SALMON: return SALMON;

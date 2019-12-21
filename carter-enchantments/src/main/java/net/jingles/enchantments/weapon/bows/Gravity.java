@@ -3,10 +3,13 @@ package net.jingles.enchantments.weapon.bows;
 import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
+import net.jingles.enchantments.enchant.TargetGroup;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
+import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Arrow;
@@ -23,12 +26,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Enchant(name = "Gravity", key = "gravity", levelRequirement = 30, targetItem = EnchantmentTarget.BOW, maxLevel = 3,
-    cooldown = 3, enchantChance = 0.15, description = "When an arrow launched by a bow with Gravity hits a block or " +
-    "entity, the arrow creates a gravitational field in a 5 (+3 per additional level) block radius that pulls entities " +
-    "towards itself. The arrow then detonates, dealing an additional 7 damage and slowing all entities caught in the " +
-    "blast for 5 seconds per level")
-
+@Enchant(name = "Gravity", key = "gravity", levelRequirement = 30, targetItem = EnchantmentTarget.BOW, 
+    maxLevel = 3, targetGroup = TargetGroup.BOWS, cooldown = 3, enchantChance = 0.15, description = 
+    "When an arrow launched by a bow with Gravity hits a block or entity, the arrow creates a gravitational " +
+    "field in a 5 (+3 per additional level) block radius that pulls entities towards itself. The arrow then " +
+    "detonates, dealing an additional 7 damage and slowing all entities caught in the blast for 5 seconds per level")
 public class Gravity extends CustomEnchant {
 
   public Gravity(NamespacedKey key) {
@@ -67,19 +69,29 @@ public class Gravity extends CustomEnchant {
         .map(entity -> (Monster) entity)
         .collect(Collectors.toSet());
 
-    //Quickly pull the target towards the hit location.
-    targets.forEach(target -> {
-      Vector difference = hitLoc.toVector().subtract(target.getLocation().toVector());
-      target.setVelocity(difference.multiply(0.45).setY(Math.min(1.5F, difference.getY())));
-    });
+    if (!targets.isEmpty()) {
+
+      hitLoc.getWorld().playSound(hitLoc, Sound.ENTITY_ILLUSIONER_MIRROR_MOVE, 1F, 1F);
+
+      //Quickly pull the target towards the hit location.
+      targets.forEach(target -> {
+        Vector difference = hitLoc.toVector().subtract(target.getLocation().toVector());
+        target.setVelocity(difference.multiply(0.45).setY(Math.min(1.5F, difference.getY())));
+      });
+
+    }    
 
     Enchantments plugin = (Enchantments) Bukkit.getPluginManager().getPlugin("Enchantments");
 
     //Detonate the arrow about half a second after pulling the entities towards it.
-    plugin.getServer().getScheduler().runTaskLater(plugin, () -> targets.forEach(target -> {
+    plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+
+      hitLoc.getWorld().playSound(hitLoc, Sound.ENTITY_GENERIC_EXPLODE, 1F, 1F);
       hitLoc.getWorld().spawnParticle(Particle.EXPLOSION_HUGE, hitLoc, 0, 0, 0, 1);
-      target.damage(7.0F, shooter);
-    }), 12L);
+
+      targets.forEach(target -> target.damage(7.0, shooter)); 
+
+    }, 12L);
 
     int duration = (5 * level) * 20;
     PotionEffect slow = new PotionEffect(PotionEffectType.SLOW, duration, 1, false, true);

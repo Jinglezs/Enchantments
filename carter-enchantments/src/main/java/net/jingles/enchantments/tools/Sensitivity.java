@@ -9,6 +9,7 @@ import net.jingles.enchantments.statuseffect.entity.EntityStatusEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
@@ -109,7 +110,10 @@ public class Sensitivity extends CustomEnchant {
     @Override
     public void start() {
 
-      Sensitivity.this.addCooldown(getTarget());
+      LivingEntity player = getTarget();
+      player.getWorld().playSound(player.getLocation(), Sound.ENTITY_VILLAGER_CELEBRATE, 1F, 1F);
+
+      Sensitivity.this.addCooldown(player);
       shulker.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, getMaxTicks(), 3, false, false));
       shulker.setGlowing(true);
       shulker.setInvulnerable(true);

@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
 import org.bukkit.block.TileState;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Creeper;
@@ -81,6 +82,8 @@ public class BastsWard extends BlockEnchant {
 
     @Override
     public void start() {
+
+      target.getWorld().playSound(target.getLocation(), Sound.ENTITY_CAT_HISS, 1F, 1F);
 
       for (int i = 0; i < 3; i++) {
         Ocelot ocelot = (Ocelot) getLocation().getWorld().spawnEntity(getLocation(), EntityType.OCELOT);
