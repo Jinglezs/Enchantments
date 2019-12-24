@@ -5,6 +5,7 @@ import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.enchant.TargetGroup;
 import net.jingles.enchantments.statuseffect.container.EntityEffectContainer;
+import net.jingles.enchantments.statuseffect.context.ItemEffectContext;
 import net.jingles.enchantments.statuseffect.entity.EntityStatusEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -18,6 +19,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.entity.Shulker;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
@@ -72,13 +74,17 @@ public class Sensitivity extends CustomEnchant {
     if (!canTrigger(event.getPlayer()) || player.getWorld()
         .rayTraceBlocks(player.getEyeLocation(), new Vector(0, 1, 0), 30) == null) return;
 
-    int level = getLevel(getItem(player));
+    ItemStack item = getItem(player);
+    int level = getLevel(item);
 
     getNearbyBlocks(location, 30).stream()
         .filter(block -> ORES.containsKey(block.getType()) && ORES.get(block.getType()) <= level)
         .sorted(Comparator.comparingDouble(block -> block.getLocation().distanceSquared(player.getLocation())))
         .max(Comparator.comparing(block -> ORES.get(block.getType())))
-        .ifPresent(block -> Enchantments.getStatusEffectManager().add(new SensitivityEffect(player, block)));
+        .ifPresent(block -> {
+          ItemEffectContext context = new ItemEffectContext(player, item, this);
+          Enchantments.getStatusEffectManager().add(new SensitivityEffect(context, player, block));
+        });
 
   }
 
@@ -100,8 +106,8 @@ public class Sensitivity extends CustomEnchant {
     private final Material targetType;
     private final Shulker shulker;
 
-    private SensitivityEffect(@NotNull Player target, Block block) {
-      super(target, Sensitivity.this, 600, 5);
+    private SensitivityEffect(ItemEffectContext context, Player target, Block block) {
+      super(target, context, 600, 5);
       this.block = block;
       this.targetType = block.getType();
       this.shulker = (Shulker) getTarget().getWorld().spawnEntity(block.getLocation(), EntityType.SHULKER);
@@ -113,7 +119,7 @@ public class Sensitivity extends CustomEnchant {
       LivingEntity player = getTarget();
       player.getWorld().playSound(player.getLocation(), Sound.ENTITY_VILLAGER_CELEBRATE, 1F, 1F);
 
-      Sensitivity.this.addCooldown(player);
+      addCooldown(player);
       shulker.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, getMaxTicks(), 3, false, false));
       shulker.setGlowing(true);
       shulker.setInvulnerable(true);

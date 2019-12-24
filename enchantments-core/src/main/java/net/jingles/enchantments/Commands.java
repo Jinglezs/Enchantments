@@ -7,18 +7,25 @@ import co.aikar.commands.annotation.*;
 import net.jingles.enchantments.cooldown.CooldownManager;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.TargetGroup;
+import net.jingles.enchantments.persistence.DataType;
+import net.jingles.enchantments.persistence.EnchantTeam;
 import net.jingles.enchantments.statuseffect.StatusEffectManager;
 import net.jingles.enchantments.statuseffect.container.EntityEffectContainer;
 import net.jingles.enchantments.statuseffect.container.WorldEffectContainer;
+import net.jingles.enchantments.util.EnchantUtils;
 import net.jingles.enchantments.util.RomanNumerals;
 import org.bukkit.ChatColor;
+import org.bukkit.block.TileState;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataHolder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -152,6 +159,7 @@ public class Commands extends BaseCommand {
     // General info
     info.append(String.format(LABELLED, "\nEnchant Chance", String.valueOf(enchant.getEnchantChance())))
     .append(String.format(LABELLED, "Max Level", enchant.getMaxLevel()))
+    .append(String.format(LABELLED, "Level Requirement", enchant.getLevelRequirement()))
     // Cooldown info
     .append(String.format(LABELLED, "\nCooldown", String.valueOf(enchant.getCooldown())))
     .append(String.format(LABELLED, "Time Unit", enchant.getTimeUnit().name()))
@@ -208,6 +216,46 @@ public class Commands extends BaseCommand {
         .collect(Collectors.joining("\n"));
 
     player.sendMessage(EFFECTS_HEADER + (!effectsMessage.isEmpty() ? effectsMessage : " - There are no active location status effects"));
+  }
+
+  @CommandAlias("edit-team")
+  @Syntax("<add | remove | toggle-tameables> <name of the entity/flag>")
+  @Description("Allows the sender to add entities to their enchantment team or toggle team flags.")
+  public void onEditTeamCommand(Player player, String action, PersistentDataHolder holder, @Optional String name) {
+
+    UUID owner = holder.getPersistentDataContainer()
+        .getOrDefault(Enchantments.OWNER_KEY, DataType.UUID, player.getUniqueId());
+
+    if (!player.getUniqueId().equals(owner))
+      throw new InvalidCommandArgument("You must own this enchantment to edit it's team.");
+
+    EnchantTeam team = EnchantUtils.getEnchantTeam(holder);
+
+    if (action.equalsIgnoreCase("toggle-tameables")) {
+
+      team.setIncludeTamedAnimals(!team.getIncludeTamedAnimals());
+
+    } else {
+
+      if (name == null) throw new InvalidCommandArgument("You must provide a named entity to add or remove");
+
+      java.util.Optional<LivingEntity> entity = player.getWorld().getLivingEntities().stream()
+          .filter(e -> e.getCustomName() != null && e.getCustomName().equalsIgnoreCase(name))
+          .findAny();
+
+      if (entity.isPresent()) {
+
+        if (action.equalsIgnoreCase("add")) team.addTeamedEntity(entity.get().getUniqueId());
+        else team.removeTeamedEntity(entity.get().getUniqueId());
+
+      } else throw new InvalidCommandArgument("An entity with that name could not be found.");
+
+      if (holder instanceof TileState) {
+        ((TileState) holder).update(true);
+      }
+
+    }
+
   }
 
 }

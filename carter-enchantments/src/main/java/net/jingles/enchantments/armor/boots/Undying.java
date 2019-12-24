@@ -3,25 +3,28 @@ package net.jingles.enchantments.armor.boots;
 import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
+import net.jingles.enchantments.persistence.EnchantTeam;
+import net.jingles.enchantments.statuseffect.context.ItemEffectContext;
 import net.jingles.enchantments.statuseffect.entity.PotionStatusEffect;
+import net.jingles.enchantments.util.EnchantUtils;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
-import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Tameable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.TimeUnit;
 
-@Enchant(name = "Undying", key = "Undying", maxLevel = 3, cooldown = 1, targetItem = EnchantmentTarget.ARMOR_FEET, timeUnit = TimeUnit.MINUTES, description = "Undying grants the owner a second chance by providing temporary "
+@Enchant(name = "Undying", key = "Undying", maxLevel = 3, cooldown = 1, targetItem = EnchantmentTarget.ARMOR_FEET,
+    timeUnit = TimeUnit.MINUTES, description = "Undying grants the owner a second chance by providing temporary "
     + "absorption and regeneration to themselves and nearby entities for 15 seconds.")
 
 public class Undying extends CustomEnchant {
@@ -54,9 +57,12 @@ public class Undying extends CustomEnchant {
     event.setCancelled(true);
     entity.setHealth(1.5);
 
-    int level = getLevel(getItem(entity));
+    ItemStack item = getItem(entity);
+    int level = getLevel(item);
     PotionEffect effect = new PotionEffect(PotionEffectType.REGENERATION, 300, level, false, false);
-    Enchantments.getStatusEffectManager().add(new UndyingEffect(effect, entity, level * 3, level));
+    ItemEffectContext context = new ItemEffectContext(entity, item, this);
+
+    Enchantments.getStatusEffectManager().add(new UndyingEffect(context, effect, entity, level * 3));
 
   }
 
@@ -65,11 +71,13 @@ public class Undying extends CustomEnchant {
     private final Particle.DustOptions options;
     private final PotionEffect absorption;
 
+    private final EnchantTeam team;
     private final int radius;
     private float angle = 0F;
 
-    private UndyingEffect(@NotNull PotionEffect potionEffect, @NotNull LivingEntity target, int radius, int level) {
-      super(potionEffect, target, Undying.this, 1);
+    private UndyingEffect(@NotNull ItemEffectContext context, @NotNull PotionEffect potionEffect, @NotNull LivingEntity target, int radius) {
+      super(potionEffect, target, context, 1);
+      this.team = EnchantUtils.getEnchantTeam(context.getTrigger());
       this.radius = radius;
       this.options = new Particle.DustOptions(Color.RED, 2.3F);
       this.absorption = new PotionEffect(PotionEffectType.ABSORPTION, getMaxTicks(), 1, false, false);
@@ -94,10 +102,8 @@ public class Undying extends CustomEnchant {
       getTarget().getWorld().spawnParticle(Particle.REDSTONE, displayLoc, 1, options);
 
       getTarget().getNearbyEntities(radius, radius, radius).stream()
-        .filter(entity -> entity instanceof Tameable && entity instanceof LivingEntity)
-        .map(entity -> (Tameable) entity)
-        .filter(Tameable::isTamed)
-        .filter(tamed -> tamed.getOwner().getUniqueId().equals(getTarget().getUniqueId()))
+        .filter(e -> e instanceof LivingEntity)
+        .filter(team::isTeamed)
         .forEach(entity -> {
           LivingEntity living = (LivingEntity) entity;
           living.addPotionEffect(getPotionEffect());

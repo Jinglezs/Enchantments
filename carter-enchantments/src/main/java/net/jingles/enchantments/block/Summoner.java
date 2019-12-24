@@ -59,7 +59,7 @@ public class Summoner extends BlockEnchant {
       event.setCancelled(true);
 
       block.setType(Material.SPAWNER);
-      block.getState().update();
+      block.getState().update(true);
 
       CreatureSpawner spawner = (CreatureSpawner) block.getState();
 
@@ -73,7 +73,7 @@ public class Summoner extends BlockEnchant {
       spawner.getPersistentDataContainer().set(getKey(), PersistentDataType.INTEGER, getLevel(item));
 
       // Update the block state so that all of the changes are saved.
-      spawner.update();
+      spawner.update(true);
 
       // Consume the enchanted item used to create the spawner.
       event.getPlayer().getInventory().remove(item);

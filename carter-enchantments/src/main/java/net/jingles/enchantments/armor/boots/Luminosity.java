@@ -4,6 +4,7 @@ import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.statuseffect.container.EntityEffectContainer;
+import net.jingles.enchantments.statuseffect.context.ItemEffectContext;
 import net.jingles.enchantments.statuseffect.entity.EntityStatusEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -50,17 +51,20 @@ public class Luminosity extends CustomEnchant {
       !canTrigger(event.getPlayer())) return;
 
     Player player = event.getPlayer();
-    Enchantments.getStatusEffectManager().add(new LuminosityEffect(player));
+    ItemStack item = getItem(player);
+
+    ItemEffectContext context = new ItemEffectContext(player, item, this);
+    Enchantments.getStatusEffectManager().add(new LuminosityEffect(player, context));
   }
 
-  private class LuminosityEffect extends EntityStatusEffect {
+  private static class LuminosityEffect extends EntityStatusEffect {
 
     private final Player player;
     private final Location location;
     private Material previous;
 
-    public LuminosityEffect(Player player) {
-      super(player, Luminosity.this, 5 * 20, 1);
+    public LuminosityEffect(Player player, ItemEffectContext context) {
+      super(player, context, 5 * 20, 1);
       this.player = player;
       this.location = player.getLocation().clone().subtract(0, 1, 0);
     }

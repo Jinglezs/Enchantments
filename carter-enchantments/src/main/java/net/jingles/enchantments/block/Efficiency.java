@@ -50,7 +50,7 @@ public class Efficiency extends BlockEnchant {
     short burnTime = (short) Math.min(Short.MAX_VALUE, furnace.getBurnTime() + (furnace.getBurnTime() * multiplier));
 
     furnace.setBurnTime(burnTime);
-    furnace.update();
+    furnace.update(true);
 
   }
 

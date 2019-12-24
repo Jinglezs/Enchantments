@@ -1,7 +1,11 @@
 package net.jingles.enchantments.block;
 
-import java.util.ArrayList;
-
+import net.jingles.enchantments.Enchantments;
+import net.jingles.enchantments.enchant.BlockEnchant;
+import net.jingles.enchantments.enchant.Enchant;
+import net.jingles.enchantments.enchant.TargetGroup;
+import net.jingles.enchantments.statuseffect.LocationStatusEffect;
+import net.jingles.enchantments.statuseffect.context.TileEntityContext;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
@@ -12,11 +16,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Sapling;
 import org.bukkit.enchantments.Enchantment;
 
-import net.jingles.enchantments.Enchantments;
-import net.jingles.enchantments.enchant.BlockEnchant;
-import net.jingles.enchantments.enchant.Enchant;
-import net.jingles.enchantments.statuseffect.LocationStatusEffect;
-import net.jingles.enchantments.enchant.TargetGroup;
+import java.util.ArrayList;
 
 @Enchant(name = "Demeter's Blessing", key = "demeters_blessing", enchantChance = 0.35, maxLevel = 3, targetGroup = TargetGroup.BANNER, description = "For every crop or sapling within a 5 block (per level) radius, the crop's age will increase by one every 20 seconds.")
 public class DemetersBlessing extends BlockEnchant {
@@ -37,20 +37,18 @@ public class DemetersBlessing extends BlockEnchant {
 
   @Override
   public void onChunkLoad(TileState tile) {
-    DemetersBlessingEffect effect = new DemetersBlessingEffect(tile);
+    TileEntityContext context = new TileEntityContext(tile, this);
+    DemetersBlessingEffect effect = new DemetersBlessingEffect(context, getLevel(tile));
     Enchantments.getStatusEffectManager().add(effect);
   }
 
-  private class DemetersBlessingEffect extends LocationStatusEffect {
+  private static class DemetersBlessingEffect extends LocationStatusEffect {
 
     private final int radius;
 
-    public DemetersBlessingEffect(TileState tile) {
-      super(DemetersBlessing.this, Integer.MAX_VALUE, 400, tile.getLocation());
-
-      int level = getLevel(tile);
+    private DemetersBlessingEffect(TileEntityContext context, int level) {
+      super(context, Integer.MAX_VALUE, 400, context.getTrigger().getLocation());
       this.radius = level * 5;
-
     }
 
     @Override

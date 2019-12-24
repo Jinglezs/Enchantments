@@ -45,7 +45,7 @@ public class CooldownManager implements Listener {
       long cooldown = System.currentTimeMillis() + TimeUnit.MILLISECONDS
           .convert(event.getRawCooldown(), event.getTimeUnit());
       holder.getPersistentDataContainer().set(enchant.getCooldownKey(), PersistentDataType.LONG, cooldown);
-      if (holder instanceof TileState) ((TileState) holder).update();
+      if (holder instanceof TileState) ((TileState) holder).update(true);
     }
 
   }
@@ -104,7 +104,7 @@ public class CooldownManager implements Listener {
    */
   public void removeCooldown(@NotNull PersistentDataHolder holder, @NotNull CustomEnchant enchant) {
     holder.getPersistentDataContainer().remove(enchant.getCooldownKey());
-    if (holder instanceof TileState) ((TileState) holder).update();
+    if (holder instanceof TileState) ((TileState) holder).update(true);
   }
 
   @NotNull

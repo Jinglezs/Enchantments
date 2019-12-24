@@ -3,7 +3,10 @@ package net.jingles.enchantments;
 import net.jingles.enchantments.enchant.BlockEnchant;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.TargetGroup;
+import net.jingles.enchantments.persistence.DataType;
+import net.jingles.enchantments.persistence.EnchantTeam;
 import net.jingles.enchantments.statuseffect.LocationStatusEffect;
+import net.jingles.enchantments.util.EnchantUtils;
 import net.jingles.enchantments.util.InventoryUtils;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -20,8 +23,6 @@ import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.world.ChunkLoadEvent;
-import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
@@ -29,13 +30,12 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class EnchantListener implements Listener {
 
@@ -179,10 +179,11 @@ public class EnchantListener implements Listener {
   @EventHandler
   public void onEnchantedBlockPlace(BlockPlaceEvent event) {
 
+    Player player = event.getPlayer();
     ItemStack item = event.getItemInHand();
     BlockState state = event.getBlockPlaced().getState();
 
-    // BlockEnchants can only affect BlockStates that extend Container
+    // BlockEnchants can only affect BlockStates that extend TileState
     if (!(state instanceof TileState)) return;
 
     PersistentDataContainer container = ((TileState) state).getPersistentDataContainer();
@@ -192,6 +193,14 @@ public class EnchantListener implements Listener {
       container.set(enchant.getKey(), PersistentDataType.INTEGER, level);
       enchant.onChunkLoad((TileState) state);
     });
+
+    // Set the enchant's owner
+    container.set(Enchantments.OWNER_KEY, DataType.UUID, player.getUniqueId());
+
+    // Apply the default team, which is a copy of the player's.
+    EnchantTeam team = EnchantUtils.getEnchantTeam(player);
+    team.addTeamedEntity(player.getUniqueId());
+    container.set(Enchantments.TEAM_KEY, DataType.ENCHANT_TEAM, team);
 
     // Update the BlockState so all of these things take effect >_>
     state.update(true);
@@ -206,22 +215,33 @@ public class EnchantListener implements Listener {
     PersistentDataContainer container = ((TileState) state).getPersistentDataContainer();
     Map<BlockEnchant, Integer> enchants = BlockEnchant.getBlockEnchants(container);
 
+    // Non-enchanted blocks are lame, they can be broken without interference.
     if (enchants.isEmpty()) return;
 
-    // Cancels all status effects originating from the block.
+    // Stops all status effects originating from the block.
     Enchantments.getStatusEffectManager().getWorldContainer().getEffectsAtLocation(state.getLocation())
-        .forEach(LocationStatusEffect::cancel);
+        .forEach(LocationStatusEffect::stop);
 
-    event.setCancelled(true);
     Block block = event.getBlock();
-    Collection<ItemStack> items = block.getDrops();
+    ItemStack tool = event.getPlayer().getInventory().getItemInMainHand();
+
+    // I'm just gonna casually copy the drops... cause they're annoying
+    List<ItemStack> items = new ArrayList<>(block.getDrops(tool));
+
+    // Stop dropping stuff ffs
+    event.setDropItems(false);
 
     items.forEach(item -> {
 
       if (item.getType() == block.getType()) {
+
         // Add the enchantments themselves
         ItemMeta meta = item.getItemMeta();
+
+        //TODO: If an enchant has persistent effects, serialize them to
+        //  this item's persistent data container.
         enchants.forEach((enchant, level) -> meta.addEnchant(enchant, level, true));
+
         // Add the enchantment lore
         InventoryUtils.addEnchantLore(meta, enchants);
         item.setItemMeta(meta);
@@ -231,29 +251,12 @@ public class EnchantListener implements Listener {
       // Manually drop each block.
       block.getWorld().dropItemNaturally(block.getLocation(), item);
 
-      block.setType(Material.AIR);
-      state.update();
-
     });
 
-  }
+    // Spigot needs to stop changing BlockStates without telling anyone.
+    state.setType(Material.AIR);
+    state.update(true);
 
-  // The chunk events make calls to BlockEnchant#onChunkLoad() and
-  // BlockEnchant#onChunkUnload for more control over how chunk
-  // loading affects block enchantments.
-
-  @EventHandler
-  public void onChunkLoad(ChunkLoadEvent event) {
-    Enchantments.getEnchantmentManager().loadBlockEnchants(event.getChunk());
-  }
-
-  @EventHandler
-  public void onChunkUnload(ChunkUnloadEvent event) {
-    Stream.of(event.getChunk().getTileEntities())
-        .filter(state -> state instanceof TileState)
-        .map(state -> (TileState) state)
-        .forEach(tile -> BlockEnchant.getBlockEnchants(tile.getPersistentDataContainer())
-            .keySet().forEach(enchant -> enchant.onChunkUnload(tile)));
   }
 
 }

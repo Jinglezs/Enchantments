@@ -1,14 +1,14 @@
 package net.jingles.enchantments.statuseffect.effects;
 
-import net.jingles.enchantments.enchant.CustomEnchant;
+import net.jingles.enchantments.statuseffect.context.EffectContext;
 import net.jingles.enchantments.statuseffect.entity.EntityStatusEffect;
 import org.bukkit.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
 
 public class FeatherFallingEffect extends EntityStatusEffect {
 
-  public FeatherFallingEffect(@NotNull LivingEntity target, @NotNull CustomEnchant source, int maxTicks) {
-    super(target, source, maxTicks, 1);
+  public FeatherFallingEffect(@NotNull LivingEntity target, EffectContext context, int maxTicks) {
+    super(target, context, maxTicks, 1);
   }
 
   @Override

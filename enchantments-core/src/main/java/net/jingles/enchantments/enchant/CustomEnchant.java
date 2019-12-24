@@ -30,7 +30,7 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
   private final double enchantChance;
   private final int levelRequirement, maxLevel, startLevel;
   private final EnchantmentTarget target;
-  private final boolean treasure, cursed;
+  private final boolean treasure, cursed, hasPersistence;
   private final NamespacedKey cooldownKey;
 
   public CustomEnchant(NamespacedKey key) {
@@ -51,6 +51,7 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
     this.treasure = annotation.treasure();
     this.cursed = annotation.cursed();
     this.cooldownKey = getCooldownKey();
+    this.hasPersistence = annotation.hasPersistence();
   }
 
   @NotNull
@@ -73,6 +74,10 @@ public abstract class CustomEnchant extends Enchantment implements Listener {
 
   public long getCooldown() {
     return this.cooldown;
+  }
+
+  public boolean hasPersistence() {
+    return this.hasPersistence;
   }
 
   @NotNull

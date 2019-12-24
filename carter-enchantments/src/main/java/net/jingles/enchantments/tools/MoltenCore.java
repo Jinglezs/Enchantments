@@ -74,7 +74,7 @@ public class MoltenCore extends CustomEnchant {
 
     event.setCancelled(true);
     block.setType(Material.AIR);
-    block.getState().update();
+    block.getState().update(true);
     drops.forEach(item -> block.getWorld().dropItemNaturally(block.getLocation(), item));
 
   }

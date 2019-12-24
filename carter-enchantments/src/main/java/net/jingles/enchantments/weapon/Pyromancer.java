@@ -4,11 +4,7 @@ import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.projectile.HomingProjectile;
-import org.bukkit.Color;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.enchantments.Enchantment;
@@ -80,7 +76,7 @@ public class Pyromancer extends CustomEnchant {
             //Sets the block on fire
             Block up = block.getRelative(BlockFace.UP);
             up.setType(Material.FIRE);
-            up.getState().update();
+            up.getState().update(true);
           }
 
           projectile.cancel();

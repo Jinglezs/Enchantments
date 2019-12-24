@@ -4,8 +4,11 @@ import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.enchant.TargetGroup;
+import net.jingles.enchantments.persistence.EnchantTeam;
 import net.jingles.enchantments.statuseffect.container.EntityEffectContainer;
+import net.jingles.enchantments.statuseffect.context.ItemEffectContext;
 import net.jingles.enchantments.statuseffect.entity.EntityStatusEffect;
+import net.jingles.enchantments.util.EnchantUtils;
 import net.jingles.enchantments.util.ParticleUtil;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
@@ -78,7 +81,10 @@ public class Mjolnir extends CustomEnchant {
         addCooldown(player);
       }
 
-    } else Enchantments.getStatusEffectManager().add(new MjolnirChargeEffect(player));
+    } else {
+      ItemEffectContext context = new ItemEffectContext(player, getItem(player), this);
+      Enchantments.getStatusEffectManager().add(new MjolnirChargeEffect(context, player));
+    }
 
   }
 
@@ -101,8 +107,8 @@ public class Mjolnir extends CustomEnchant {
     private final Particle.DustOptions options;
     private final String charging = "Flight Charge: %d seconds";
 
-    private MjolnirChargeEffect(Player player) {
-      super(player, Mjolnir.this, 10 * 20, 20);
+    private MjolnirChargeEffect(ItemEffectContext context, Player player) {
+      super(player, context, 10 * 20, 20);
       this.player = player;
       this.options = new Particle.DustOptions(Color.YELLOW, 1);
     }
@@ -120,7 +126,8 @@ public class Mjolnir extends CustomEnchant {
       player.getWorld().playSound(player.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1, 0.5F);
 
       if (!player.isSneaking() || duration > 10) {
-        Enchantments.getStatusEffectManager().add(new MjolnirFlightEffect(player, duration * 2 * 20));
+        MjolnirFlightEffect effect = new MjolnirFlightEffect((ItemEffectContext) getContext(), player, duration * 2 * 20);
+        Enchantments.getStatusEffectManager().add(effect);
         this.stop();
       }
 
@@ -134,8 +141,8 @@ public class Mjolnir extends CustomEnchant {
     private final Particle.DustOptions options;
     private final String remaining = "%d seconds of flight remaining";
 
-    private MjolnirFlightEffect(Player player, int maxTicks) {
-      super(player, Mjolnir.this, maxTicks, 1);
+    private MjolnirFlightEffect(ItemEffectContext context, Player player, int maxTicks) {
+      super(player, context, maxTicks, 1);
       this.player = player;
       options = new Particle.DustOptions(Color.WHITE, 3);
     }
@@ -178,8 +185,11 @@ public class Mjolnir extends CustomEnchant {
 
       player.getWorld().playSound(player.getLocation(), Sound.ENTITY_LIGHTNING_BOLT_IMPACT, 2, 1);
 
+      EnchantTeam team = EnchantUtils.getEnchantTeam(player);
+
       player.getWorld().getNearbyEntities(player.getLocation(), 10, 10, 10).stream()
           .filter(entity -> entity instanceof LivingEntity && !entity.equals(player))
+          .filter(entity -> !team.isTeamed(entity))
           .map(entity -> (LivingEntity) entity)
           .forEach(entity -> {
             entity.getWorld().playSound(entity.getLocation(), Sound.BLOCK_GRASS_BREAK, 2, 1);

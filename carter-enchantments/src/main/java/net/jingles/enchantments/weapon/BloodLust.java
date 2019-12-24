@@ -1,5 +1,10 @@
 package net.jingles.enchantments.weapon;
 
+import net.jingles.enchantments.Enchantments;
+import net.jingles.enchantments.enchant.CustomEnchant;
+import net.jingles.enchantments.enchant.Enchant;
+import net.jingles.enchantments.statuseffect.context.ItemEffectContext;
+import net.jingles.enchantments.statuseffect.entity.PotionStatusEffect;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
 import org.bukkit.enchantments.Enchantment;
@@ -11,11 +16,6 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-
-import net.jingles.enchantments.Enchantments;
-import net.jingles.enchantments.enchant.CustomEnchant;
-import net.jingles.enchantments.enchant.Enchant;
-import net.jingles.enchantments.statuseffect.entity.PotionStatusEffect;
 
 @Enchant(name = "Blood Lust", key = "blood_lust", maxLevel = 3, targetItem = EnchantmentTarget.WEAPON,
   description = "Upon killing a mob or player, the owner receives speed and power effects that " +
@@ -47,21 +47,23 @@ public class BloodLust extends CustomEnchant {
     if (!canTrigger(player))
       return;
 
-    int level = getLevel(getItem(player));
+    ItemStack item = getItem(player);
+    int level = getLevel(item);
     int duration = (level * 10) * 20;
 
     PotionEffect effect = new PotionEffect(PotionEffectType.SPEED, duration, level);
     PotionEffect effect1 = new PotionEffect(PotionEffectType.INCREASE_DAMAGE, duration, level);
 
-    Enchantments.getStatusEffectManager().add(new BloodLustEffect(effect, player));
-    Enchantments.getStatusEffectManager().add(new BloodLustEffect(effect1, player));
+    ItemEffectContext context = new ItemEffectContext(player, item, this);
+    Enchantments.getStatusEffectManager().add(new BloodLustEffect(context, effect, player));
+    Enchantments.getStatusEffectManager().add(new BloodLustEffect(context, effect1, player));
 
   }
 
-  private class BloodLustEffect extends PotionStatusEffect {
+  private static class BloodLustEffect extends PotionStatusEffect {
 
-    public BloodLustEffect(PotionEffect potionEffect, LivingEntity target) {
-      super(potionEffect, target, BloodLust.this, 1);
+    private BloodLustEffect(ItemEffectContext context, PotionEffect potionEffect, LivingEntity target) {
+      super(potionEffect, target, context, 1);
     }
 
     @Override

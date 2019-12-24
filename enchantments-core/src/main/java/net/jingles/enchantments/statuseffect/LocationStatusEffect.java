@@ -1,6 +1,6 @@
 package net.jingles.enchantments.statuseffect;
 
-import net.jingles.enchantments.enchant.CustomEnchant;
+import net.jingles.enchantments.statuseffect.context.EffectContext;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 
@@ -8,8 +8,8 @@ public abstract class LocationStatusEffect extends StatusEffect {
 
   private Location location;
 
-  public LocationStatusEffect(@NotNull CustomEnchant source, int maxTicks, int interval, @NotNull Location location) {
-    super(source, maxTicks, interval);
+  public LocationStatusEffect(EffectContext context, int maxTicks, int interval, @NotNull Location location) {
+    super(context, maxTicks, interval);
     this.location = location;
   }
 

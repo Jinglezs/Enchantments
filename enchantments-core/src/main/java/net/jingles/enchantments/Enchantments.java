@@ -10,10 +10,15 @@ import net.jingles.enchantments.enchant.TargetGroup;
 import net.jingles.enchantments.projectile.ProjectileManager;
 import net.jingles.enchantments.statuseffect.StatusEffectManager;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.block.TileState;
+import org.bukkit.conversations.ConversationFactory;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataHolder;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.RayTraceResult;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -27,6 +32,9 @@ public class Enchantments extends JavaPlugin {
   private static ProjectileManager projectileManager;
   private static EnchantmentManager enchantmentManager;
   private static StatusEffectManager statusEffectManager;
+  private static ConversationFactory conversationFactory;
+  public static NamespacedKey TEAM_KEY;
+  public static NamespacedKey OWNER_KEY;
 
   @Override
   public void onEnable() {
@@ -37,6 +45,15 @@ public class Enchantments extends JavaPlugin {
 
     getServer().getPluginManager().registerEvents(new EnchantListener(), this);
     getServer().getWorlds().forEach(world -> getEnchantmentManager().loadBlockEnchants(world));
+
+    TEAM_KEY = new NamespacedKey(this, "enchant_team");
+    OWNER_KEY = new NamespacedKey(this, "enchant_owner");
+
+  }
+
+  @Override
+  public void onDisable() {
+    getStatusEffectManager().cancelAll();
   }
 
   //Ignore what Spigot has to say and forcefully enable enchantment registration
@@ -67,11 +84,13 @@ public class Enchantments extends JavaPlugin {
     cooldownManager = new CooldownManager(this);
     projectileManager = new ProjectileManager(this);
     statusEffectManager = new StatusEffectManager(this);
+    conversationFactory = new ConversationFactory(this);
 
     manager.registerDependency(EnchantmentManager.class, enchantmentManager);
     manager.registerDependency(CooldownManager.class, cooldownManager);
     manager.registerDependency(ProjectileManager.class, projectileManager);
     manager.registerDependency(StatusEffectManager.class, statusEffectManager);
+    manager.registerDependency(ConversationFactory.class, conversationFactory);
 
     //----- ARGUMENT COMPLETIONS -----
 
@@ -121,6 +140,18 @@ public class Enchantments extends JavaPlugin {
     manager.getCommandContexts().registerIssuerOnlyContext(ItemStack.class, context ->
             context.getPlayer().getInventory().getItemInMainHand());
 
+    // Returns the player unless they are looking at a tile entity
+    manager.getCommandContexts().registerIssuerOnlyContext(PersistentDataHolder.class, context -> {
+
+      RayTraceResult result = context.getPlayer().rayTraceBlocks(5);
+
+      if (result == null || result.getHitBlock() == null ||
+        !(result.getHitBlock().getState() instanceof TileState)) return context.getPlayer();
+
+      return (TileState) result.getHitBlock().getState();
+
+    });
+
     //Gets a CustomEnchant object from the remaining command arguments (String array)
     manager.getCommandContexts().registerContext(CustomEnchant.class, context -> {
       String key = String.join("_", context.getArgs());
@@ -153,6 +184,10 @@ public class Enchantments extends JavaPlugin {
 
   public static StatusEffectManager getStatusEffectManager() {
     return statusEffectManager;
+  }
+
+  public static ConversationFactory getConversationFactory() {
+    return conversationFactory;
   }
 
 }

@@ -3,6 +3,7 @@ package net.jingles.enchantments.weapon;
 import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
+import net.jingles.enchantments.statuseffect.context.ItemEffectContext;
 import net.jingles.enchantments.statuseffect.entity.EntityStatusEffect;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -84,7 +85,8 @@ public class Backstab extends CustomEnchant {
     player.teleport(teleport);
 
     double damage = event.getDamage() * 1.5;
-    Enchantments.getStatusEffectManager().add(new BackstabEffect(player, attacker.getUniqueId(), 100, damage));
+    ItemEffectContext context = new ItemEffectContext(player, getItem(player), this);
+    Enchantments.getStatusEffectManager().add(new BackstabEffect(context, player, attacker.getUniqueId(), damage));
     addCooldown(player);
   }
 
@@ -98,13 +100,13 @@ public class Backstab extends CustomEnchant {
     return entity instanceof LivingEntity ? (LivingEntity) entity : null;
   }
 
-  private class BackstabEffect extends EntityStatusEffect {
+  private static class BackstabEffect extends EntityStatusEffect {
 
     private final UUID attacker;
     private final double damage;
 
-    public BackstabEffect(Player player, UUID attacker, int maxTicks, double damage) {
-      super(player, Backstab.this, maxTicks, maxTicks);
+    public BackstabEffect(ItemEffectContext context, Player player, UUID attacker, double damage) {
+      super(player, context, 100, 100);
       this.attacker = attacker;
       this.damage = damage;
     }

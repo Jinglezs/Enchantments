@@ -4,6 +4,7 @@ import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.statuseffect.container.EntityEffectContainer;
+import net.jingles.enchantments.statuseffect.context.ItemEffectContext;
 import net.jingles.enchantments.statuseffect.entity.EntityStatusEffect;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ChatMessageType;
@@ -56,8 +57,10 @@ public class Thiccness extends CustomEnchant {
 
     Player player = event.getPlayer();
 
-    if (player.isOnGround() && event.isSneaking())
-      Enchantments.getStatusEffectManager().add(new ThiccnessChargeEffect(player));
+    if (player.isOnGround() && event.isSneaking()) {
+      ItemEffectContext context = new ItemEffectContext(player, getItem(player), this);
+      Enchantments.getStatusEffectManager().add(new ThiccnessChargeEffect(context, player));
+    }
 
   }
 
@@ -66,8 +69,8 @@ public class Thiccness extends CustomEnchant {
     private final Player player;
     private double charge;
 
-    private ThiccnessChargeEffect(Player player) {
-      super(player, Thiccness.this, Integer.MAX_VALUE, 5);
+    private ThiccnessChargeEffect(ItemEffectContext context, Player player) {
+      super(player, context, Integer.MAX_VALUE, 5);
       this.player = player;
     }
 

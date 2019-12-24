@@ -30,6 +30,8 @@ public @interface Enchant {
 
   double enchantChance() default 0.35;
 
+  boolean hasPersistence() default false;
+
   //Standard enchantment information:
 
   int startingLevel() default 1;

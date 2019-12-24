@@ -1,8 +1,16 @@
 package net.jingles.enchantments.tools;
 
-import java.text.NumberFormat;
-import java.util.concurrent.TimeUnit;
-
+import net.jingles.enchantments.Enchantments;
+import net.jingles.enchantments.enchant.CustomEnchant;
+import net.jingles.enchantments.enchant.Enchant;
+import net.jingles.enchantments.enchant.TargetGroup;
+import net.jingles.enchantments.statuseffect.container.EntityEffectContainer;
+import net.jingles.enchantments.statuseffect.context.ItemEffectContext;
+import net.jingles.enchantments.statuseffect.entity.EntityStatusEffect;
+import net.jingles.enchantments.statuseffect.entity.PotionStatusEffect;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
@@ -19,22 +27,14 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 
-import net.jingles.enchantments.Enchantments;
-import net.jingles.enchantments.enchant.CustomEnchant;
-import net.jingles.enchantments.enchant.Enchant;
-import net.jingles.enchantments.enchant.TargetGroup;
-import net.jingles.enchantments.statuseffect.container.EntityEffectContainer;
-import net.jingles.enchantments.statuseffect.entity.EntityStatusEffect;
-import net.jingles.enchantments.statuseffect.entity.PotionStatusEffect;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
+import java.text.NumberFormat;
 
 @Enchant(name = "Throwing Axe", key = "throwing_axe", targetGroup = TargetGroup.AXES, maxLevel = 1,
-  cooldown = 13, timeUnit = TimeUnit.SECONDS, description = "Shift right clicking allows the user to " +
-    "begin charging an axe throw. Shift right clicking again will throw the axe with the accumulated force. The " +
-    "axe travels in a parabolic motion and deals damage equivalent to the axe's normal damage multiplied " +
-    "by the force of the throw. Enchantments such as sharpness do not affect the final damage.")
+  cooldown = 13, description = "Shift right clicking allows the user to begin charging an axe throw. " +
+    "Shift right clicking again will throw the axe with the accumulated force. The axe travels in a parabolic " +
+    "motion and deals damage equivalent to the axe's normal damage multiplied by the force of the throw. " +
+    "Enchantments such as sharpness do not affect the final damage.")
+
 public class ThrowingAxe extends CustomEnchant {
 
   private static final PotionEffect SLOW = new PotionEffect(PotionEffectType.SLOW, Integer.MAX_VALUE, 2);
@@ -69,9 +69,9 @@ public class ThrowingAxe extends CustomEnchant {
     ThrowingAxeChargeEffect effect = container.getEffectsBySource(this).stream()
       .findFirst()
       .map(e -> (ThrowingAxeChargeEffect) e)
-      .orElse(new ThrowingAxeChargeEffect(player, getItem(player)));
+      .orElse(new ThrowingAxeChargeEffect(new ItemEffectContext(player, getItem(player), this), player));
 
-    if (isCharging) effect.cancel();
+    if (isCharging) effect.stop();
     else Enchantments.getStatusEffectManager().add(effect);  
 
   }
@@ -82,9 +82,9 @@ public class ThrowingAxe extends CustomEnchant {
     private ItemStack axe;
     private double charge = 0.5;
 
-    public ThrowingAxeChargeEffect(LivingEntity target, ItemStack axe) {
-      super(SLOW, target, ThrowingAxe.this, 5);
-      this.axe = axe;
+    private ThrowingAxeChargeEffect(ItemEffectContext context, LivingEntity target) {
+      super(SLOW, target, context, 5);
+      this.axe = context.getItem();
     }
 
     @Override
@@ -94,7 +94,7 @@ public class ThrowingAxe extends CustomEnchant {
 
       if (!player.getInventory().getItemInMainHand().equals(axe)) {
         this.throwAxe = false;
-        this.cancel();
+        this.stop();
         return;
       }
 
@@ -125,7 +125,8 @@ public class ThrowingAxe extends CustomEnchant {
         item.setPickupDelay(Integer.MAX_VALUE);
         item.setGlowing(true);
 
-        Enchantments.getStatusEffectManager().add(new ThrowingAxeThrowEffect((Player) getTarget(), item, charge));
+        ThrowingAxeThrowEffect effect = new ThrowingAxeThrowEffect((ItemEffectContext) getContext(), (Player) getTarget(), charge, item);
+        Enchantments.getStatusEffectManager().add(effect);
 
       }
 
@@ -138,19 +139,18 @@ public class ThrowingAxe extends CustomEnchant {
     private final double launchForce, damage;
     private final Item axe;
 
-    public ThrowingAxeThrowEffect(Player owner, Item axe, double force) {
-      super(owner, ThrowingAxe.this, 25 * 20, 1);
+    private ThrowingAxeThrowEffect(ItemEffectContext context, Player owner, double force, Item axe) {
+      super(owner, context, 25 * 20, 1);
       this.launchForce = force;
       this.axe = axe;
 
-      double defaultDamage = 0;
+      double defaultDamage;
 
       switch (axe.getItemStack().getType()) {
-        case DIAMOND_AXE: defaultDamage = 9;
-        case IRON_AXE: defaultDamage = 9;
-        case GOLDEN_AXE: defaultDamage = 7;
-        case STONE_AXE: defaultDamage = 9;
-        case WOODEN_AXE: defaultDamage = 7;
+        case GOLDEN_AXE:
+        case WOODEN_AXE:
+          defaultDamage = 7;
+          break;
         default: defaultDamage = 9;
       }
 
@@ -164,7 +164,7 @@ public class ThrowingAxe extends CustomEnchant {
       Player owner = (Player) getTarget();
 
       owner.playSound(owner.getLocation(), Sound.ITEM_TRIDENT_THROW, 1F, 1F);
-      owner.getInventory().removeItem(axe.getItemStack());
+      owner.getInventory().setItemInMainHand(null);
 
       Vector initialVelocity = owner.getEyeLocation().getDirection().normalize().multiply(launchForce);
       axe.setVelocity(initialVelocity); 
@@ -175,7 +175,7 @@ public class ThrowingAxe extends CustomEnchant {
     public void effect() {
       
       if (axe.isOnGround()) {
-        this.cancel();
+        this.stop();
       }
 
       // Add gravity and drag to the item's velocity
@@ -197,13 +197,14 @@ public class ThrowingAxe extends CustomEnchant {
           e.getWorld().playSound(e.getLocation(), Sound.ITEM_TRIDENT_HIT, 1F, 1F);
           e.damage(damage);
 
-          this.cancel();
+          this.stop();
 
         }); 
       
     }
 
     public void stop() {
+      super.stop();
       axe.setVelocity(new Vector(0, 0, 0));
       axe.setPickupDelay(0);
     }
