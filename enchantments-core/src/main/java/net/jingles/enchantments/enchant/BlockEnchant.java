@@ -23,7 +23,7 @@ public abstract class BlockEnchant extends CustomEnchant {
     super(key);
   }
 
-  public abstract boolean canTrigger(@NotNull TileState tile);
+  public abstract boolean canTrigger(@Nullable TileState tile);
 
   /**
    * This method can be overrode to determine how the enchanted block
@@ -52,7 +52,7 @@ public abstract class BlockEnchant extends CustomEnchant {
     return false;
   }
 
-  public int getLevel(@NotNull TileState tile) {
+  public int getLevel(@Nullable TileState tile) {
       return !hasEnchant(tile) ? 0 :
         tile.getPersistentDataContainer().get(getKey(), PersistentDataType.INTEGER);
   }
@@ -96,8 +96,8 @@ public abstract class BlockEnchant extends CustomEnchant {
         .findFirst().orElse(null);
   }
 
-  public boolean hasEnchant(@NotNull TileState tile) {
-    return tile.getPersistentDataContainer().has(getKey(), PersistentDataType.INTEGER);
+  public boolean hasEnchant(@Nullable TileState tile) {
+    return tile != null && tile.getPersistentDataContainer().has(getKey(), PersistentDataType.INTEGER);
   }
 
   public void addCooldown(@NotNull TileState tile) {

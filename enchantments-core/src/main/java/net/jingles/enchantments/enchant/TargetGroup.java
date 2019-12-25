@@ -143,6 +143,11 @@ public enum TargetGroup {
   BREWING_STAND(material -> material == Material.BREWING_STAND),
 
   /**
+   * Any block that is capable of smelting/brewing items, excluding Campfires.
+   */
+  COOKING_BLOCKS(material -> FURNACES.canEnchant(material) || BREWING_STAND.canEnchant(material)),
+
+  /**
    * Represents all items that can be enchanted through this plugin, but cannot be enchanted normally in vanilla.
    */
   NON_VANILLA(material -> TILE_ENTITY.canEnchant(material) || BLOCK.canEnchant(material) || ELYTRA.canEnchant(material) ||
