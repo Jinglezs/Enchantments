@@ -9,6 +9,7 @@ import org.bukkit.persistence.PersistentDataHolder;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class EnchantUtils {
@@ -23,6 +24,10 @@ public class EnchantUtils {
   public static EnchantTeam getEnchantTeam(PersistentDataHolder holder) {
     return holder.getPersistentDataContainer().getOrDefault(Enchantments.TEAM_KEY,
         DataType.ENCHANT_TEAM, new EnchantTeam(new HashSet<>(), true));
+  }
+
+  public static UUID getOwner(PersistentDataHolder holder) {
+    return holder.getPersistentDataContainer().get(Enchantments.OWNER_KEY, DataType.UUID);
   }
 
 }

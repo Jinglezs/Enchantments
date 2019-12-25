@@ -16,6 +16,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Enchant(name = "Homecoming", key = "homecoming", enchantChance = 0.47, targetGroup = TargetGroup.CAMPFIRE,
   description = "The enchanted campfire has a radius of 20 blocks per level. Every 5 seconds, all players " +
@@ -34,7 +35,7 @@ public class Homecoming extends BlockEnchant {
   }
 
   @Override
-  public boolean canTrigger(@NotNull TileState tile) {
+  public boolean canTrigger(@Nullable TileState tile) {
     return false;
   }
 

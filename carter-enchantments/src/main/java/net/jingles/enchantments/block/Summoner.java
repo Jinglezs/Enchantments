@@ -19,6 +19,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 
@@ -37,7 +38,7 @@ public class Summoner extends BlockEnchant {
   }
 
   @Override
-  public boolean canTrigger(@NotNull TileState tile) {
+  public boolean canTrigger(@Nullable TileState tile) {
     return hasEnchant(tile);
   }
 

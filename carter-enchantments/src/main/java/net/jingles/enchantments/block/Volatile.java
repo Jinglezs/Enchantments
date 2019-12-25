@@ -18,10 +18,15 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.potion.PotionData;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-@Enchant(name = "Volatile", key = "volatile", targetGroup = TargetGroup.BREWING_STAND,
-  description = "This brewing stand has been infused with gunpowder, causing all of its potions " +
-      "to become volatile. Anything it brews becomes a splash potion and is upgraded by one level.")
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+@Enchant(name = "Volatile", key = "volatile", cursed = true, maxLevel = 1, targetGroup = TargetGroup.BREWING_STAND,
+    description = "This brewing stand has been cursed by creeper mojo, causing all of its potions " +
+        "to become volatile. Anything it brews becomes a splash potion and is upgraded by one level.")
 public class Volatile extends BlockEnchant {
 
   public Volatile(NamespacedKey key) {
@@ -29,7 +34,7 @@ public class Volatile extends BlockEnchant {
   }
 
   @Override
-  public boolean canTrigger(@NotNull TileState tile) {
+  public boolean canTrigger(@Nullable TileState tile) {
     return hasEnchant(tile);
   }
 
@@ -49,14 +54,14 @@ public class Volatile extends BlockEnchant {
 
   }
 
-  // After a delay of 3 ticks, this will replace all potions with their splash potion
+  // After a delay of 5 ticks, this will replace all potions with their splash potion
   // counterparts. Additionally, all of the potions will be upgraded.
   private static class VolatilePotionDetectEffect extends LocationStatusEffect {
 
     private final BrewingStand stand;
 
     private VolatilePotionDetectEffect(TileEntityContext context) {
-      super(context, 1, 1, 3, context.getTrigger().getLocation());
+      super(context, 5, 1, 5, context.getTrigger().getLocation());
       this.stand = (BrewingStand) context.getTrigger();
     }
 
@@ -64,33 +69,52 @@ public class Volatile extends BlockEnchant {
     public void effect() {
 
       BrewerInventory inventory = stand.getInventory();
+      ItemStack[] contents = inventory.getContents();
 
-      for (int i = 0; i < 3; i++) {
+      // Gets the indexes of all results that are potions or splash potions and
+      // collects them into a set
+      Set<Integer> indexes = IntStream.range(0, 3)
+          .filter(i -> {
 
-        ItemStack item = inventory.getItem(i);
-        if (item == null || item.getType() != Material.POTION) continue;
+            ItemStack item = contents[i];
+            return item != null && (item.getType() == Material.POTION || item.getType() == Material.SPLASH_POTION);
 
-        PotionMeta meta = (PotionMeta) item.getItemMeta();
+          }).boxed().collect(Collectors.toSet());
+
+      // Iterate over the potion at each index and replace them as necessary
+      for (int index : indexes) {
+
+        // Get the potion info
+        ItemStack potion = inventory.getItem(index);
+        PotionMeta meta = (PotionMeta) potion.getItemMeta();
         PotionData data = meta.getBasePotionData();
 
-        // Do nothing to incomplete potions
-        switch (data.getType()) {
-          case WATER:
-          case THICK:
-          case AWKWARD:
-          case MUNDANE:
-            continue;
-        }
-
-        // Upgrade the potion. Ex: Speed I ---> Speed II
-        if (!data.isUpgraded()) {
+        // Upgrade the potion if possible. Ex: Speed I ---> Speed II
+        if (data.getType().isUpgradeable() && !data.isUpgraded()) {
           data = new PotionData(data.getType(), false, true);
           meta.setBasePotionData(data);
         }
 
-        // Make it a splash potion
-        item.setType(Material.SPLASH_POTION);
-        item.setItemMeta(meta);
+        // Create a splash potion with the same potion data as the original
+        if (potion.getType() != Material.SPLASH_POTION)
+          potion = new ItemStack(Material.SPLASH_POTION, 1);
+
+        // Set the new item meta and replace the potion with the updated one
+        potion.setItemMeta(meta);
+        inventory.setItem(index, potion);
+
+      }
+
+      // Take one item from the ingredient slot.
+
+      ItemStack ingredient = inventory.getIngredient();
+
+      if (ingredient != null && ingredient.getType() != Material.AIR) {
+
+        int newAmount = ingredient.getAmount() - 1;
+
+        if (newAmount < 0) inventory.setIngredient(null);
+        else ingredient.setAmount(newAmount);
 
       }
 

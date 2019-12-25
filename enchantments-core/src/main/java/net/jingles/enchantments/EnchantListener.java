@@ -8,6 +8,7 @@ import net.jingles.enchantments.persistence.EnchantTeam;
 import net.jingles.enchantments.statuseffect.LocationStatusEffect;
 import net.jingles.enchantments.util.EnchantUtils;
 import net.jingles.enchantments.util.InventoryUtils;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -215,6 +216,15 @@ public class EnchantListener implements Listener {
 
     // Non-enchanted blocks are lame, they can be broken without interference.
     if (enchants.isEmpty()) return;
+
+    EnchantTeam team = EnchantUtils.getEnchantTeam((TileState) state);
+
+    // Prevent players from breaking enchanted blocks if they aren't on its team.
+    if (!team.isTeamed(event.getPlayer())) {
+      event.setCancelled(true);
+      event.getPlayer().sendMessage(ChatColor.RED + "This enchanted block does not belong to you or your team.");
+      return;
+    }
 
     // Stops all status effects originating from the block.
     Enchantments.getStatusEffectManager().getWorldContainer().getEffectsAtLocation(state.getLocation())

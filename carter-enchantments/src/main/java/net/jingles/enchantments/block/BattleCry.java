@@ -19,6 +19,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -42,7 +43,7 @@ public class BattleCry extends BlockEnchant {
   }
 
   @Override
-  public boolean canTrigger(@NotNull TileState tile) {
+  public boolean canTrigger(@Nullable TileState tile) {
     return hasEnchant(tile) && !Enchantments.getCooldownManager()
         .hasCooldown(tile, this);
   }
@@ -59,8 +60,8 @@ public class BattleCry extends BlockEnchant {
     if (!canTrigger(bell)) return;
 
     int duration = getLevel(bell) * (30 * 20);
-    List<PotionEffect> effects = Arrays.asList(new PotionEffect(PotionEffectType.HEALTH_BOOST, duration, 3, false, false),
-        new PotionEffect(PotionEffectType.INCREASE_DAMAGE, duration, 3, false, false));
+    List<PotionEffect> effects = Arrays.asList(new PotionEffect(PotionEffectType.HEALTH_BOOST, duration, 2, false, false),
+        new PotionEffect(PotionEffectType.INCREASE_DAMAGE, duration, 2, false, false));
 
     EnchantTeam team = EnchantUtils.getEnchantTeam(bell);
 
@@ -71,6 +72,7 @@ public class BattleCry extends BlockEnchant {
         .forEach(player -> player.addPotionEffects(effects));
 
     bell.getWorld().playSound(bell.getLocation(), Sound.EVENT_RAID_HORN, 10f, 2f);
+    addCooldown(bell);
 
   }
 

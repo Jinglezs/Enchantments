@@ -22,6 +22,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.TimeUnit;
 
@@ -37,7 +38,7 @@ public class PolyphonicMelody extends BlockEnchant {
   }
 
   @Override
-  public boolean canTrigger(@NotNull TileState tile) {
+  public boolean canTrigger(@Nullable TileState tile) {
     return hasEnchant(tile);
   }
 
