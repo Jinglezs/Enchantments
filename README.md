@@ -12,6 +12,7 @@ can extend enchantment functionality further, such as status effects and cooldow
 - [Cooldown System](Cooldown-System)
 - [Enchantment Targets](Enchantment-Targets)
 - [Status Effects](Status-Effects)
+- [Custom Projectiles](Custom-Projectiles)
 
 ### Basic Functionality
 Custom enchantments are an extension of Bukkit's Enchantment class and act like any vanilla
@@ -77,3 +78,17 @@ that define how the effectis serialized and deserialized.
 Every status effect has an EffectContext, which defines the enchantment that created it, the item or
 tile entity that owns the enchantment, and a different method of (de)serialization that is unique to
 each context implementation.
+
+### Custom Projectiles
+Enchantments comes with a custom projectile system that permits particle projectiles with customizable
+bounding boxes. Projectile creation occurs in a single statement via its constructor, as each setter 
+returns the Projectile instance. All of the necessary values must be set in order for the launch() 
+method to successfully register the projectile. To control the projectile's movement, override the move() 
+method or simply set its velocity repeatedly. For targetting and displaying the particles, override target() 
+and display() methods, respectively. There are other customizable features, such as entity and block filters 
+and options to define what happens when the projectile collides with an entity or block that can all be
+defined during construction.
+
+HomingProjectile is a self-explanatory projectile class that defines a particle projectile that follows
+its target around until it either expires or collides with something. It contains all of the same
+customization options as normal custom projectiles.
