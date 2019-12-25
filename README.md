@@ -6,13 +6,13 @@ for to all items and a small selection of blocks. It provides a few additional u
 can extend enchantment functionality further, such as status effects and cooldowns.
 
 ### Navigation: 
-- [Basic Functionality](Basic-Functionality)
-- [Block Enchantments](Block-Enchantments)
-- [Creating Your Own Enchantments](Creating-Your-Own-Enchantments)
-- [Cooldown System](Cooldown-System)
-- [Enchantment Targets](Enchantment-Targets)
-- [Status Effects](Status-Effects)
-- [Custom Projectiles](Custom-Projectiles)
+- [Basic Functionality](#Basic-Functionality)
+- [Block Enchantments](#Block-Enchantments)
+- [Creating Your Own Enchantments](#Creating-Your-Own-Enchantments)
+- [Cooldown System](#Cooldown-System)
+- [Enchantment Targets](#Enchantment-Targets)
+- [Status Effects](#Status-Effects)
+- [Custom Projectiles](#Custom-Projectiles)
 
 ### Basic Functionality
 Custom enchantments are an extension of Bukkit's Enchantment class and act like any vanilla
