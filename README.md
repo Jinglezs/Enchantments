@@ -5,7 +5,7 @@ Enchantments is essentially a library that allows developers to create customize
 for to all items and a small selection of blocks. It provides a few additional utilities that
 can extend enchantment functionality further, such as status effects and cooldowns.
 
-### Navigation: 
+### Navigation
 - [Basic Functionality](#Basic-Functionality)
 - [Block Enchantments](#Block-Enchantments)
 - [Creating Your Own Enchantments](#Creating-Your-Own-Enchantments)
