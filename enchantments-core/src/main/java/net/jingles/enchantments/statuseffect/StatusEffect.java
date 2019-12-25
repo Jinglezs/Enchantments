@@ -8,6 +8,7 @@ public abstract class StatusEffect implements Comparable<StatusEffect> {
   private EffectContext context; // The context of this effect
   private int maxTicks; // The maximum amount of ticks that the effect can live for.
   private int interval; // Time between effect executions
+  private int delay = 0;
   private int nextExecution = 0; // The next tick amount that will trigger the effect
   private int ticks = 0; // The current amount of ticks the effect has been alive for
   private boolean cancelled = false; // Whether or not the effect should be stopped.
@@ -18,8 +19,17 @@ public abstract class StatusEffect implements Comparable<StatusEffect> {
     this.interval = Math.max(1, interval);
   }
 
+  public StatusEffect(EffectContext context, int maxTicks, int interval, int delay) {
+    this(context, maxTicks, interval);
+    nextExecution = delay;
+  }
+
   public abstract void effect();
 
+  /**
+   * Code executed as soon as the status effect is registered.
+   * Please note that this ignores any delay.
+   */
   public void start() {
   }
 

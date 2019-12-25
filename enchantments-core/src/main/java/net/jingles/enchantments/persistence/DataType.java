@@ -41,7 +41,7 @@ public interface DataType {
         return outputStream.toByteArray();
 
       } catch (Exception e) {
-        throw new IllegalStateException("Unable to save homes.", e);
+        throw new IllegalStateException("Unable to save the UUID.", e);
       }
     }
 
@@ -58,7 +58,7 @@ public interface DataType {
         return id;
 
       } catch (ClassNotFoundException | IOException e) {
-        throw new IllegalStateException("Unable to deserialize homes.", e);
+        throw new IllegalStateException("Unable to deserialize the UUID.", e);
       }
     }
   };
@@ -86,13 +86,12 @@ public interface DataType {
         BukkitObjectOutputStream dataOutput = new BukkitObjectOutputStream(outputStream);
 
         dataOutput.writeObject(complex);
-
-        // Serialize that array
         dataOutput.close();
+
         return outputStream.toByteArray();
 
       } catch (Exception e) {
-        throw new IllegalStateException("Unable to save homes.", e);
+        throw new IllegalStateException("Unable to save enchantment team.", e);
       }
     }
 
@@ -106,10 +105,11 @@ public interface DataType {
 
         EnchantTeam team = (EnchantTeam) dataInput.readObject();
         dataInput.close();
+
         return team;
 
       } catch (ClassNotFoundException | IOException e) {
-        throw new IllegalStateException("Unable to deserialize homes.", e);
+        throw new IllegalStateException("Unable to deserialize enchantment team.", e);
       }
     }
   };

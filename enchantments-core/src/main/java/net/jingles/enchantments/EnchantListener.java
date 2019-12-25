@@ -23,6 +23,7 @@ import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
@@ -30,10 +31,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -256,6 +254,20 @@ public class EnchantListener implements Listener {
     // Spigot needs to stop changing BlockStates without telling anyone.
     state.setType(Material.AIR);
     state.update(true);
+
+  }
+
+  // Sets the player's enchant team if they don't have one.
+  @EventHandler
+  public void onPlayerJoin(PlayerJoinEvent event) {
+
+    if (event.getPlayer().getPersistentDataContainer().has(Enchantments.TEAM_KEY, DataType.ENCHANT_TEAM)) return;
+
+    Player player = event.getPlayer();
+    HashSet<UUID> entities = new HashSet<>();
+    entities.add(player.getUniqueId());
+
+    player.getPersistentDataContainer().set(Enchantments.TEAM_KEY, DataType.ENCHANT_TEAM, new EnchantTeam(entities, true));
 
   }
 

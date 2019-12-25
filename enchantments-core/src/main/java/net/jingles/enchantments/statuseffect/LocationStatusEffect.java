@@ -13,6 +13,11 @@ public abstract class LocationStatusEffect extends StatusEffect {
     this.location = location;
   }
 
+  public LocationStatusEffect(EffectContext context, int maxTicks, int interval, int delay, @NotNull Location location) {
+    super(context, maxTicks, interval, delay);
+    this.location = location;
+  }
+
   @NotNull
   public Location getLocation() {
     return this.location;

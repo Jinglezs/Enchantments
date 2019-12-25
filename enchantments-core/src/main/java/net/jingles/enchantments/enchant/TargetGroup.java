@@ -138,6 +138,11 @@ public enum TargetGroup {
   SKULLS(material -> material.name().endsWith("_SKULL")),
 
   /**
+   * Brewing stand, obviously
+   */
+  BREWING_STAND(material -> material == Material.BREWING_STAND),
+
+  /**
    * Represents all items that can be enchanted through this plugin, but cannot be enchanted normally in vanilla.
    */
   NON_VANILLA(material -> TILE_ENTITY.canEnchant(material) || BLOCK.canEnchant(material) || ELYTRA.canEnchant(material) ||

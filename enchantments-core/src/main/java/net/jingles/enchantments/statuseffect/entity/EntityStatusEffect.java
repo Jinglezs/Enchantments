@@ -17,6 +17,11 @@ public abstract class EntityStatusEffect extends StatusEffect {
     this.target = target;
   }
 
+  public EntityStatusEffect(LivingEntity target, EffectContext context, int maxTicks, int interval, int delay) {
+    super(context, maxTicks, interval, delay);
+    this.target = target;
+  }
+
   @NotNull
   public LivingEntity getTarget() {
     return this.target;

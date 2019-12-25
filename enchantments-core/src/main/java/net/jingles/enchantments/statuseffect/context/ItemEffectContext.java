@@ -15,10 +15,14 @@ public class ItemEffectContext implements EffectContext {
   private final PersistentDataContainer container;
 
   public ItemEffectContext(LivingEntity trigger, ItemStack item, CustomEnchant source) {
+
     this.trigger = trigger;
     this.item = item;
     this.source = source;
-    this.container = item.getItemMeta().getPersistentDataContainer();
+
+    this.container = (item == null || item.getItemMeta() == null) ? null :
+        item.getItemMeta().getPersistentDataContainer();
+
   }
 
   @Override
@@ -42,6 +46,8 @@ public class ItemEffectContext implements EffectContext {
   @Override
   public void serialize(PersistentEffect effect) {
 
+    if (item == null || item.getItemMeta() == null) return;
+
     ItemMeta meta = item.getItemMeta();
     effect.serialize(meta.getPersistentDataContainer());
     item.setItemMeta(meta);
@@ -50,6 +56,7 @@ public class ItemEffectContext implements EffectContext {
 
   @Override
   public void deserialize(PersistentEffect effect) {
+    if (item == null || item.getItemMeta() == null) return;
     effect.deserialize(item.getItemMeta().getPersistentDataContainer());
   }
 

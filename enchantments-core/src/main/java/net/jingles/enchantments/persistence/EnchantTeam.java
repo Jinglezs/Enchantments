@@ -6,9 +6,14 @@ import org.bukkit.entity.Tameable;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public class EnchantTeam implements Serializable {
+
+  // Stupid Java Serializable shite throwing errors everywhere
+  // for absolutely no reason. Go away >:V
+  private static final long serialVersionUID = 0;
 
   private final HashSet<UUID> teamedEntities;
   private boolean includeTamedAnimals;
@@ -18,7 +23,11 @@ public class EnchantTeam implements Serializable {
     this.includeTamedAnimals = includeTamedAnimals;
   }
 
-  private boolean isDefinitelyTeamed(UUID id) {
+  public Set<UUID> getTeamedEntities() {
+    return new HashSet<>(teamedEntities);
+  }
+
+  public boolean isDefinitelyTeamed(UUID id) {
     return teamedEntities.contains(id);
   }
 

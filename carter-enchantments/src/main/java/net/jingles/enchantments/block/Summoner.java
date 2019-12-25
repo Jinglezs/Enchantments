@@ -26,7 +26,7 @@ import static org.bukkit.entity.EntityType.*;
 
 @Enchant(name = "Summoner", key = "summoner", levelRequirement = 30, targetItem = EnchantmentTarget.ALL, maxLevel = 1,
     enchantChance = 0.15, targetGroup = TargetGroup.NONE, description = "This enchantment can be applied to any item. " +
-    "Right clicking an iron block with the enchanted item will consume the item and replace the block with a mob spawner. " +
+    "Right clicking a diamond block with the enchanted item will consume the item and replace the block with a mob spawner. " +
     "The type of mob that is spawned is based on what the item material is. For example, a feather would result in a " +
     "chicken spawner. Right clicking a spawner created by this enchantment while sneaking will refund the enchantment.")
 
@@ -54,7 +54,7 @@ public class Summoner extends BlockEnchant {
 
     if (item == null || block == null) return;
 
-    if (hasEnchantment(item) && block.getType() == Material.IRON_BLOCK) {
+    if (hasEnchantment(item) && block.getType() == Material.DIAMOND_BLOCK) {
 
       event.setCancelled(true);
 
@@ -78,7 +78,7 @@ public class Summoner extends BlockEnchant {
       // Consume the enchanted item used to create the spawner.
       event.getPlayer().getInventory().remove(item);
 
-      // Replaces the spawner with an iron block and refunds the enchantment.
+      // Replaces the spawner with a diamond block and refunds the enchantment.
     } else if (block.getType() == Material.SPAWNER && event.getPlayer().isSneaking()) {
 
       event.setCancelled(true);
@@ -97,7 +97,7 @@ public class Summoner extends BlockEnchant {
       InventoryUtils.addEnchantLore(meta, Collections.singletonMap(this, level));
       item.setItemMeta(meta);
 
-      block.setType(Material.IRON_BLOCK);
+      block.setType(Material.DIAMOND_BLOCK);
       block.getState().update(true);
 
     }

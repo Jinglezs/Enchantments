@@ -48,10 +48,9 @@ public class Reinforcement extends CustomEnchant {
     Optional<EntityEffectContainer> container = Enchantments.getStatusEffectManager()
         .getEntityContainer(entity.getUniqueId());
 
-    if (!container.isPresent()) return true;
+    return container.map(entityEffectContainer -> !entityEffectContainer.hasEffect(ReinforcementEffect.class) &&
+        !Enchantments.getCooldownManager().hasCooldown(entity, this)).orElse(true);
 
-    return !container.get().hasEffect(ReinforcementEffect.class) &&
-        !Enchantments.getCooldownManager().hasCooldown(entity, this);
   }
 
   @EventHandler
@@ -122,7 +121,7 @@ public class Reinforcement extends CustomEnchant {
       // Fire at the closest nearby enemy and set the lastFireTime.
 
       Optional<LivingEntity> closest = getTarget().getNearbyEntities(15, 15, 15).stream()
-          .filter(entity -> !team.isTeamed(entity) && !entity.isDead())
+          .filter(entity -> entity instanceof LivingEntity && !entity.isDead() && !team.isTeamed(entity))
           .map(entity -> (LivingEntity) entity)
           .min((e1, e2) -> {
             Location player = getTarget().getLocation();
