@@ -4,18 +4,16 @@ import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.enchant.TargetGroup;
+import net.jingles.enchantments.persistence.EnchantTeam;
 import net.jingles.enchantments.projectile.HomingProjectile;
 import net.jingles.enchantments.statuseffect.container.EntityEffectContainer;
+import net.jingles.enchantments.statuseffect.context.ItemEffectContext;
 import net.jingles.enchantments.statuseffect.entity.EntityStatusEffect;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
+import net.jingles.enchantments.util.EnchantUtils;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -50,10 +48,9 @@ public class Reinforcement extends CustomEnchant {
     Optional<EntityEffectContainer> container = Enchantments.getStatusEffectManager()
         .getEntityContainer(entity.getUniqueId());
 
-    if (!container.isPresent()) return true;
+    return container.map(entityEffectContainer -> !entityEffectContainer.hasEffect(ReinforcementEffect.class) &&
+        !Enchantments.getCooldownManager().hasCooldown(entity, this)).orElse(true);
 
-    return !container.get().hasEffect(ReinforcementEffect.class) &&
-        !Enchantments.getCooldownManager().hasCooldown(entity, this);
   }
 
   @EventHandler
@@ -64,21 +61,27 @@ public class Reinforcement extends CustomEnchant {
     if (event.getItem() == null || event.getItem().getType() != Material.SHIELD ||
         !canTrigger(player)) return;
 
+    ItemStack item = getItem(player);
+
     // The duration increases by 7 seconds per level.
-    int level = getLevel(getItem(player));
+    int level = getLevel(item);
     int duration = level * (7 * 20);
     int damage = level * 3;
-    Enchantments.getStatusEffectManager().add(new ReinforcementEffect(player, duration, damage));
+
+    ItemEffectContext context = new ItemEffectContext(player, item, this);
+    Enchantments.getStatusEffectManager().add(new ReinforcementEffect(context, player, duration, damage));
   }
 
   private class ReinforcementEffect extends EntityStatusEffect {
 
+    private final EnchantTeam team;
     private final double damage;
     private long lastFireTime;
 
-    private ReinforcementEffect(Player target, int maxTicks, double damage) {
-      super(target, Reinforcement.this, maxTicks, 1);
+    private ReinforcementEffect(ItemEffectContext context, Player target, int maxTicks, double damage) {
+      super(target, context, maxTicks, 1);
       this.damage = damage;
+      this.team = EnchantUtils.getEnchantTeam(target);
     }
 
     @Override
@@ -117,10 +120,9 @@ public class Reinforcement extends CustomEnchant {
       if (lastFireTime + 1000L > System.currentTimeMillis()) return;
       // Fire at the closest nearby enemy and set the lastFireTime.
 
-      Optional<Monster> closest = getTarget().getNearbyEntities(15, 15, 15).stream()
-          .filter(entity -> Monster.class.isAssignableFrom(entity.getClass()))
-          .map(entity -> (Monster) entity)
-          .filter(entity -> !entity.isDead())
+      Optional<LivingEntity> closest = getTarget().getNearbyEntities(15, 15, 15).stream()
+          .filter(entity -> entity instanceof LivingEntity && !entity.isDead() && !team.isTeamed(entity))
+          .map(entity -> (LivingEntity) entity)
           .min((e1, e2) -> {
             Location player = getTarget().getLocation();
             return Double.compare(e1.getLocation().distanceSquared(player), e2.getLocation().distanceSquared(player));
@@ -128,7 +130,7 @@ public class Reinforcement extends CustomEnchant {
 
       if (closest.isPresent()) {
 
-        Monster entity = closest.get();
+        LivingEntity entity = closest.get();
         entity.getWorld().playSound(getTarget().getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1F, 1F);
 
         // Fire a projectile from the circle.
@@ -145,7 +147,7 @@ public class Reinforcement extends CustomEnchant {
             .withBlockFilter(block -> !block.isPassable())
             .onEntityHit((projectile, target) -> {
               projectile.cancel();
-              ((Monster) target).damage(damage);
+              ((LivingEntity) target).damage(damage);
             })
             .onBlockHit((projectile, block) -> projectile.cancel())
             .launch();

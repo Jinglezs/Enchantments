@@ -55,7 +55,7 @@ public class HeartwardAmulet extends CustomEnchant {
 
     Block block = player.getWorld().getBlockAt(player.getLocation().add(0, 1, 0));
     block.setType(Material.CHEST);
-    block.getState().update();
+    block.getState().update(true);
 
     Chest chest = (Chest) block.getState();
     int chestSize = chest.getBlockInventory().getSize();
@@ -71,7 +71,7 @@ public class HeartwardAmulet extends CustomEnchant {
 
       Block block2 = block.getRelative(BlockFace.UP);
       block2.setType(Material.CHEST);
-      block2.getState().update();
+      block2.getState().update(true);
 
       chest.getBlockInventory().setContents(setOne);
       ((Chest) block2.getState()).getBlockInventory().setContents(setTwo);

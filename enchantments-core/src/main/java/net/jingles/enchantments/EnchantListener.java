@@ -3,8 +3,12 @@ package net.jingles.enchantments;
 import net.jingles.enchantments.enchant.BlockEnchant;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.TargetGroup;
+import net.jingles.enchantments.persistence.DataType;
+import net.jingles.enchantments.persistence.EnchantTeam;
 import net.jingles.enchantments.statuseffect.LocationStatusEffect;
+import net.jingles.enchantments.util.EnchantUtils;
 import net.jingles.enchantments.util.InventoryUtils;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -20,8 +24,7 @@ import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.enchantment.PrepareItemEnchantEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.world.ChunkLoadEvent;
-import org.bukkit.event.world.ChunkUnloadEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
@@ -29,13 +32,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class EnchantListener implements Listener {
 
@@ -138,7 +137,6 @@ public class EnchantListener implements Listener {
     if (original.getItemMeta() != null)
       original.getItemMeta().getEnchants().forEach(additions::put);
 
-
     // Collects the enchantments from the second item
     if (addition != null) {
 
@@ -176,13 +174,16 @@ public class EnchantListener implements Listener {
 
   }
 
+  // Transfers the block enchantments from the item to the block.
+  // The block's enchant team is copied from the player that placed it.
   @EventHandler
   public void onEnchantedBlockPlace(BlockPlaceEvent event) {
 
+    Player player = event.getPlayer();
     ItemStack item = event.getItemInHand();
     BlockState state = event.getBlockPlaced().getState();
 
-    // BlockEnchants can only affect BlockStates that extend Container
+    // BlockEnchants can only affect BlockStates that extend TileState
     if (!(state instanceof TileState)) return;
 
     PersistentDataContainer container = ((TileState) state).getPersistentDataContainer();
@@ -193,10 +194,20 @@ public class EnchantListener implements Listener {
       enchant.onChunkLoad((TileState) state);
     });
 
+    // Set the enchant's owner
+    container.set(Enchantments.OWNER_KEY, DataType.UUID, player.getUniqueId());
+
+    // Apply the default team, which is a copy of the player's.
+    EnchantTeam team = EnchantUtils.getEnchantTeam(player);
+    team.addTeamedEntity(player.getUniqueId());
+    container.set(Enchantments.TEAM_KEY, DataType.ENCHANT_TEAM, team);
+
     // Update the BlockState so all of these things take effect >_>
     state.update(true);
   }
 
+  // Transfers the enchantments from the block to the item that the block drops.
+  // Additionally, any active status effects originating from it are cancelled.
   @EventHandler
   public void onEnchantedBlockBreak(BlockBreakEvent event) {
 
@@ -206,23 +217,38 @@ public class EnchantListener implements Listener {
     PersistentDataContainer container = ((TileState) state).getPersistentDataContainer();
     Map<BlockEnchant, Integer> enchants = BlockEnchant.getBlockEnchants(container);
 
+    // Non-enchanted blocks are lame, they can be broken without interference.
     if (enchants.isEmpty()) return;
 
-    // Cancels all status effects originating from the block.
+    EnchantTeam team = EnchantUtils.getEnchantTeam((TileState) state);
+
+    // Prevent players from breaking enchanted blocks if they aren't on its team.
+    if (!team.isTeamed(event.getPlayer())) {
+      event.setCancelled(true);
+      event.getPlayer().sendMessage(ChatColor.RED + "This enchanted block does not belong to you or your team.");
+      return;
+    }
+
+    // Stops all status effects originating from the block, serializing them if possible.
     Enchantments.getStatusEffectManager().getWorldContainer().getEffectsAtLocation(state.getLocation())
         .forEach(LocationStatusEffect::cancel);
 
-    event.setCancelled(true);
     Block block = event.getBlock();
-    Collection<ItemStack> items = block.getDrops();
+    ItemStack tool = event.getPlayer().getInventory().getItemInMainHand();
+
+    // I'm just gonna casually copy the drops... cause they're annoying
+    List<ItemStack> items = new ArrayList<>(block.getDrops(tool));
+
+    // Stop dropping stuff ffs
+    event.setDropItems(false);
 
     items.forEach(item -> {
 
       if (item.getType() == block.getType()) {
-        // Add the enchantments themselves
+
+        // Add the enchantments and corresponding lore
         ItemMeta meta = item.getItemMeta();
         enchants.forEach((enchant, level) -> meta.addEnchant(enchant, level, true));
-        // Add the enchantment lore
         InventoryUtils.addEnchantLore(meta, enchants);
         item.setItemMeta(meta);
 
@@ -231,29 +257,26 @@ public class EnchantListener implements Listener {
       // Manually drop each block.
       block.getWorld().dropItemNaturally(block.getLocation(), item);
 
-      block.setType(Material.AIR);
-      state.update();
-
     });
 
+    // Spigot needs to stop changing BlockStates without telling anyone.
+    state.setType(Material.AIR);
+    state.update(true);
+
   }
 
-  // The chunk events make calls to BlockEnchant#onChunkLoad() and
-  // BlockEnchant#onChunkUnload for more control over how chunk
-  // loading affects block enchantments.
-
+  // Sets the player's enchant team if they don't have one.
   @EventHandler
-  public void onChunkLoad(ChunkLoadEvent event) {
-    Enchantments.getEnchantmentManager().loadBlockEnchants(event.getChunk());
-  }
+  public void onPlayerJoin(PlayerJoinEvent event) {
 
-  @EventHandler
-  public void onChunkUnload(ChunkUnloadEvent event) {
-    Stream.of(event.getChunk().getTileEntities())
-        .filter(state -> state instanceof TileState)
-        .map(state -> (TileState) state)
-        .forEach(tile -> BlockEnchant.getBlockEnchants(tile.getPersistentDataContainer())
-            .keySet().forEach(enchant -> enchant.onChunkUnload(tile)));
+    if (event.getPlayer().getPersistentDataContainer().has(Enchantments.TEAM_KEY, DataType.ENCHANT_TEAM)) return;
+
+    Player player = event.getPlayer();
+    HashSet<UUID> entities = new HashSet<>();
+    entities.add(player.getUniqueId());
+
+    player.getPersistentDataContainer().set(Enchantments.TEAM_KEY, DataType.ENCHANT_TEAM, new EnchantTeam(entities, true));
+
   }
 
 }

@@ -1,28 +1,45 @@
 package net.jingles.enchantments.statuseffect;
 
-import net.jingles.enchantments.enchant.CustomEnchant;
+import net.jingles.enchantments.statuseffect.context.EffectContext;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class StatusEffect implements Comparable<StatusEffect> {
 
-  private CustomEnchant source; // The enchantment that created the effect.
+  private EffectContext context; // The context of this effect
   private int maxTicks; // The maximum amount of ticks that the effect can live for.
   private int interval; // Time between effect executions
+  private int delay = 0;
   private int nextExecution = 0; // The next tick amount that will trigger the effect
   private int ticks = 0; // The current amount of ticks the effect has been alive for
   private boolean cancelled = false; // Whether or not the effect should be stopped.
 
-  public StatusEffect(@NotNull CustomEnchant source, int maxTicks, int interval) {
-    this.source = source;
+  public StatusEffect(EffectContext context, int maxTicks, int interval) {
+    this.context = context;
     this.maxTicks = maxTicks;
     this.interval = Math.max(1, interval);
   }
 
+  public StatusEffect(EffectContext context, int maxTicks, int interval, int delay) {
+    this(context, maxTicks, interval);
+    nextExecution = delay;
+  }
+
   public abstract void effect();
 
+  /**
+   * Code executed as soon as the status effect is registered.
+   * Please note that this ignores any delay.
+   */
   public void start() {
   }
 
+  /**
+   * Stops the effect. This can be overrode to allow for
+   * custom effects when this status effect ends, but it
+   * must always call super.stop().
+   *
+   * Stopped effects are never serialized.
+   */
   public void stop() {
     this.cancelled = true;
   }
@@ -33,8 +50,8 @@ public abstract class StatusEffect implements Comparable<StatusEffect> {
    * @return the owning CustomEnchant
    */
   @NotNull
-  public CustomEnchant getSource() {
-    return this.source;
+  public EffectContext getContext() {
+    return this.context;
   }
 
   /**
@@ -89,9 +106,26 @@ public abstract class StatusEffect implements Comparable<StatusEffect> {
   /**
    * Cancels the effect, which prevents its effect() method
    * from running again and removes it from the owning container.
+   *
+   * This does not run the stop() method and will serialize
+   * the effect if it is labelled as persistent.
    */
   public void cancel() {
-    this.cancelled = true;
+
+    stop();
+
+    if (isPersistent()) {
+      this.getContext().serialize((PersistentEffect) this);
+    }
+
+  }
+
+  /**
+   * Whether or not the effect will be saved when the server is stopped.
+   * @return true if saved, false if cancelled without saving.
+   */
+  public boolean isPersistent() {
+    return this instanceof PersistentEffect;
   }
 
   /**

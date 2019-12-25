@@ -1,5 +1,10 @@
 package net.jingles.enchantments.armor.helmet;
 
+import net.jingles.enchantments.Enchantments;
+import net.jingles.enchantments.enchant.CustomEnchant;
+import net.jingles.enchantments.enchant.Enchant;
+import net.jingles.enchantments.statuseffect.context.ItemEffectContext;
+import net.jingles.enchantments.statuseffect.entity.EntityStatusEffect;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -16,11 +21,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.projectiles.ProjectileSource;
-
-import net.jingles.enchantments.Enchantments;
-import net.jingles.enchantments.enchant.CustomEnchant;
-import net.jingles.enchantments.enchant.Enchant;
-import net.jingles.enchantments.statuseffect.entity.EntityStatusEffect;
 
 @Enchant(name = "Cardiologist", key = "cardiologist", targetItem = EnchantmentTarget.ARMOR_HEAD, 
   description = "Damaging an entity causes their health to be displayed in a bossbar for 7 seconds per level.")
@@ -65,7 +65,9 @@ public class Cardiologist extends CustomEnchant {
     if (hasEffect) return;
 
     int duration = (getLevel(getItem(player)) * 7) * 20;
-    Enchantments.getStatusEffectManager().add(new CardiologistEffect(player, target, duration));
+
+    ItemEffectContext context = new ItemEffectContext(player, getItem(player), this);
+    Enchantments.getStatusEffectManager().add(new CardiologistEffect(context, player, target, duration));
   
   }
 
@@ -75,8 +77,8 @@ public class Cardiologist extends CustomEnchant {
     private double maxHealth;
     private BossBar bar;
 
-    public CardiologistEffect(Player owner, LivingEntity target, int duration) {
-      super(target, Cardiologist.this, duration, 1);
+    public CardiologistEffect(ItemEffectContext context, Player owner, LivingEntity target, int duration) {
+      super(target, context, duration, 1);
 
       this.owner = owner;
 
@@ -98,7 +100,7 @@ public class Cardiologist extends CustomEnchant {
     public void effect() {
 
       if (!canTrigger(owner) || getTarget() == null || getTarget().isDead()) {
-        this.cancel();
+        this.stop();
         return;
       }
 

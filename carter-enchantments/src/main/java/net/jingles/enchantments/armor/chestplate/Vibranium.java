@@ -4,7 +4,10 @@ import com.google.common.primitives.Doubles;
 import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
+import net.jingles.enchantments.persistence.EnchantTeam;
 import net.jingles.enchantments.statuseffect.LocationStatusEffect;
+import net.jingles.enchantments.statuseffect.context.ItemEffectContext;
+import net.jingles.enchantments.util.EnchantUtils;
 import net.jingles.enchantments.util.ParticleUtil;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -82,9 +85,13 @@ public class Vibranium extends CustomEnchant {
 
     // Should be equivalent at max capacity due to the clamp method.
     if (heldEnergy == level * 25) {
+
       kineticEnergy.remove(player.getUniqueId());
-      Enchantments.getStatusEffectManager().add(new VibraniumReleaseEffect(player, player.getLocation(), heldEnergy));
-      Enchantments.getCooldownManager().addCooldown(player, this, getCooldown(), getTimeUnit());
+      addCooldown(player);
+
+      ItemEffectContext context = new ItemEffectContext(player, getItem(player), this);
+      Enchantments.getStatusEffectManager().add(new VibraniumReleaseEffect(context, heldEnergy));
+
     }
 
     // Cancel the damage because it was "absorbed." We do not want to cancel the entire
@@ -92,17 +99,22 @@ public class Vibranium extends CustomEnchant {
     event.setDamage(0D);
   }
 
-  private class VibraniumReleaseEffect extends LocationStatusEffect {
+  private static class VibraniumReleaseEffect extends LocationStatusEffect {
 
     private final List<LivingEntity> affected = new ArrayList<>();
     private final Particle.DustOptions options = new Particle.DustOptions(Color.PURPLE, 1);
+
+    private final EnchantTeam team;
     private final double damage;
     private double radius;
 
-    public VibraniumReleaseEffect(Player owner, Location location, double damage) {
-      super(Vibranium.this, 10, 1, location);
+    public VibraniumReleaseEffect(ItemEffectContext context, double damage) {
+      super(context, 10, 1, context.getTrigger().getLocation());
+
+      this.team = EnchantUtils.getEnchantTeam(context.getTrigger());
       this.damage = damage;
-      affected.add(owner);
+
+      affected.add(context.getTrigger());
     }
 
     @Override
@@ -115,9 +127,10 @@ public class Vibranium extends CustomEnchant {
       // Creates a sphere effect that grows each tick to simulate an explosion's quick expansion.
       ParticleUtil.sphere(getLocation(), ++radius, Particle.REDSTONE, options);
       // Damages and knocks away nearby enemies that have not been already. Adds them to the affected list.
-      getLocation().getWorld().getNearbyEntities(getLocation(), radius, radius, radius,
-          entity -> entity instanceof LivingEntity && !affected.contains(entity))
-          .stream().map(entity -> (LivingEntity) entity)
+      getLocation().getWorld().getNearbyEntities(getLocation(), radius, radius, radius)
+          .stream()
+          .filter(e -> e instanceof LivingEntity && !affected.contains(e) && !team.isTeamed(e))
+          .map(entity -> (LivingEntity) entity)
           .forEach(entity -> {
             entity.damage(damage);
             entity.setVelocity(ParticleUtil.bounceFromSource(entity.getVelocity(), getLocation()).setY(0.95));

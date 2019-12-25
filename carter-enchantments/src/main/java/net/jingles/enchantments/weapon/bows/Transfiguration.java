@@ -5,6 +5,7 @@ import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.enchant.TargetGroup;
 import net.jingles.enchantments.statuseffect.container.EntityEffectContainer;
+import net.jingles.enchantments.statuseffect.context.ItemEffectContext;
 import net.jingles.enchantments.statuseffect.entity.EntityStatusEffect;
 import net.jingles.enchantments.util.ParticleUtil;
 import org.bukkit.Color;
@@ -66,7 +67,8 @@ public class Transfiguration extends CustomEnchant {
     LivingEntity hit = (LivingEntity) event.getHitEntity();
     if (hit.isDead() || hit.getClass().isAssignableFrom(Boss.class)) return;
 
-    Enchantments.getStatusEffectManager().add(new TransfigurationEffect(hit));
+    ItemEffectContext context = new ItemEffectContext(shooter, getItem(shooter), this);
+    Enchantments.getStatusEffectManager().add(new TransfigurationEffect(context, hit));
     addCooldown(hit);
   }
 
@@ -96,12 +98,12 @@ public class Transfiguration extends CustomEnchant {
     event.getDrops().clear();
   }
 
-  private class TransfigurationEffect extends EntityStatusEffect {
+  private static class TransfigurationEffect extends EntityStatusEffect {
 
     private LivingEntity mount;
 
-    private TransfigurationEffect(LivingEntity target) {
-      super(target, Transfiguration.this, 15 * 20, 1);
+    private TransfigurationEffect(ItemEffectContext context, LivingEntity target) {
+      super(target, context, 15 * 20, 1);
     }
 
     @Override

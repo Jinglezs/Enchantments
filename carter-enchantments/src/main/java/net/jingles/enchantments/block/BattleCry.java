@@ -4,6 +4,8 @@ import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.BlockEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.enchant.TargetGroup;
+import net.jingles.enchantments.persistence.EnchantTeam;
+import net.jingles.enchantments.util.EnchantUtils;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
@@ -12,10 +14,12 @@ import org.bukkit.block.TileState;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,7 +43,7 @@ public class BattleCry extends BlockEnchant {
   }
 
   @Override
-  public boolean canTrigger(@NotNull TileState tile) {
+  public boolean canTrigger(@Nullable TileState tile) {
     return hasEnchant(tile) && !Enchantments.getCooldownManager()
         .hasCooldown(tile, this);
   }
@@ -48,22 +52,27 @@ public class BattleCry extends BlockEnchant {
   public void onBellInteract(PlayerInteractEvent event) {
 
     Block block = event.getClickedBlock();
-    if (block == null || block.getType() != Material.BELL) return;
+    if (block == null || block.getType() != Material.BELL ||
+      event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 
     // For whatever reason, you can't cast CraftBell to Bell lol
     TileState bell = (TileState) block.getState();
     if (!canTrigger(bell)) return;
 
     int duration = getLevel(bell) * (30 * 20);
-    List<PotionEffect> effects = Arrays.asList(new PotionEffect(PotionEffectType.HEALTH_BOOST, duration, 3, false, false),
-        new PotionEffect(PotionEffectType.INCREASE_DAMAGE, duration, 3, false, false));
+    List<PotionEffect> effects = Arrays.asList(new PotionEffect(PotionEffectType.HEALTH_BOOST, duration, 2, false, false),
+        new PotionEffect(PotionEffectType.INCREASE_DAMAGE, duration, 2, false, false));
+
+    EnchantTeam team = EnchantUtils.getEnchantTeam(bell);
 
     bell.getWorld().getNearbyEntities(bell.getLocation(), 100, 100, 100).stream()
-        .filter(entity -> entity instanceof Player)
-        .map(entity -> (Player) entity)
+        .filter(team::isTeamed)
+        .filter(e -> e instanceof Player)
+        .map(e -> (Player) e)
         .forEach(player -> player.addPotionEffects(effects));
 
     bell.getWorld().playSound(bell.getLocation(), Sound.EVENT_RAID_HORN, 10f, 2f);
+    addCooldown(bell);
 
   }
 

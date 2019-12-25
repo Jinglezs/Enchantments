@@ -1,25 +1,30 @@
 package net.jingles.enchantments.statuseffect;
 
 import net.jingles.enchantments.Enchantments;
+import net.jingles.enchantments.enchant.BlockEnchant;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.statuseffect.StatusEffect.TickFailure;
 import net.jingles.enchantments.statuseffect.container.EffectContainer;
 import net.jingles.enchantments.statuseffect.container.EntityEffectContainer;
 import net.jingles.enchantments.statuseffect.container.WorldEffectContainer;
+import net.jingles.enchantments.statuseffect.context.ItemEffectContext;
 import net.jingles.enchantments.statuseffect.effects.FeatherFallingEffect;
 import net.jingles.enchantments.statuseffect.entity.EntityStatusEffect;
+import org.bukkit.block.TileState;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.stream.Stream;
 
 public class StatusEffectManager extends BukkitRunnable implements EffectContainer<StatusEffect>, Listener {
 
@@ -43,10 +48,8 @@ public class StatusEffectManager extends BukkitRunnable implements EffectContain
       StatusEffect effect = iterator.next();
       TickFailure canTick = effect.canTick();
 
-      if (canTick.isFatal()) {
-        effect.stop();
-        iterator.remove();
-      } else if (canTick == TickFailure.SUCCESS) {
+      if (canTick.isFatal()) iterator.remove();
+      else if (canTick == TickFailure.SUCCESS) {
         effect.effect();
         effect.setNextExecution();
       }
@@ -126,7 +129,7 @@ public class StatusEffectManager extends BukkitRunnable implements EffectContain
    */
   @NotNull
   public FeatherFallingEffect negateFallDamage(@NotNull LivingEntity entity, @NotNull CustomEnchant source, int duration) {
-    FeatherFallingEffect effect = new FeatherFallingEffect(entity, source, duration);
+    FeatherFallingEffect effect = new FeatherFallingEffect(entity, new ItemEffectContext(entity, null, source), duration);
     this.add(effect);
     return effect;
   }
@@ -143,14 +146,40 @@ public class StatusEffectManager extends BukkitRunnable implements EffectContain
     removeStatusEffects(event.getEntity());
   }
 
+  // The chunk events make calls to BlockEnchant#onChunkLoad() and
+  // BlockEnchant#onChunkUnload for more control over how chunk
+  // loading affects block enchantments.
+
   @EventHandler
-  public void onEntityDespawn(ChunkUnloadEvent event) {
+  public void onChunkLoad(ChunkLoadEvent event) {
+    Enchantments.getEnchantmentManager().loadBlockEnchants(event.getChunk());
+  }
+
+  @EventHandler
+  public void onChunkUnload(ChunkUnloadEvent event) {
+
     Arrays.asList(event.getChunk().getEntities()).forEach(this::removeStatusEffects);
+
+    Stream.of(event.getChunk().getTileEntities())
+        .filter(state -> state instanceof TileState)
+        .map(state -> (TileState) state)
+        .forEach(tile -> {
+
+          // Unload the enchantments and cancel all effects that stem from them.
+          BlockEnchant.getBlockEnchants(tile.getPersistentDataContainer())
+              .keySet()
+              .forEach(enchant -> {
+                enchant.onChunkUnload(tile);
+                getEffectsBySource(enchant).forEach(StatusEffect::cancel);
+              });
+
+        });
+
   }
 
   private void removeStatusEffects(Entity entity) {
     Enchantments.getStatusEffectManager().getEntityContainer(entity.getUniqueId())
-        .ifPresent(container -> container.getStatusEffects().forEach(StatusEffect::stop));
+        .ifPresent(container -> container.getStatusEffects().forEach(StatusEffect::cancel));
   }
 
 }

@@ -1,7 +1,7 @@
 package net.jingles.enchantments.enchant;
 
 import net.jingles.enchantments.Enchantments;
-import net.jingles.enchantments.statuseffect.StatusEffect;
+import net.jingles.enchantments.persistence.DataType;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.TileState;
 import org.bukkit.enchantments.Enchantment;
@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public abstract class BlockEnchant extends CustomEnchant {
@@ -22,7 +23,7 @@ public abstract class BlockEnchant extends CustomEnchant {
     super(key);
   }
 
-  public abstract boolean canTrigger(@NotNull TileState tile);
+  public abstract boolean canTrigger(@Nullable TileState tile);
 
   /**
    * This method can be overrode to determine how the enchanted block
@@ -44,8 +45,6 @@ public abstract class BlockEnchant extends CustomEnchant {
    * @param tile the tile entity with the enchantment
    */
   public void onChunkUnload(TileState tile) {
-    Enchantments.getStatusEffectManager().getWorldContainer().getEffectsAtLocation(tile.getLocation())
-        .forEach(StatusEffect::stop);
   }
 
   @Override
@@ -53,9 +52,13 @@ public abstract class BlockEnchant extends CustomEnchant {
     return false;
   }
 
-  public int getLevel(@NotNull TileState tile) {
+  public int getLevel(@Nullable TileState tile) {
       return !hasEnchant(tile) ? 0 :
         tile.getPersistentDataContainer().get(getKey(), PersistentDataType.INTEGER);
+  }
+
+  public UUID getOwner(TileState tile) {
+    return tile.getPersistentDataContainer().get(Enchantments.OWNER_KEY, DataType.UUID);
   }
 
   @NotNull
@@ -93,8 +96,8 @@ public abstract class BlockEnchant extends CustomEnchant {
         .findFirst().orElse(null);
   }
 
-  public boolean hasEnchant(@NotNull TileState tile) {
-    return tile.getPersistentDataContainer().has(getKey(), PersistentDataType.INTEGER);
+  public boolean hasEnchant(@Nullable TileState tile) {
+    return tile != null && tile.getPersistentDataContainer().has(getKey(), PersistentDataType.INTEGER);
   }
 
   public void addCooldown(@NotNull TileState tile) {

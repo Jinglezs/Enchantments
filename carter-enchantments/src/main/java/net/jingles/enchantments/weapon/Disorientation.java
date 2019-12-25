@@ -3,6 +3,7 @@ package net.jingles.enchantments.weapon;
 import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
+import net.jingles.enchantments.statuseffect.context.ItemEffectContext;
 import net.jingles.enchantments.statuseffect.entity.PotionStatusEffect;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -14,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
@@ -50,16 +52,19 @@ public class Disorientation extends CustomEnchant {
     Player attacker = (Player) event.getDamager();
     if (!canTrigger(attacker)) return;
 
-    int duration = getLevel(getItem(attacker)) * 20;
+    ItemStack item = getItem(attacker);
+    int duration = getLevel(item) * 20;
+
     PotionEffect effect = new PotionEffect(PotionEffectType.CONFUSION, duration, 3, false, true);
-    Enchantments.getStatusEffectManager().add(new DisorientationEffect(effect, (LivingEntity) event.getEntity()));
+    ItemEffectContext context = new ItemEffectContext(attacker, item, this);
+    Enchantments.getStatusEffectManager().add(new DisorientationEffect(context, effect, (LivingEntity) event.getEntity()));
 
   }
 
-  private class DisorientationEffect extends PotionStatusEffect {
+  private static class DisorientationEffect extends PotionStatusEffect {
 
-    public DisorientationEffect(PotionEffect potionEffect, LivingEntity target) {
-      super(potionEffect, target, Disorientation.this, 1);
+    private DisorientationEffect(ItemEffectContext context, PotionEffect potionEffect, LivingEntity target) {
+      super(potionEffect, target, context, 1);
     }
 
     @Override

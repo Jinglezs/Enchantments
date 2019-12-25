@@ -1,6 +1,6 @@
 package net.jingles.enchantments.statuseffect.entity;
 
-import net.jingles.enchantments.enchant.CustomEnchant;
+import net.jingles.enchantments.statuseffect.context.EffectContext;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffect;
 import org.jetbrains.annotations.NotNull;
@@ -9,8 +9,8 @@ public abstract class PotionStatusEffect extends EntityStatusEffect {
 
   private final PotionEffect potionEffect;
 
-  public PotionStatusEffect(@NotNull PotionEffect potionEffect, @NotNull LivingEntity target, @NotNull CustomEnchant source, int interval) {
-    super(target, source, potionEffect.getDuration(), interval);
+  public PotionStatusEffect(@NotNull PotionEffect potionEffect, @NotNull LivingEntity target, EffectContext context, int interval) {
+    super(target, context, potionEffect.getDuration(), interval);
     this.potionEffect = potionEffect;
   }
 

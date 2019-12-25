@@ -4,17 +4,13 @@ import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.enchant.TargetGroup;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
+import net.jingles.enchantments.persistence.EnchantTeam;
+import net.jingles.enchantments.util.EnchantUtils;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Monster;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.inventory.ItemStack;
@@ -63,10 +59,12 @@ public class Gravity extends CustomEnchant {
     int level = getLevel(getItem(shooter));
     int radius = 5 + (3 * level);
 
+    EnchantTeam team = EnchantUtils.getEnchantTeam(shooter);
+
     //Gets nearby entities within the radius that are living, not players, and are not tamed by the enchant owner.
-    Set<Monster> targets = hitLoc.getWorld().getNearbyEntities(hitLoc, radius, radius, radius).stream()
-        .filter(entity -> entity instanceof Monster)
-        .map(entity -> (Monster) entity)
+    Set<LivingEntity> targets = hitLoc.getWorld().getNearbyEntities(hitLoc, radius, radius, radius).stream()
+        .filter(entity -> entity instanceof LivingEntity && !team.isTeamed(entity))
+        .map(entity -> (LivingEntity) entity)
         .collect(Collectors.toSet());
 
     if (!targets.isEmpty()) {

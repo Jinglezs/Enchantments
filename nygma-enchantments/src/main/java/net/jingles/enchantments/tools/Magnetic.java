@@ -60,7 +60,7 @@ public class Magnetic extends CustomEnchant {
 
     event.setCancelled(true);
     block.setType(Material.AIR);
-    block.getState().update();
+    block.getState().update(true);
 
     int level = tool.getItemMeta().getEnchantLevel(Enchantment.DURABILITY);
     // Adds one damage to the tool.

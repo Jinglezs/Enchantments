@@ -1,9 +1,11 @@
 package net.jingles.enchantments.block;
 
-import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
-
+import net.jingles.enchantments.Enchantments;
+import net.jingles.enchantments.enchant.BlockEnchant;
+import net.jingles.enchantments.enchant.Enchant;
+import net.jingles.enchantments.enchant.TargetGroup;
+import net.jingles.enchantments.statuseffect.LocationStatusEffect;
+import net.jingles.enchantments.statuseffect.context.TileEntityContext;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Sound;
@@ -17,16 +19,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
 
-import net.jingles.enchantments.Enchantments;
-import net.jingles.enchantments.enchant.BlockEnchant;
-import net.jingles.enchantments.enchant.Enchant;
-import net.jingles.enchantments.enchant.TargetGroup;
-import net.jingles.enchantments.statuseffect.LocationStatusEffect;
+import java.util.ArrayList;
+import java.util.stream.Stream;
 
 @Enchant(name = "Bast's Ward", key = "basts_ward", maxLevel = 1, targetGroup = TargetGroup.SKULLS,
-  cooldown = 25, timeUnit = TimeUnit.SECONDS, description = "When a creeper targets a player near " +
-    "an enchanted creeper head, a swarm of ocelots are summoned to scare it away. Additionally, " +
-    "any explosion caused by the creeper is negated.")
+  cooldown = 25, description = "When a creeper targets a player near an enchanted creeper head, " +
+    "a swarm of ocelots are summoned to scare it away. Additionally, any explosion caused by the " +
+    "creeper is negated.")
 public class BastsWard extends BlockEnchant {
 
   public BastsWard(NamespacedKey key) {
@@ -51,12 +50,17 @@ public class BastsWard extends BlockEnchant {
 
     Location location = event.getEntity().getLocation();
 
-    if (Stream.of(location.getChunk().getTileEntities()).filter(tileEntity -> tileEntity instanceof TileState)
-        .map(tileEntity -> (TileState) tileEntity).filter(this::canTrigger).noneMatch(e -> canTrigger(e)))
-      return;
+    Stream.of(location.getChunk().getTileEntities())
+        .filter(tileEntity -> tileEntity instanceof TileState)
+        .map(tileEntity -> (TileState) tileEntity).filter(this::canTrigger)
+        .filter(this::canTrigger)
+        .forEach(tile -> {
 
-    BastsWardEffect effect = new BastsWardEffect((Creeper) event.getEntity(), event.getEntity().getLocation());
-    Enchantments.getStatusEffectManager().add(effect);
+          TileEntityContext context = new TileEntityContext(tile, this);
+          BastsWardEffect effect = new BastsWardEffect(context, (Creeper) event.getEntity(), event.getEntity().getLocation());
+          Enchantments.getStatusEffectManager().add(effect);
+
+        });
 
   }
 
@@ -70,13 +74,13 @@ public class BastsWard extends BlockEnchant {
 
   }
 
-  private class BastsWardEffect extends LocationStatusEffect {
+  private static class BastsWardEffect extends LocationStatusEffect {
 
     private ArrayList<Ocelot> ocelots = new ArrayList<>();
     private Creeper target;
 
-    public BastsWardEffect(Creeper target, Location location) {
-      super(BastsWard.this, 30 * 20, 1, location);
+    private BastsWardEffect(TileEntityContext context, Creeper target, Location location) {
+      super(context, 30 * 20, 1, location);
       this.target = target;
     }
 
@@ -98,7 +102,7 @@ public class BastsWard extends BlockEnchant {
 
       if (target == null || target.isDead() || ocelots.stream()
         .noneMatch(o -> o.getLocation().distanceSquared(target.getLocation()) < 25 * 25)) {
-        this.cancel();
+        this.stop();
       }
 
     }

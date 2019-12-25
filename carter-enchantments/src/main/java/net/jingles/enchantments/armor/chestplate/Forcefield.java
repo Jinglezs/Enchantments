@@ -4,6 +4,7 @@ import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.projectile.ProjectileManager;
+import net.jingles.enchantments.statuseffect.context.ItemEffectContext;
 import net.jingles.enchantments.statuseffect.entity.EntityStatusEffect;
 import net.jingles.enchantments.util.ParticleUtil;
 import org.bukkit.Color;
@@ -16,6 +17,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 @Enchant(name = "Forcefield", key = "forcefield", maxLevel = 3, targetItem = EnchantmentTarget.ARMOR_TORSO,
@@ -49,18 +51,22 @@ public class Forcefield extends CustomEnchant {
     // Cancel the event so that the hit is not registered.
     event.setCancelled(true);
 
+    ItemStack item = getItem(hit);
+
     // 5 seconds per level
-    int duration = getLevel(getItem(hit)) * (5 * 20);
-    Enchantments.getStatusEffectManager().add(new ForcefieldEffect(hit, duration));
+    int duration = getLevel(item) * (5 * 20);
+
+    ItemEffectContext context = new ItemEffectContext(hit, item, this);
+    Enchantments.getStatusEffectManager().add(new ForcefieldEffect(context, hit, duration));
 
   }
 
-  private class ForcefieldEffect extends EntityStatusEffect {
+  private static class ForcefieldEffect extends EntityStatusEffect {
 
     private final Particle.DustOptions options = new Particle.DustOptions(Color.GRAY, 2);
 
-    private ForcefieldEffect(LivingEntity target, int maxTicks) {
-      super(target, Forcefield.this, maxTicks, 5);
+    private ForcefieldEffect(ItemEffectContext context, LivingEntity target, int maxTicks) {
+      super(target, context, maxTicks, 5);
     }
 
     @Override

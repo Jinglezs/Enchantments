@@ -7,18 +7,26 @@ import co.aikar.commands.annotation.*;
 import net.jingles.enchantments.cooldown.CooldownManager;
 import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.TargetGroup;
+import net.jingles.enchantments.persistence.DataType;
+import net.jingles.enchantments.persistence.EnchantTeam;
 import net.jingles.enchantments.statuseffect.StatusEffectManager;
 import net.jingles.enchantments.statuseffect.container.EntityEffectContainer;
 import net.jingles.enchantments.statuseffect.container.WorldEffectContainer;
+import net.jingles.enchantments.util.EnchantUtils;
 import net.jingles.enchantments.util.RomanNumerals;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.block.TileState;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataHolder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -107,19 +115,19 @@ public class Commands extends BaseCommand {
     if (type.equals("all")) {
 
       enchants = Enchantments.getEnchantmentManager().getRegisteredEnchants().stream()
-        .map(CustomEnchant::getName)
-        .collect(Collectors.joining(ChatColor.WHITE + ", " + ChatColor.GOLD));
+          .map(CustomEnchant::getName)
+          .collect(Collectors.joining(ChatColor.WHITE + ", " + ChatColor.GOLD));
 
     } else if (type.equals("hand")) {
 
       ItemStack item = sender instanceof Player ? ((Player) sender).getInventory().getItemInMainHand() : null;
 
       if (item == null) throw new InvalidCommandArgument("You must be holding an item in your main hand.");
-      
-      enchants = Enchantments.getEnchantmentManager().getRegisteredEnchants().stream() 
-        .filter(enchant -> enchant.canEnchantItem(item))
-        .map(CustomEnchant::getName)
-        .collect(Collectors.joining(ChatColor.WHITE + ", " + ChatColor.GOLD));
+
+      enchants = Enchantments.getEnchantmentManager().getRegisteredEnchants().stream()
+          .filter(enchant -> enchant.canEnchantItem(item))
+          .map(CustomEnchant::getName)
+          .collect(Collectors.joining(ChatColor.WHITE + ", " + ChatColor.GOLD));
 
     } else {
 
@@ -132,9 +140,9 @@ public class Commands extends BaseCommand {
       }
 
       enchants = Enchantments.getEnchantmentManager().getRegisteredBlockEnchants().stream()
-        .filter(enchant -> enchant.getTargetGroup() == target)
-        .map(CustomEnchant::getName)
-        .collect(Collectors.joining(ChatColor.WHITE + ", " + ChatColor.GOLD));
+          .filter(enchant -> enchant.getTargetGroup() == target)
+          .map(CustomEnchant::getName)
+          .collect(Collectors.joining(ChatColor.WHITE + ", " + ChatColor.GOLD));
 
     }
 
@@ -151,16 +159,17 @@ public class Commands extends BaseCommand {
 
     // General info
     info.append(String.format(LABELLED, "\nEnchant Chance", String.valueOf(enchant.getEnchantChance())))
-    .append(String.format(LABELLED, "Max Level", enchant.getMaxLevel()))
-    // Cooldown info
-    .append(String.format(LABELLED, "\nCooldown", String.valueOf(enchant.getCooldown())))
-    .append(String.format(LABELLED, "Time Unit", enchant.getTimeUnit().name()))
-    // Target info
-    .append(String.format(LABELLED, "Target Item", enchant.getItemTarget().name()))
-    .append(String.format(LABELLED, "Target Group", enchant.getTargetGroup().name()))
-    // Description
-    .append(String.format(LABELLED, "\nDescription", enchant.getDescription()))
-    .append("\n");
+        .append(String.format(LABELLED, "Max Level", enchant.getMaxLevel()))
+        .append(String.format(LABELLED, "Level Requirement", enchant.getLevelRequirement()))
+        // Cooldown info
+        .append(String.format(LABELLED, "\nCooldown", String.valueOf(enchant.getCooldown())))
+        .append(String.format(LABELLED, "Time Unit", enchant.getTimeUnit().name()))
+        // Target info
+        .append(String.format(LABELLED, "Target Item", enchant.getItemTarget().name()))
+        .append(String.format(LABELLED, "Target Group", enchant.getTargetGroup().name()))
+        // Description
+        .append(String.format(LABELLED, "\nDescription", enchant.getDescription()))
+        .append("\n");
 
     sender.sendMessage(String.format(HEADER, enchant.getName()) + info.toString());
   }
@@ -208,6 +217,84 @@ public class Commands extends BaseCommand {
         .collect(Collectors.joining("\n"));
 
     player.sendMessage(EFFECTS_HEADER + (!effectsMessage.isEmpty() ? effectsMessage : " - There are no active location status effects"));
+  }
+
+  @CommandAlias("edit-team")
+  @Syntax("<add | remove | toggle-tameables> <name of the player>")
+  @Description("Allows the sender to add entities to their enchantment team or toggle team flags.")
+  public void onEditTeamCommand(Player player, String action, PersistentDataHolder holder, @Optional String name) {
+
+    UUID owner = holder.getPersistentDataContainer()
+        .getOrDefault(Enchantments.OWNER_KEY, DataType.UUID, player.getUniqueId());
+
+    if (!player.getUniqueId().equals(owner))
+      throw new InvalidCommandArgument("You must own this enchantment to edit it's team.");
+
+    EnchantTeam team = EnchantUtils.getEnchantTeam(holder);
+
+    if (action.equalsIgnoreCase("toggle-tameables")) {
+
+      boolean newSetting = !team.getIncludeTamedAnimals();
+      team.setIncludeTamedAnimals(newSetting);
+      player.sendMessage(TITLE + "Tamed animals will be considered part of your team: " + newSetting);
+
+    } else {
+
+      if (name == null) throw new InvalidCommandArgument("You must provide a player name to add or remove");
+
+      OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(name);
+
+      if (action.equalsIgnoreCase("add")) {
+
+        if (team.isDefinitelyTeamed(offlinePlayer.getUniqueId())) {
+          player.sendMessage(TITLE + "That player is already on your team!");
+          return;
+        }
+
+        team.addTeamedEntity(offlinePlayer.getUniqueId());
+        player.sendMessage(TITLE + "Added " + offlinePlayer.getName() + " to your team.");
+
+      } else {
+
+        if (!team.isDefinitelyTeamed(offlinePlayer.getUniqueId())) {
+          player.sendMessage(TITLE + "That player is not on your team!");
+          return;
+        }
+
+        team.removeTeamedEntity(offlinePlayer.getUniqueId());
+        player.sendMessage(TITLE + "Removed " + offlinePlayer.getName() + " from your team.");
+
+      }
+
+      // Save the changes to the data holder
+      holder.getPersistentDataContainer().set(Enchantments.TEAM_KEY, DataType.ENCHANT_TEAM, team);
+
+      if (holder instanceof TileState) {
+        ((TileState) holder).update(true);
+      }
+
+    }
+
+  }
+
+  @CommandAlias("team-info")
+  @Description("Displays information about your enchantment team.")
+  public void onTeamShow(Player player, PersistentDataHolder holder) {
+
+    EnchantTeam team = EnchantUtils.getEnchantTeam(holder);
+
+    StringBuilder builder = new StringBuilder("\n" +TITLE + "Enchantment Team Info: \n");
+    builder.append(" - Include Tamed Animals: ").append(team.getIncludeTamedAnimals());
+    builder.append("\n - Players: ");
+
+    String players = team.getTeamedEntities().stream()
+        .map(Bukkit::getOfflinePlayer)
+        .map(OfflinePlayer::getName)
+        .collect(Collectors.joining(", "));
+
+    builder.append(players).append("\n\n");
+    player.sendMessage(builder.toString());
+
   }
 
 }

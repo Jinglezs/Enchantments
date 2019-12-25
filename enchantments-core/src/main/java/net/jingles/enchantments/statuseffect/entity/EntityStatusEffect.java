@@ -1,7 +1,7 @@
 package net.jingles.enchantments.statuseffect.entity;
 
-import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.statuseffect.StatusEffect;
+import net.jingles.enchantments.statuseffect.context.EffectContext;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;
 import org.jetbrains.annotations.NotNull;
@@ -12,8 +12,13 @@ public abstract class EntityStatusEffect extends StatusEffect {
 
   private final LivingEntity target;
 
-  public EntityStatusEffect(@NotNull LivingEntity target, @NotNull CustomEnchant source, int maxTicks, int interval) {
-    super(source, maxTicks, interval);
+  public EntityStatusEffect(LivingEntity target, EffectContext context, int maxTicks, int interval) {
+    super(context, maxTicks, interval);
+    this.target = target;
+  }
+
+  public EntityStatusEffect(LivingEntity target, EffectContext context, int maxTicks, int interval, int delay) {
+    super(context, maxTicks, interval, delay);
     this.target = target;
   }
 

@@ -35,7 +35,7 @@ public interface EffectContainer<T extends StatusEffect> {
    */
   default Set<T> getEffectsBySource(CustomEnchant source) {
     return getStatusEffects().stream()
-        .filter(effect -> effect.getSource().equals(source))
+        .filter(effect -> effect.getContext().getSource().equals(source))
         .collect(Collectors.toSet());
   }
 
@@ -46,6 +46,13 @@ public interface EffectContainer<T extends StatusEffect> {
       .findFirst();
   }
 
+  default <U extends StatusEffect> Set<U> getEffectsByClass(Class<U> effect) {
+    return getStatusEffects().stream()
+      .filter(e -> effect == e.getClass())
+      .map(e -> (U) e)
+      .collect(Collectors.toSet());
+  }
+
   /**
    * Removes and stops all effects created by the given source.
    *
@@ -53,7 +60,7 @@ public interface EffectContainer<T extends StatusEffect> {
    */
   default void removeEffects(CustomEnchant source) {
     getStatusEffects().stream()
-        .filter(statusEffect -> statusEffect.getSource().equals(source))
+        .filter(statusEffect -> statusEffect.getContext().getSource().equals(source))
         .forEach(StatusEffect::stop);
   }
 

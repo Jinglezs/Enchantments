@@ -4,15 +4,19 @@ import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.BlockEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.enchant.TargetGroup;
+import net.jingles.enchantments.persistence.EnchantTeam;
 import net.jingles.enchantments.statuseffect.LocationStatusEffect;
+import net.jingles.enchantments.statuseffect.context.TileEntityContext;
+import net.jingles.enchantments.util.EnchantUtils;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.TileState;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @Enchant(name = "Homecoming", key = "homecoming", enchantChance = 0.47, targetGroup = TargetGroup.CAMPFIRE,
   description = "The enchanted campfire has a radius of 20 blocks per level. Every 5 seconds, all players " +
@@ -31,26 +35,26 @@ public class Homecoming extends BlockEnchant {
   }
 
   @Override
-  public boolean canTrigger(@NotNull TileState tile) {
+  public boolean canTrigger(@Nullable TileState tile) {
     return false;
   }
 
   @Override
   public void onChunkLoad(TileState tile) {
-    HomecomingEffect effect = new HomecomingEffect(tile, Integer.MAX_VALUE, tile.getLocation());
+    TileEntityContext context = new TileEntityContext(tile, this);
+    HomecomingEffect effect = new HomecomingEffect(context, tile.getLocation(), getLevel(tile));
     Enchantments.getStatusEffectManager().add(effect);
   }
 
-  private class HomecomingEffect extends LocationStatusEffect {
+  private static class HomecomingEffect extends LocationStatusEffect {
 
     private final PotionEffect regen;
     private final PotionEffect saturation;
     private final double radius;
 
-    public HomecomingEffect(TileState tile, int maxTicks, @NotNull Location location) {
-      super(Homecoming.this, maxTicks, 100, location);
+    private HomecomingEffect(TileEntityContext context, @NotNull Location location, int level) {
+      super(context, Integer.MAX_VALUE, 100, location);
 
-      int level = getLevel(tile);
       int duration = level * (10 * 20);
 
       this.radius = level * 20;
@@ -61,9 +65,11 @@ public class Homecoming extends BlockEnchant {
     @Override
     public void effect() {
 
+      EnchantTeam team = EnchantUtils.getEnchantTeam(((TileEntityContext) getContext()).getTrigger());
+
       getLocation().getWorld().getNearbyEntities(getLocation(), radius, radius, radius).stream()
-          .filter(entity -> entity instanceof Player)
-          .map(entity -> (Player) entity)
+          .filter(e -> e instanceof LivingEntity && team.isTeamed(e))
+          .map(e -> (LivingEntity) e)
           .forEach(entity -> {
             entity.addPotionEffect(regen);
             entity.addPotionEffect(saturation);
