@@ -110,7 +110,7 @@ public abstract class StatusEffect implements Comparable<StatusEffect> {
    * This does not run the stop() method and will serialize
    * the effect if it is labelled as persistent.
    */
-  void cancel() {
+  public void cancel() {
 
     stop();
 

@@ -56,8 +56,13 @@ public class ItemEffectContext implements EffectContext {
 
   @Override
   public void deserialize(PersistentEffect effect) {
+
     if (item == null || item.getItemMeta() == null) return;
-    effect.deserialize(item.getItemMeta().getPersistentDataContainer());
+
+    ItemMeta meta = item.getItemMeta();
+    effect.deserialize(meta.getPersistentDataContainer());
+    item.setItemMeta(meta);
+
   }
 
 }

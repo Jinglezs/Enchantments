@@ -134,10 +134,6 @@ public class StatusEffectManager extends BukkitRunnable implements EffectContain
     return effect;
   }
 
-  public void cancelAll() {
-    getStatusEffects().forEach(StatusEffect::cancel);
-  }
-
   // Events that remove status effects when the entity becomes nullable:
 
   @EventHandler

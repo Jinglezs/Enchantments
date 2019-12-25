@@ -32,12 +32,14 @@ public class TileEntityContext implements EffectContext {
 
   @Override
   public void serialize(PersistentEffect effect) {
-    //TODO:
+    effect.serialize(trigger.getPersistentDataContainer());
+    trigger.update(true);
   }
 
   @Override
   public void deserialize(PersistentEffect effect) {
-    //TODO:
+    effect.deserialize(trigger.getPersistentDataContainer());
+    trigger.update(true);
   }
 
 }

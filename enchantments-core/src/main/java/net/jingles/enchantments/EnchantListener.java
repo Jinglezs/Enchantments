@@ -137,7 +137,6 @@ public class EnchantListener implements Listener {
     if (original.getItemMeta() != null)
       original.getItemMeta().getEnchants().forEach(additions::put);
 
-
     // Collects the enchantments from the second item
     if (addition != null) {
 
@@ -175,6 +174,8 @@ public class EnchantListener implements Listener {
 
   }
 
+  // Transfers the block enchantments from the item to the block.
+  // The block's enchant team is copied from the player that placed it.
   @EventHandler
   public void onEnchantedBlockPlace(BlockPlaceEvent event) {
 
@@ -205,6 +206,8 @@ public class EnchantListener implements Listener {
     state.update(true);
   }
 
+  // Transfers the enchantments from the block to the item that the block drops.
+  // Additionally, any active status effects originating from it are cancelled.
   @EventHandler
   public void onEnchantedBlockBreak(BlockBreakEvent event) {
 
@@ -226,9 +229,9 @@ public class EnchantListener implements Listener {
       return;
     }
 
-    // Stops all status effects originating from the block.
+    // Stops all status effects originating from the block, serializing them if possible.
     Enchantments.getStatusEffectManager().getWorldContainer().getEffectsAtLocation(state.getLocation())
-        .forEach(LocationStatusEffect::stop);
+        .forEach(LocationStatusEffect::cancel);
 
     Block block = event.getBlock();
     ItemStack tool = event.getPlayer().getInventory().getItemInMainHand();
@@ -243,14 +246,9 @@ public class EnchantListener implements Listener {
 
       if (item.getType() == block.getType()) {
 
-        // Add the enchantments themselves
+        // Add the enchantments and corresponding lore
         ItemMeta meta = item.getItemMeta();
-
-        //TODO: If an enchant has persistent effects, serialize them to
-        //  this item's persistent data container.
         enchants.forEach((enchant, level) -> meta.addEnchant(enchant, level, true));
-
-        // Add the enchantment lore
         InventoryUtils.addEnchantLore(meta, enchants);
         item.setItemMeta(meta);
 
