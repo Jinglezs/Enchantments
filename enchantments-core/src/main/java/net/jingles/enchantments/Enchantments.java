@@ -8,6 +8,7 @@ import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.EnchantmentManager;
 import net.jingles.enchantments.enchant.TargetGroup;
 import net.jingles.enchantments.projectile.ProjectileManager;
+import net.jingles.enchantments.statuseffect.StatusEffect;
 import net.jingles.enchantments.statuseffect.StatusEffectManager;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -53,7 +54,8 @@ public class Enchantments extends JavaPlugin {
 
   @Override
   public void onDisable() {
-    getStatusEffectManager().cancelAll();
+    // Stop all of the status effects, serializing them if possible.
+    getStatusEffectManager().getStatusEffects().forEach(StatusEffect::cancel);
   }
 
   //Ignore what Spigot has to say and forcefully enable enchantment registration
