@@ -69,7 +69,7 @@ public class Transfiguration extends CustomEnchant {
 
     ItemEffectContext context = new ItemEffectContext(shooter, getItem(shooter), this);
     Enchantments.getStatusEffectManager().add(new TransfigurationEffect(context, hit));
-    addCooldown(hit);
+    addCooldown(shooter);
   }
 
   @EventHandler
@@ -103,7 +103,7 @@ public class Transfiguration extends CustomEnchant {
     private LivingEntity mount;
 
     private TransfigurationEffect(ItemEffectContext context, LivingEntity target) {
-      super(target, context, 15 * 20, 1);
+      super(target, context, 10 * 20, 1);
     }
 
     @Override
@@ -139,7 +139,7 @@ public class Transfiguration extends CustomEnchant {
     public void effect() {
 
       //Cancels the effect is the mount has been killed.
-      if (mount == null || mount.isDead()) {
+      if (mount == null) {
         this.stop();
         return;
       }

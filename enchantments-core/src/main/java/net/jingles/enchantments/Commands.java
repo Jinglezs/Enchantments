@@ -158,17 +158,17 @@ public class Commands extends BaseCommand {
     StringBuilder info = new StringBuilder();
 
     // General info
-    info.append(String.format(LABELLED, "\nEnchant Chance", String.valueOf(enchant.getEnchantChance())))
-        .append(String.format(LABELLED, "Max Level", enchant.getMaxLevel()))
-        .append(String.format(LABELLED, "Level Requirement", enchant.getLevelRequirement()))
+    info.append(String.format(LABELLED, "\n - Enchant Chance", String.valueOf(enchant.getEnchantChance())))
+        .append(String.format(LABELLED, " - Max Level", enchant.getMaxLevel()))
+        .append(String.format(LABELLED, " - Level Requirement", enchant.getLevelRequirement()))
         // Cooldown info
-        .append(String.format(LABELLED, "\nCooldown", String.valueOf(enchant.getCooldown())))
-        .append(String.format(LABELLED, "Time Unit", enchant.getTimeUnit().name()))
+        .append(String.format(LABELLED, "\n - Cooldown", String.valueOf(enchant.getCooldown())))
+        .append(String.format(LABELLED, " - Time Unit", enchant.getTimeUnit().name()))
         // Target info
-        .append(String.format(LABELLED, "Target Item", enchant.getItemTarget().name()))
-        .append(String.format(LABELLED, "Target Group", enchant.getTargetGroup().name()))
+        .append(String.format(LABELLED, " - Target Item", enchant.getItemTarget().name()))
+        .append(String.format(LABELLED, " - Target Group", enchant.getTargetGroup().name()))
         // Description
-        .append(String.format(LABELLED, "\nDescription", enchant.getDescription()))
+        .append(String.format(LABELLED, "\n - Description", enchant.getDescription()))
         .append("\n");
 
     sender.sendMessage(String.format(HEADER, enchant.getName()) + info.toString());

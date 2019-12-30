@@ -1,6 +1,7 @@
 package net.jingles.enchantments.enchant;
 
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.enchantments.EnchantmentTarget;
 
 import java.util.function.Predicate;
@@ -141,6 +142,16 @@ public enum TargetGroup {
    * Brewing stand, obviously
    */
   BREWING_STAND(material -> material == Material.BREWING_STAND),
+
+  /**
+   * Daylight sensors
+   */
+  DAYLIGHT_DETECTOR(material -> material == Material.DAYLIGHT_DETECTOR),
+
+  /**
+   * Standing and wall signs of any wood type
+   */
+  SIGN(Tag.SIGNS::isTagged),
 
   /**
    * Any block that is capable of smelting/brewing items, excluding Campfires.

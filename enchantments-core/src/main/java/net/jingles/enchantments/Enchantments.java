@@ -34,6 +34,7 @@ public class Enchantments extends JavaPlugin {
   private static EnchantmentManager enchantmentManager;
   private static StatusEffectManager statusEffectManager;
   private static ConversationFactory conversationFactory;
+
   public static NamespacedKey TEAM_KEY;
   public static NamespacedKey OWNER_KEY;
 
@@ -190,6 +191,10 @@ public class Enchantments extends JavaPlugin {
 
   public static ConversationFactory getConversationFactory() {
     return conversationFactory;
+  }
+
+  public static NamespacedKey createKey(String name) {
+    return new NamespacedKey(getPlugin(Enchantments.class), name);
   }
 
 }

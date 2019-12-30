@@ -7,6 +7,7 @@ import org.bukkit.block.TileState;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
@@ -24,6 +25,26 @@ public abstract class BlockEnchant extends CustomEnchant {
   }
 
   public abstract boolean canTrigger(@Nullable TileState tile);
+
+  /**
+   * This method can be overrode to retrieve information from the
+   * ItemStack used to place the block. This is especially useful
+   * for persistent status effects
+   * @param meta the meta of the ItemStack used to place the block
+   * @param tile the TileState that was created upon block placement
+   */
+  public void onBlockPlace(ItemMeta meta, TileState tile) {
+  }
+
+  /**
+   * This method can be overrode to trasnfer information from the
+   * block that was just broken to any item. This is especially
+   * useful for persistent status effects.
+   * @param meta the meta of the item to transfer information to
+   * @param tile the tile entity of the block has been broken.
+   */
+  public void onBlockBreak(ItemMeta meta, TileState tile) {
+  }
 
   /**
    * This method can be overrode to determine how the enchanted block

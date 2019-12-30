@@ -91,7 +91,7 @@ public class Efficiency extends BlockEnchant {
 
     if (!canTrigger(event.getContents().getHolder())) return;
 
-    int chance = (getLevel(event.getContents().getHolder()) * 20) / 100;
+    double chance = (getLevel(event.getContents().getHolder()) * 20) / 100D;
 
     if (Math.random() <= chance) {
       ItemStack item = event.getContents().getIngredient();

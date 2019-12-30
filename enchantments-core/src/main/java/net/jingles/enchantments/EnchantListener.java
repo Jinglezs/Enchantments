@@ -5,13 +5,12 @@ import net.jingles.enchantments.enchant.CustomEnchant;
 import net.jingles.enchantments.enchant.TargetGroup;
 import net.jingles.enchantments.persistence.DataType;
 import net.jingles.enchantments.persistence.EnchantTeam;
-import net.jingles.enchantments.statuseffect.LocationStatusEffect;
+import net.jingles.enchantments.statuseffect.StatusEffect;
 import net.jingles.enchantments.util.EnchantUtils;
 import net.jingles.enchantments.util.InventoryUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.block.TileState;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.enchantments.EnchantmentOffer;
@@ -115,6 +114,8 @@ public class EnchantListener implements Listener {
 
   }
 
+  // Permits custom enchantments to be applied to items via
+  // enchanted books.
   @EventHandler
   public void onAnvilInventoryClick(InventoryClickEvent event) {
 
@@ -176,23 +177,19 @@ public class EnchantListener implements Listener {
 
   // Transfers the block enchantments from the item to the block.
   // The block's enchant team is copied from the player that placed it.
+  //
+  // Please note that persistent effect deserialization should be handled
+  // within the enchantment's onBlockPlace or onChunkLoad method.
   @EventHandler
   public void onEnchantedBlockPlace(BlockPlaceEvent event) {
 
+    if (!(event.getBlockPlaced().getState() instanceof TileState)) return;
+
     Player player = event.getPlayer();
     ItemStack item = event.getItemInHand();
-    BlockState state = event.getBlockPlaced().getState();
 
-    // BlockEnchants can only affect BlockStates that extend TileState
-    if (!(state instanceof TileState)) return;
-
-    PersistentDataContainer container = ((TileState) state).getPersistentDataContainer();
-    // Save the enchantment level to the container with the corresponding key.
-    // Call the onChunkLoad method because the block is being loaded in
-    BlockEnchant.getBlockEnchants(item).forEach((enchant, level) -> {
-      container.set(enchant.getKey(), PersistentDataType.INTEGER, level);
-      enchant.onChunkLoad((TileState) state);
-    });
+    TileState state = (TileState) event.getBlockPlaced().getState();
+    PersistentDataContainer container = state.getPersistentDataContainer();
 
     // Set the enchant's owner
     container.set(Enchantments.OWNER_KEY, DataType.UUID, player.getUniqueId());
@@ -201,6 +198,14 @@ public class EnchantListener implements Listener {
     EnchantTeam team = EnchantUtils.getEnchantTeam(player);
     team.addTeamedEntity(player.getUniqueId());
     container.set(Enchantments.TEAM_KEY, DataType.ENCHANT_TEAM, team);
+
+    // Save the enchantment level to the container with the corresponding key.
+    // Call the onChunkLoad method because the block is being loaded in
+    BlockEnchant.getBlockEnchants(item).forEach((enchant, level) -> {
+      container.set(enchant.getKey(), PersistentDataType.INTEGER, level);
+      enchant.onBlockPlace(item.getItemMeta(), state);
+      enchant.onChunkLoad(state);
+    });
 
     // Update the BlockState so all of these things take effect >_>
     state.update(true);
@@ -211,16 +216,16 @@ public class EnchantListener implements Listener {
   @EventHandler
   public void onEnchantedBlockBreak(BlockBreakEvent event) {
 
-    BlockState state = event.getBlock().getState();
-    if (!(state instanceof TileState)) return;
+    if (!(event.getBlock().getState() instanceof TileState)) return;
 
-    PersistentDataContainer container = ((TileState) state).getPersistentDataContainer();
+    TileState state = (TileState) event.getBlock().getState();
+    PersistentDataContainer container = state.getPersistentDataContainer();
     Map<BlockEnchant, Integer> enchants = BlockEnchant.getBlockEnchants(container);
 
     // Non-enchanted blocks are lame, they can be broken without interference.
     if (enchants.isEmpty()) return;
 
-    EnchantTeam team = EnchantUtils.getEnchantTeam((TileState) state);
+    EnchantTeam team = EnchantUtils.getEnchantTeam(state);
 
     // Prevent players from breaking enchanted blocks if they aren't on its team.
     if (!team.isTeamed(event.getPlayer())) {
@@ -229,26 +234,30 @@ public class EnchantListener implements Listener {
       return;
     }
 
-    // Stops all status effects originating from the block, serializing them if possible.
-    Enchantments.getStatusEffectManager().getWorldContainer().getEffectsAtLocation(state.getLocation())
-        .forEach(LocationStatusEffect::cancel);
-
     Block block = event.getBlock();
     ItemStack tool = event.getPlayer().getInventory().getItemInMainHand();
 
     // I'm just gonna casually copy the drops... cause they're annoying
-    List<ItemStack> items = new ArrayList<>(block.getDrops(tool));
+    List<ItemStack> drops = new ArrayList<>(block.getDrops(tool));
 
     // Stop dropping stuff ffs
     event.setDropItems(false);
 
-    items.forEach(item -> {
+    for (ItemStack item : drops) {
 
+      // Only apply the enchantments if the drop matches the original block
       if (item.getType() == block.getType()) {
 
-        // Add the enchantments and corresponding lore
         ItemMeta meta = item.getItemMeta();
-        enchants.forEach((enchant, level) -> meta.addEnchant(enchant, level, true));
+
+        // Add the enchantments and corresponding lore
+        // Transfer any information from the block to the item
+        enchants.forEach((enchant, level) -> {
+          meta.addEnchant(enchant, level, true);
+          enchant.onChunkUnload(state);
+          enchant.onBlockBreak(meta, state);
+        });
+
         InventoryUtils.addEnchantLore(meta, enchants);
         item.setItemMeta(meta);
 
@@ -257,7 +266,12 @@ public class EnchantListener implements Listener {
       // Manually drop each block.
       block.getWorld().dropItemNaturally(block.getLocation(), item);
 
-    });
+    }
+
+    // Stops all status effects originating from the block. Serialization should
+    // have been handled within the enchantment class itself.
+    Enchantments.getStatusEffectManager().getWorldContainer()
+        .getEffectsAtLocation(state.getLocation()).forEach(StatusEffect::stop);
 
     // Spigot needs to stop changing BlockStates without telling anyone.
     state.setType(Material.AIR);
