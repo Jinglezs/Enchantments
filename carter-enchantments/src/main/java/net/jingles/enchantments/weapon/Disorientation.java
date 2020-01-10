@@ -74,8 +74,8 @@ public class Disorientation extends CustomEnchant {
         ((Mob) getTarget()).setTarget(null);
       }
 
-      float yaw = ThreadLocalRandom.current().nextFloat();
-      float pitch = ThreadLocalRandom.current().nextFloat();
+      float yaw = ThreadLocalRandom.current().nextInt(360);
+      float pitch = ThreadLocalRandom.current().nextInt(-90, 90);
 
       Location location = getTarget().getLocation();
       location.setYaw(yaw);

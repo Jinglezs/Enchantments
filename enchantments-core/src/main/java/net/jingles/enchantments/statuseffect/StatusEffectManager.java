@@ -10,6 +10,7 @@ import net.jingles.enchantments.statuseffect.container.WorldEffectContainer;
 import net.jingles.enchantments.statuseffect.context.ItemEffectContext;
 import net.jingles.enchantments.statuseffect.effects.FeatherFallingEffect;
 import net.jingles.enchantments.statuseffect.entity.EntityStatusEffect;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.TileState;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -19,12 +20,12 @@ import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
-import java.util.stream.Stream;
 
 public class StatusEffectManager extends BukkitRunnable implements EffectContainer<StatusEffect>, Listener {
 
@@ -160,20 +161,21 @@ public class StatusEffectManager extends BukkitRunnable implements EffectContain
 
     Arrays.asList(event.getChunk().getEntities()).forEach(this::removeStatusEffects);
 
-    Stream.of(event.getChunk().getTileEntities())
-        .filter(state -> state instanceof TileState)
-        .map(state -> (TileState) state)
-        .forEach(tile -> {
+    // Unload the enchantments and cancel all effects that stem from them.
+    for (BlockState state : event.getChunk().getTileEntities()) {
 
-          // Unload the enchantments and cancel all effects that stem from them.
-          BlockEnchant.getBlockEnchants(tile.getPersistentDataContainer())
-              .keySet()
-              .forEach(enchant -> {
-                enchant.onChunkUnload(tile);
-                getEffectsBySource(enchant).forEach(StatusEffect::cancel);
-              });
+      if (!(state instanceof TileState)) continue;
 
-        });
+      TileState tile = (TileState) state;
+      PersistentDataContainer container = tile.getPersistentDataContainer();
+      Set<BlockEnchant> blockEnchants = BlockEnchant.getBlockEnchants(container).keySet();
+
+      for (BlockEnchant enchant : blockEnchants) {
+        enchant.onChunkUnload(tile);
+        getEffectsBySource(enchant).forEach(StatusEffect::cancel);
+      }
+
+    }
 
   }
 

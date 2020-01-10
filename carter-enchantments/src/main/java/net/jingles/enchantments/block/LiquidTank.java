@@ -1,6 +1,5 @@
 package net.jingles.enchantments.block;
 
-import com.google.common.primitives.Ints;
 import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.BlockEnchant;
 import net.jingles.enchantments.enchant.Enchant;
@@ -8,12 +7,13 @@ import net.jingles.enchantments.enchant.TargetGroup;
 import net.jingles.enchantments.statuseffect.LocationStatusEffect;
 import net.jingles.enchantments.statuseffect.PersistentEffect;
 import net.jingles.enchantments.statuseffect.context.TileEntityContext;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.block.Sign;
+import net.jingles.enchantments.util.InventoryUtils;
+import org.bukkit.*;
+import org.bukkit.block.DaylightDetector;
 import org.bukkit.block.TileState;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
@@ -29,13 +29,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-@Enchant(name = "Liquid Tank", key = "liquid_tank", hasPersistence = true, targetGroup = TargetGroup.SIGN,
-    description = "Right clicking this sign with a liquid item allows its contents to be emptied into the tank. Sneak-right " +
-        "clicking with the correct item will retrieve the liquid. The liquid that the tank holds is determined by the first " +
-        "liquid to be placed in it, and the tank can hold 30 units per level.")
+@Enchant(name = "Liquid Tank", key = "liquid_tank", hasPersistence = true, targetGroup = TargetGroup.DAYLIGHT_DETECTOR,
+    description = "Place a cauldron underneath this enchanted detector to create a liquid tank. Right clicking this " +
+        "tank with a liquid item allows its contents to be emptied into the tank. They can be retrieved by right clicking " +
+        "again with the correct item. The liquid that the tank holds is determined by the first liquid to be placed in " +
+        "it, and the tank can hold 30 units per level.")
 public class LiquidTank extends BlockEnchant {
-
-  private static final String FORMAT = ChatColor.BOLD + "Capacity: " + ChatColor.RESET + "%d/%d";
 
   public LiquidTank(NamespacedKey key) {
     super(key);
@@ -43,7 +42,13 @@ public class LiquidTank extends BlockEnchant {
 
   @Override
   public boolean canTrigger(@Nullable TileState tile) {
-    return hasEnchant(tile);
+
+    if (tile == null) return false;
+
+    Material blockBelow = tile.getLocation()
+        .subtract(0, 1, 0).getBlock().getType();
+
+    return hasEnchant(tile) && blockBelow == Material.CAULDRON;
   }
 
   @Override
@@ -92,25 +97,27 @@ public class LiquidTank extends BlockEnchant {
     if (event.getAction() != Action.RIGHT_CLICK_BLOCK ||
         event.getHand() != EquipmentSlot.HAND ||
         event.getClickedBlock() == null ||
-        !(event.getClickedBlock().getState() instanceof Sign)) return;
+        !(event.getClickedBlock().getState() instanceof DaylightDetector)) return;
 
-    Sign sign = (Sign) event.getClickedBlock().getState();
-    if (!canTrigger(sign)) return;
+    DaylightDetector detector = (DaylightDetector) event.getClickedBlock().getState();
+    if (!canTrigger(detector)) return;
 
     Optional<LiquidTankEffect> optionalEffect = Enchantments.getStatusEffectManager()
         .getWorldContainer()
-        .getEffect(sign.getLocation(), LiquidTankEffect.class);
+        .getEffect(detector.getLocation(), LiquidTankEffect.class);
 
     if (!optionalEffect.isPresent()) return;
 
     event.setCancelled(true);
 
     LiquidTankEffect effect = optionalEffect.get();
-    effect.handleExchange(event.getPlayer(), sign);
+    effect.handleExchange(event.getPlayer());
 
   }
 
   private enum Exchange {
+
+    EMPTY("empty", ChatColor.WHITE + "Empty Liquid", null, null),
 
     EXPERIENCE("experience", ChatColor.GREEN + "Experience", Material.AIR, Material.AIR),
 
@@ -172,42 +179,43 @@ public class LiquidTank extends BlockEnchant {
    */
   private static class LiquidTankEffect extends LocationStatusEffect implements PersistentEffect {
 
-    private final NamespacedKey effectKey = Enchantments.createKey("liquid_tank_effect");
+    private static final String TITLE = ChatColor.BOLD + "%s Tank";
+    private static final String CAPACITY = ChatColor.BOLD + "Capacity: " + ChatColor.RESET + "%d/%d";
+
+    private final NamespacedKey typeKey, amountKey;
     private final int maxAmount;
 
-    private Exchange exchange = null;
+    private Exchange exchange = Exchange.EMPTY;
     private int amount = 0;
+
+    // The hologram armor stands
+    private ArmorStand title, capacity;
 
     private LiquidTankEffect(TileEntityContext context) {
       super(context, Integer.MAX_VALUE, Integer.MAX_VALUE, context.getTrigger().getLocation());
       this.maxAmount = ((BlockEnchant) context.getSource()).getLevel(context.getTrigger()) * 30;
+      this.typeKey = Enchantments.createKey("liquid_tank_type");
+      this.amountKey = Enchantments.createKey("liquid_tank_amount");
     }
 
     @Override
     public void start() {
 
-      Sign sign = (Sign) ((TileEntityContext) getContext()).getTrigger();
-      sign.setEditable(true);
+      Location loc = ((TileEntityContext) getContext()).getTrigger().getLocation().add(0.5, 0.25, 0.5);
 
-      sign.setLine(0, ChatColor.BOLD + "-----");
-      sign.setLine(3, ChatColor.BOLD + "-----");
+      this.capacity = (ArmorStand) loc.getWorld().spawnEntity(loc, EntityType.ARMOR_STAND);
+      capacity.setSmall(true);
+      capacity.setMarker(true);
+      capacity.setVisible(false);
+      capacity.setCustomNameVisible(true);
+      capacity.setCustomName(String.format(CAPACITY, amount, maxAmount));
 
-      if (exchange == null) {
-
-        sign.setLine(1, ChatColor.BOLD + "Empty Liquid");
-        sign.setLine(2, ChatColor.BOLD + "Tank");
-
-      } else {
-
-        //TODO: Newly placed Liquid Tanks are always considered new.
-        //  meaning this vvv is never reflected in game.
-
-        sign.setLine(1, exchange.getName() + " Tank");
-        sign.setLine(2, String.format(FORMAT, amount, maxAmount));
-
-      }
-
-      sign.update();
+      this.title = (ArmorStand) loc.getWorld().spawnEntity(loc.add(0, 0.25, 0), EntityType.ARMOR_STAND);
+      title.setSmall(true);
+      title.setMarker(true);
+      title.setVisible(false);
+      title.setCustomNameVisible(true);
+      title.setCustomName(String.format(TITLE, exchange != null ? exchange.name : "Empty Liquid"));
 
     }
 
@@ -216,97 +224,97 @@ public class LiquidTank extends BlockEnchant {
     }
 
     @Override
+    public void stop() {
+      super.stop();
+      title.remove();
+      capacity.remove();
+      getContext().serialize(this);
+    }
+
+    @Override
     public void serialize(PersistentDataContainer container) {
-      if (exchange == null) return;
-      container.set(effectKey, PersistentDataType.STRING, exchange.getId());
-      container.set(effectKey, PersistentDataType.INTEGER, amount);
+      container.set(typeKey, PersistentDataType.STRING, exchange.getId());
+      container.set(amountKey, PersistentDataType.INTEGER, amount);
     }
 
     @Override
     public void deserialize(PersistentDataContainer container) {
-      if (!container.has(effectKey, PersistentDataType.STRING)) return;
-      this.exchange = Exchange.getExchange(container.get(effectKey, PersistentDataType.STRING));
-      this.amount = container.getOrDefault(effectKey, PersistentDataType.INTEGER, 0);
-    }
-
-    /**
-     * Gets the Exchange type that this tank is set to use.
-     *
-     * @return the Exchange type
-     */
-    public Exchange getExchange() {
-      return this.exchange;
-    }
-
-    /**
-     * Gets the maximum amount of liquid this tank can hold.
-     *
-     * @return the max amount
-     */
-    public int getMaxAmount() {
-      return this.maxAmount;
-    }
-
-    public int getAmount() {
-      return this.amount;
+      String id = container.getOrDefault(typeKey, PersistentDataType.STRING, "empty");
+      this.exchange = Exchange.getExchange(id);
+      this.amount = container.getOrDefault(amountKey, PersistentDataType.INTEGER, 0);
     }
 
     /**
      * Places the given amount of liquid in the tank. To remove liquid,
      * pass a negative number as the amount.
      *
-     * @param amount the amount to give or take
+     * @param change the amount to give or take
      */
-    public void giveAmount(int amount) {
+    private void giveAmount(int change) {
+      int newAmount = amount + change;
+      this.amount = Math.min(maxAmount, Math.max(0, newAmount));
+    }
 
-      int newAmount = this.amount + amount;
-      this.amount = Ints.constrainToRange(newAmount, 0, maxAmount);
-      // Constrains the range so 0 <= amount <= maxAmount
-
+    private boolean canAddOrRemove(int change) {
+      int changed = amount + change;
+      return changed >= 0 && changed <= maxAmount;
     }
 
     /**
      * Handles an exchange between the given player and the tank
+     *
      * @param player the player
      */
-    public void handleExchange(Player player, Sign sign) {
+    private void handleExchange(Player player) {
 
-      Material held = player.getInventory().getItemInMainHand().getType();
+      int index = player.getInventory().getHeldItemSlot();
+      ItemStack held = player.getInventory().getItem(index);
+      Material type = held == null ? Material.AIR : held.getType();
 
-      if (exchange == null) {
-        exchange = Exchange.getExchange(held);
+      if (exchange == Exchange.EMPTY) {
+        exchange = Exchange.getExchange(type);
+        title.setCustomName(String.format(TITLE, exchange.getName()));
       }
 
-      // If the exchange is Experience, remove if sneaking, add otherwise.
-      // In any other case, remove if the item it's the empty version, add
-      // if it's the full version, and do not change if it's neither.
-      int change = exchange == Exchange.EXPERIENCE ? (player.isSneaking() ? -1 : 1) :
-          (held == exchange.empty ? -1 : held == exchange.filled ? 1 : 0);
+      if (exchange == Exchange.EXPERIENCE) {
 
-      // Ensure the amount stays within the tank's capacity
-      if (amount + change < 0 || amount + change > maxAmount) return;
+        int change = player.isSneaking() ? -1 : 1;
 
-      if (exchange != Exchange.EXPERIENCE) {
+        if (!canAddOrRemove(change) || (change == 1 && player.getExpToLevel() - change < 0)) return;
 
-        if (change == 0) return;
+        // The amount of levels to give/take is opposite of the change to the tank's capacity.
+        player.giveExpLevels(-1 * change);
+        giveAmount(change);
 
-        Material replacement = change == -1 ? exchange.empty : exchange.filled;
-        player.getInventory().setItemInMainHand(new ItemStack(replacement, 1));
+        Sound sound = change == -1 ? Sound.ENTITY_EXPERIENCE_ORB_PICKUP : Sound.ITEM_BOTTLE_EMPTY;
+        player.getWorld().playSound(player.getLocation(), sound, 1F, 1F);
 
       } else {
 
-        if (change < 0 && player.getExpToLevel() < 1) return;
-        player.giveExpLevels(-1 * change);
+        // If they are retrieving liquid with the empty item, the change is negative.
+        // If they are emptying an item, the change is positive.
+        // Zero if they are using an item that cannot be emptied/filled.
+        int change = type == exchange.empty ? -1 : type == exchange.filled ? 1 : 0;
+        if (change == 0 || !canAddOrRemove(change)) return;
+
+        InventoryUtils.removeItem(player.getInventory(), type, 1);
+
+        Material replacement = change == -1 ? exchange.filled : exchange.empty;
+        player.getInventory().addItem(new ItemStack(replacement, 1));
+
+        giveAmount(change);
+
+        Sound sound = change == -1 ? Sound.ITEM_BUCKET_FILL : Sound.ITEM_BUCKET_EMPTY;
+        player.getWorld().playSound(player.getLocation(), sound, 1F, 1F);
 
       }
 
-      giveAmount(amount);
+      if (amount == 0) {
+        exchange = Exchange.EMPTY;
+        title.setCustomName(String.format(TITLE, exchange.getName()));
+      }
 
-      //TODO: Sign is not updating the capacity
-
-      sign.setLine(1, exchange.getName() + " Tank");
-      sign.setLine(2, String.format(FORMAT, amount, maxAmount));
-      sign.update();
+      capacity.setCustomName(String.format(CAPACITY, amount, maxAmount));
 
     }
 
