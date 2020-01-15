@@ -2,6 +2,7 @@ package net.jingles.enchantments.persistence;
 
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionData;
 import org.bukkit.util.io.BukkitObjectInputStream;
 import org.bukkit.util.io.BukkitObjectOutputStream;
 import org.jetbrains.annotations.NotNull;
@@ -29,37 +30,13 @@ public interface DataType {
     @NotNull
     @Override
     public byte[] toPrimitive(@NotNull UUID complex, @NotNull PersistentDataAdapterContext context) {
-      try {
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        BukkitObjectOutputStream dataOutput = new BukkitObjectOutputStream(outputStream);
-
-        dataOutput.writeObject(complex);
-
-        // Serialize that array
-        dataOutput.close();
-        return outputStream.toByteArray();
-
-      } catch (Exception e) {
-        throw new IllegalStateException("Unable to save the UUID.", e);
-      }
+      return toByteArray(complex);
     }
 
     @NotNull
     @Override
     public UUID fromPrimitive(@NotNull byte[] primitive, @NotNull PersistentDataAdapterContext context) {
-      try {
-
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(primitive);
-        BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
-
-        UUID id = (UUID) dataInput.readObject();
-        dataInput.close();
-        return id;
-
-      } catch (ClassNotFoundException | IOException e) {
-        throw new IllegalStateException("Unable to deserialize the UUID.", e);
-      }
+      return fromByteArray(primitive, UUID.class);
     }
   };
 
@@ -80,39 +57,72 @@ public interface DataType {
     @NotNull
     @Override
     public byte[] toPrimitive(@NotNull EnchantTeam complex, @NotNull PersistentDataAdapterContext context) {
-      try {
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        BukkitObjectOutputStream dataOutput = new BukkitObjectOutputStream(outputStream);
-
-        dataOutput.writeObject(complex);
-        dataOutput.close();
-
-        return outputStream.toByteArray();
-
-      } catch (Exception e) {
-        throw new IllegalStateException("Unable to save enchantment team.", e);
-      }
+      return toByteArray(complex);
     }
 
     @NotNull
     @Override
     public EnchantTeam fromPrimitive(@NotNull byte[] primitive, @NotNull PersistentDataAdapterContext context) {
-      try {
-
-        ByteArrayInputStream inputStream = new ByteArrayInputStream(primitive);
-        BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
-
-        EnchantTeam team = (EnchantTeam) dataInput.readObject();
-        dataInput.close();
-
-        return team;
-
-      } catch (ClassNotFoundException | IOException e) {
-        throw new IllegalStateException("Unable to deserialize enchantment team.", e);
-      }
+      return fromByteArray(primitive, EnchantTeam.class);
     }
   };
+
+  PersistentDataType<byte[], PotionData> POTION_DATA = new PersistentDataType<byte[], PotionData>() {
+
+    @Override
+    public Class<byte[]> getPrimitiveType() {
+      return byte[].class;
+    }
+
+    @Override
+    public Class<PotionData> getComplexType() {
+      return PotionData.class;
+    }
+
+    @Override
+    public byte[] toPrimitive(PotionData complex, PersistentDataAdapterContext context) {
+      return toByteArray(complex);
+    }
+
+    @Override
+    public PotionData fromPrimitive(byte[] primitive, PersistentDataAdapterContext context) {
+      return fromByteArray(primitive, PotionData.class);
+    }
+
+  };
+
+  static byte[] toByteArray(Object object) {
+
+    try {
+      ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+      BukkitObjectOutputStream dataOutput = new BukkitObjectOutputStream(outputStream);
+
+      dataOutput.writeObject(object);
+
+      // Serialize that array
+      dataOutput.close();
+      return outputStream.toByteArray();
+
+    } catch (Exception e) {
+      throw new IllegalStateException("Unable to save the UUID.", e);
+    }
+
+  }
+
+  static <T> T fromByteArray(byte[] primitive, Class<T> type) {
+    try {
+
+      ByteArrayInputStream inputStream = new ByteArrayInputStream(primitive);
+      BukkitObjectInputStream dataInput = new BukkitObjectInputStream(inputStream);
+
+      T object = (T) dataInput.readObject();
+      dataInput.close();
+      return object;
+
+    } catch (ClassNotFoundException | IOException e) {
+      throw new IllegalStateException("Unable to deserialize the UUID.", e);
+    }
+  }
   
 }
 

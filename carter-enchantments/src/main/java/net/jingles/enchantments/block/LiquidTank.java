@@ -4,6 +4,7 @@ import net.jingles.enchantments.Enchantments;
 import net.jingles.enchantments.enchant.BlockEnchant;
 import net.jingles.enchantments.enchant.Enchant;
 import net.jingles.enchantments.enchant.TargetGroup;
+import net.jingles.enchantments.persistence.DataType;
 import net.jingles.enchantments.statuseffect.LocationStatusEffect;
 import net.jingles.enchantments.statuseffect.PersistentEffect;
 import net.jingles.enchantments.statuseffect.context.TileEntityContext;
@@ -21,8 +22,10 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.potion.PotionData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -129,7 +132,13 @@ public class LiquidTank extends BlockEnchant {
 
     DRAGON_BREATH("dragon_breath", ChatColor.LIGHT_PURPLE + "Dragon Breath", Material.DRAGON_BREATH, Material.GLASS_BOTTLE),
 
-    HONEY("honey", ChatColor.GOLD + "Honey", Material.HONEY_BOTTLE, Material.GLASS_BOTTLE);
+    HONEY("honey", ChatColor.GOLD + "Honey", Material.HONEY_BOTTLE, Material.GLASS_BOTTLE),
+    
+    MUSHROOM_STEW("mushroom_stew", ChatColor.RED + "Mushroom Stew", Material.MUSHROOM_STEW, Material.BOWL),
+
+    BEETROOT_SOUP("beetroot_soup", ChatColor.RED + "Beetroot Soup", Material.BEETROOT_SOUP, Material.BOWL),
+
+    POTION("potion", ChatColor.LIGHT_PURPLE + "Potion", Material.POTION, Material.BOWL);
 
     private String id, name;
     private Material filled, empty;
@@ -182,9 +191,10 @@ public class LiquidTank extends BlockEnchant {
     private static final String TITLE = ChatColor.BOLD + "%s Tank";
     private static final String CAPACITY = ChatColor.BOLD + "Capacity: " + ChatColor.RESET + "%d/%d";
 
-    private final NamespacedKey typeKey, amountKey;
+    private final NamespacedKey typeKey, amountKey, potionKey;
     private final int maxAmount;
 
+    private PotionData data = null;
     private Exchange exchange = Exchange.EMPTY;
     private int amount = 0;
 
@@ -196,6 +206,7 @@ public class LiquidTank extends BlockEnchant {
       this.maxAmount = ((BlockEnchant) context.getSource()).getLevel(context.getTrigger()) * 30;
       this.typeKey = Enchantments.createKey("liquid_tank_type");
       this.amountKey = Enchantments.createKey("liquid_tank_amount");
+      this.potionKey = Enchantments.createKey("potion_data");
     }
 
     @Override
@@ -235,6 +246,7 @@ public class LiquidTank extends BlockEnchant {
     public void serialize(PersistentDataContainer container) {
       container.set(typeKey, PersistentDataType.STRING, exchange.getId());
       container.set(amountKey, PersistentDataType.INTEGER, amount);
+      container.set(potionKey, DataType.POTION_DATA, data);
     }
 
     @Override
@@ -242,6 +254,7 @@ public class LiquidTank extends BlockEnchant {
       String id = container.getOrDefault(typeKey, PersistentDataType.STRING, "empty");
       this.exchange = Exchange.getExchange(id);
       this.amount = container.getOrDefault(amountKey, PersistentDataType.INTEGER, 0);
+      this.data = container.get(potionKey, DataType.POTION_DATA);
     }
 
     /**
@@ -280,7 +293,7 @@ public class LiquidTank extends BlockEnchant {
 
         int change = player.isSneaking() ? -1 : 1;
 
-        if (!canAddOrRemove(change) || (change == 1 && player.getExpToLevel() - change < 0)) return;
+        if (!canAddOrRemove(change) || (change == 1 && player.getLevel() < 1)) return;
 
         // The amount of levels to give/take is opposite of the change to the tank's capacity.
         player.giveExpLevels(-1 * change);
@@ -289,6 +302,33 @@ public class LiquidTank extends BlockEnchant {
         Sound sound = change == -1 ? Sound.ENTITY_EXPERIENCE_ORB_PICKUP : Sound.ITEM_BOTTLE_EMPTY;
         player.getWorld().playSound(player.getLocation(), sound, 1F, 1F);
 
+      } else if (exchange == Exchange.POTION) {
+
+        int change = type == exchange.empty ? -1 : type == exchange.filled ? 1 : 0;
+        if (change == 0 || !canAddOrRemove(change)) return;
+
+        if (change == 1) {
+
+          PotionData heldData = ((PotionMeta) held.getItemMeta()).getBasePotionData();
+          if (!data.equals(heldData)) return;
+
+          held.setType(Material.GLASS_BOTTLE);
+
+        } else {
+
+          held.setType(Material.POTION);
+
+          PotionMeta meta = (PotionMeta) held.getItemMeta();
+          meta.setBasePotionData(data);
+          held.setItemMeta(meta);
+
+        }
+        
+        giveAmount(change);
+
+        Sound sound = change == -1 ? Sound.ITEM_BUCKET_FILL : Sound.ITEM_BUCKET_EMPTY;
+        player.getWorld().playSound(player.getLocation(), sound, 1F, 1F);
+  
       } else {
 
         // If they are retrieving liquid with the empty item, the change is negative.

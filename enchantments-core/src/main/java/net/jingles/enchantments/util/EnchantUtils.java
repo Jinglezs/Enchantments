@@ -6,7 +6,12 @@ import net.jingles.enchantments.persistence.DataType;
 import net.jingles.enchantments.persistence.EnchantTeam;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataHolder;
+import org.bukkit.util.io.BukkitObjectInputStream;
+import org.bukkit.util.io.BukkitObjectOutputStream;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -22,8 +27,8 @@ public class EnchantUtils {
   }
 
   public static EnchantTeam getEnchantTeam(PersistentDataHolder holder) {
-    return holder.getPersistentDataContainer().getOrDefault(Enchantments.TEAM_KEY,
-        DataType.ENCHANT_TEAM, new EnchantTeam(new HashSet<>(), true));
+    return holder.getPersistentDataContainer().getOrDefault(Enchantments.TEAM_KEY, DataType.ENCHANT_TEAM,
+        new EnchantTeam(new HashSet<>(), true));
   }
 
   public static UUID getOwner(PersistentDataHolder holder) {
